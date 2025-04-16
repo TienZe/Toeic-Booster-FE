@@ -13,39 +13,64 @@ const theme = createTheme({
     },
     MuiTypography: {
       styleOverrides: {
-        root: {
-          // color: "#54565A",
-          // fontWeight: 400,
-        },
         h1: {
-          fontSize: "90px",
-          fontWeight: "bold",
-        },
-        h3: {
-          fontFamily: "'Roboto', sans-serif",
-          fontSize: "3rem",
-          fontWeight: "bold",
-        },
-        h4: {
-          fontFamily: "'Roboto', sans-serif",
-          fontSize: "2rem",
-          fontWeight: "bold",
-        },
-        h5: {
-          fontFamily: "'Roboto', sans-serif",
-          fontSize: "1.5rem",
+          fontSize: "3.5rem",
           fontWeight: 600,
+          letterSpacing: "-0.025em",
           lineHeight: 1.2,
         },
+        h2: {
+          fontSize: "2.5rem",
+          fontWeight: 600,
+          letterSpacing: "-0.025em",
+          lineHeight: 1.2,
+        },
+        h3: {
+          fontSize: "2rem",
+          fontWeight: 600,
+          letterSpacing: "-0.025em",
+          lineHeight: 1.3,
+        },
+        h4: {
+          fontSize: "1.5rem",
+          fontWeight: 600,
+          letterSpacing: "-0.025em",
+          lineHeight: 1.4,
+        },
+        h5: {
+          fontSize: "1.25rem",
+          fontWeight: 600,
+          letterSpacing: "-0.025em",
+          lineHeight: 1.5,
+        },
         h6: {
-          fontFamily: "'Roboto', sans-serif",
-          fontSize: "1.2rem",
+          fontSize: "1rem",
+          fontWeight: 600,
+          letterSpacing: "-0.025em",
+          lineHeight: 1.6,
+        },
+        body1: {
+          fontSize: "1rem",
+          lineHeight: 1.5,
         },
         body2: {
+          fontSize: "0.875rem",
+          lineHeight: 1.5,
           color: "rgba(84, 86, 90, 0.6)",
         },
+        subtitle1: {
+          fontSize: "1rem",
+          lineHeight: 1.5,
+          fontWeight: 500,
+        },
+        subtitle2: {
+          fontSize: "0.875rem",
+          lineHeight: 1.5,
+          fontWeight: 500,
+        },
         caption: {
-          fontSize: 14,
+          fontSize: "0.75rem",
+          lineHeight: 1.5,
           fontWeight: 500,
         },
       },
@@ -53,15 +78,16 @@ const theme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: "6px",
+          borderRadius: "0.5rem",
           fontWeight: 500,
+          fontSize: "0.875rem",
           "& .MuiChip-label": {
             overflow: "initial",
           },
         },
         sizeSmall: {
-          height: "22px",
-          fontSize: "12px",
+          height: "1.5rem",
+          fontSize: "0.75rem",
         },
       },
       defaultProps: {
