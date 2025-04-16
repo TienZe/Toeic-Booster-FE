@@ -15,17 +15,13 @@ import { capitalizeFirstLetter } from "../../../utils/stringFormatter";
 import { toast } from "react-toastify";
 
 interface FormData {
-  username: string;
   email: string;
   name: string;
   password: string;
-  passwordConfirm: string;
+  passwordConfirmation: string;
 }
 
 const validationRules = {
-  username: {
-    required: "Username is required",
-  },
   email: {
     required: "Email is required",
     pattern: {
@@ -47,7 +43,7 @@ const validationRules = {
       message: "Password must be at least 6 characters long",
     },
   },
-  passwordConfirm: {
+  passwordConfirmation: {
     required: "Confirm password is required",
   },
 };
@@ -60,6 +56,8 @@ const RegisterPage: React.FC = () => {
     getValues,
   } = useForm<FormData>();
 
+  console.log("errors", errors);
+
   const navigate = useNavigate();
 
   const { mutate, isPending, isError, error, reset } = useMutation({
@@ -68,34 +66,21 @@ const RegisterPage: React.FC = () => {
       navigate("/account/login");
       toast.success("Register successful! Please login to continue.");
     },
+    
   });
 
   let errorMessages;
-  if (isError && error && error?.message) {
-    if (Array.isArray(error.message)) {
-      errorMessages = (
-        <Stack spacing={0.25} component="ul">
-          {error.message.map((message) => (
-            <li>
-              <Alert severity="error" onClose={() => reset()}>
-                {capitalizeFirstLetter(message)}
-              </Alert>
-            </li>
-          ))}
-        </Stack>
-      );
-    } else {
-      errorMessages = (
-        <Alert severity="error" onClose={() => reset()}>
-          {capitalizeFirstLetter(error.message)}
-        </Alert>
-      );
-    }
+  if (isError && error && error.message) {
+    errorMessages = (
+      <Alert severity="error" onClose={() => reset()}>
+        {capitalizeFirstLetter(error.message)}
+      </Alert>
+    );
   }
 
   const handleSubmitRegisterForm: SubmitHandler<FormData> = (data) => {
     console.log("Submit register form: ", data);
-    mutate({ ...data, roles: ["user"] }); // temp
+    mutate(data);
   };
 
   return (
@@ -114,21 +99,6 @@ const RegisterPage: React.FC = () => {
           onSubmit={handleSubmit(handleSubmitRegisterForm)}
         >
           <Stack spacing={1}>
-            <Controller
-              name="username"
-              control={control}
-              rules={validationRules.username}
-              render={({ field }) => (
-                <RoundedInput
-                  {...field}
-                  label="User name"
-                  placeholder="Enter your user name"
-                  validationError={errors.username?.message}
-                  gap={0.4}
-                />
-              )}
-            />
-
             <Controller
               name="email"
               control={control}
@@ -175,10 +145,10 @@ const RegisterPage: React.FC = () => {
             />
 
             <Controller
-              name="passwordConfirm"
+              name="passwordConfirmation"
               control={control}
               rules={{
-                ...validationRules.passwordConfirm,
+                ...validationRules.passwordConfirmation,
                 validate: (value: string) =>
                   value === getValues("password") || "Password does not match",
               }}
@@ -187,7 +157,7 @@ const RegisterPage: React.FC = () => {
                   {...field}
                   label="Confirm Password"
                   placeholder="Retype your password"
-                  validationError={errors.passwordConfirm?.message}
+                  validationError={errors.passwordConfirmation?.message}
                   gap={0.4}
                 />
               )}

@@ -37,7 +37,7 @@ export const setupAxiosInterceptors = (store: StoreType) => {
   );
 
   axiosClient.interceptors.response.use(
-    (response) => response,
+    (response) => response.data,
     async (error) => {
       const originalRequest = error.config;
 
@@ -54,7 +54,8 @@ export const setupAxiosInterceptors = (store: StoreType) => {
           });
         }
 
-        const refreshToken = localStorage.getItem("refreshToken");
+        // BE implement access token as refresh token
+        const refreshToken = localStorage.getItem("token");
 
         if (refreshToken) {
           originalRequest._retry = true;
@@ -68,7 +69,6 @@ export const setupAxiosInterceptors = (store: StoreType) => {
             store.dispatch(
               authActions.refreshToken({
                 token: refreshResponse.token,
-                refreshToken: refreshResponse.refreshToken,
               }),
             );
           } catch (error) {
@@ -120,8 +120,8 @@ export const setupAxiosInterceptors = (store: StoreType) => {
 
         if (response.data) {
           // Reject the error response from body
-          console.log("Response with error:", response.data);
-          return Promise.reject(response.data);
+          console.log("Response with error:", response.data.error);
+          return Promise.reject(response.data.error);
         }
       }
 
@@ -147,5 +147,4 @@ async function refreshAccessToken(refreshToken: string) {
 
 type RefreshResponse = {
   token: string;
-  refreshToken: string;
 };

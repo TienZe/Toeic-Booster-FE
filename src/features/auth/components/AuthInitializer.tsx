@@ -9,7 +9,6 @@ const AuthInitializer: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const dispatch = useDispatch();
   const token = localStorage.getItem("token");
-  const refreshToken = localStorage.getItem("refreshToken");
 
   const {
     data: user,
@@ -22,7 +21,7 @@ const AuthInitializer: React.FC<{ children: React.ReactNode }> = ({
   if (isSuccess && user) {
     // init redux auth state
     dispatch(
-      authActions.login({ token: token!, user, refreshToken: refreshToken! }),
+      authActions.login({ token: token!, user }),
     );
   }
 

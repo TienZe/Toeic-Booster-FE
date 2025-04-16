@@ -23,18 +23,21 @@ import { loginGoggle, postLogin } from "../api/account-api";
 import LoginResponse from "../types/LoginResponse";
 import { useGoogleLogin } from "@react-oauth/google";
 import Link from "../../../components/UI/Link";
-import { canAccessAdminPage } from "../../../types/auth";
+// import { canAccessAdminPage } from "../../../types/auth";
 import GoogleIcon from "../../../assets/icons/google.svg";
 import { Image } from "../../../components/UI/Image";
+import { validateEmail } from "../../../utils/helper";
 
 interface FormData {
-  username: string;
+  email: string;
   password: string;
 }
 
 const validationRules = {
-  username: {
-    required: "Username is required",
+  email: {
+    required: "Email is required",
+    validate: (value: string) =>
+      validateEmail(value) || "Please enter a valid email format",
   },
   password: {
     required: "Password is required",
@@ -68,19 +71,21 @@ const LoginPage: React.FC = () => {
 
   const handleLoginSuccess = useCallback(
     (responseData: LoginResponse) => {
+      console.log("responseData", responseData);
       dispatch(
         authActions.login({
           token: responseData.token,
-          refreshToken: responseData.refreshToken,
           user: responseData.user,
         }),
       );
 
-      if (canAccessAdminPage(responseData.user)) {
-        navigate("/admin");
-      } else {
         navigate("/");
-      }
+
+      // if (canAccessAdminPage(responseData.user)) {
+      //   navigate("/admin");
+      // } else {
+      //   navigate("/");
+      // }
 
       toast.success("Login successful!");
     },
@@ -118,15 +123,15 @@ const LoginPage: React.FC = () => {
           <Stack spacing={1}>
             {/* Username Field */}
             <Controller
-              name="username"
+              name="email"
               control={control}
-              rules={validationRules.username}
+              rules={validationRules.email}
               render={({ field }) => (
                 <RoundedInput
                   {...field}
-                  label="User name"
-                  placeholder="Enter your user name"
-                  validationError={errors.username?.message}
+                  label="Email"
+                  placeholder="Enter your email address"
+                  validationError={errors.email?.message}
                 />
               )}
             />

@@ -29,12 +29,10 @@ import { toast } from "react-toastify";
 import { updatePassword, updateUserProfile } from "../api/user-profile";
 import { me } from "../../auth/api/account-api";
 import PasswordTextField from "../../../components/UI/PasswordTextField";
-import { getPhoneValidator } from "../../../utils/helper";
 
 type ProfileFormData = {
   name: string;
   email?: string;
-  phone?: string | null;
 };
 
 type ChangePasswordFormData = {
@@ -52,10 +50,10 @@ const UserProfilePage: React.FC = () => {
   );
 
   const profileForm = useForm<ProfileFormData>({
-    defaultValues: { name: "", email: "", phone: "" },
+    defaultValues: { name: "", email: "" },
   });
 
-  const [name, email, phone] = profileForm.watch(["name", "email", "phone"]);
+  const [name, email] = profileForm.watch(["name", "email"]);
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["user"],
@@ -107,10 +105,6 @@ const UserProfilePage: React.FC = () => {
       request.email = data.email;
     }
 
-    if (data.phone && data.phone !== user?.phone) {
-      request.phone = data.phone;
-    }
-
     updateProfileMutation.mutate(request);
   };
 
@@ -133,7 +127,6 @@ const UserProfilePage: React.FC = () => {
       profileForm.reset({
         name: user.name,
         email: user.email,
-        phone: user.phone,
       });
 
       setFileSrc(user.avatar || DefaultAvatar);
@@ -200,7 +193,7 @@ const UserProfilePage: React.FC = () => {
                 whiteSpace: "nowrap",
               }}
             >
-              {user?.username || user?.name}
+              {user?.name}
             </Typography>
           </Box>
         </Box>
@@ -237,7 +230,6 @@ const UserProfilePage: React.FC = () => {
                       value={name}
                       error={!!profileForm.formState.errors.name}
                       helperText={profileForm.formState.errors.name?.message}
-                      // name="name"
                       {...profileForm.register("name", {
                         required: "Name is required",
                       })}
@@ -252,19 +244,6 @@ const UserProfilePage: React.FC = () => {
                       helperText={profileForm.formState.errors.email?.message}
                       {...profileForm.register("email", {
                         required: "Email is required",
-                      })}
-                    />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, md: 6 }}>
-                    <TextField
-                      label={"Phone"}
-                      variant="standard"
-                      value={phone}
-                      error={!!profileForm.formState.errors.phone}
-                      helperText={profileForm.formState.errors.phone?.message}
-                      {...profileForm.register("phone", {
-                        ...(user?.phone && { required: "Phone is required" }),
-                        ...getPhoneValidator(),
                       })}
                     />
                   </Grid2>

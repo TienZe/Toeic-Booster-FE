@@ -90,13 +90,13 @@ const Header: React.FC = () => {
                 </CustomNavLink>
               )}
             </NavLink>
-            <NavLink to="/listen">
+            {/* <NavLink to="/listen">
               {({ isActive }) => (
                 <CustomNavLink isActive={isActive}>
                   Listen Practice
                 </CustomNavLink>
               )}
-            </NavLink>
+            </NavLink> */}
           </Stack>
         </Stack>
 

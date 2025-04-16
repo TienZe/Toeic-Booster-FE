@@ -48,7 +48,7 @@ import { getTopTestTaken } from "../api/TopTest.api";
 import Link from "../../../components/UI/Link";
 
 type UserTargetFormData = {
-  testDate: Date;
+  testDate: string;
   targetScore: number;
 };
 
@@ -86,7 +86,7 @@ const UserHomePage = () => {
 
   const userTargetForm = useForm<UserTargetFormData>({
     defaultValues: {
-      testDate: new Date(),
+      testDate: new Date().toISOString().split("T")[0],
       targetScore: 450,
     },
   });
@@ -122,7 +122,7 @@ const UserHomePage = () => {
   useEffect(() => {
     if (user) {
       userTargetForm.reset({
-        testDate: userTestDate,
+        testDate: userTestDate.toISOString().split("T")[0],
         targetScore: user?.targetScore || 450,
       });
     }
@@ -153,7 +153,7 @@ const UserHomePage = () => {
             useFlexGap
           >
             <Typography variant="h4" color="primary.main">
-              Hello, {user?.name || user?.username}!
+              Hello, {user?.name}!
             </Typography>
 
             <Stack spacing={1} direction="row" sx={{ alignSelf: "center" }}>
@@ -341,102 +341,6 @@ const UserHomePage = () => {
                     </Grid2>
                   );
                 })}
-                {/* <Grid2>
-                  <ExamCard
-                    id="7"
-                    title="IELTS Simulation Listening test 1"
-                    duration="40 minutes"
-                    totalParticipants={675321}
-                    totalComments={2319}
-                    numOfParts={4}
-                    numOfQuestions={40}
-                    tags={["Listening", "Reading"]}
-                  />
-                </Grid2>
-                <Grid2>
-                  <ExamCard
-                    id="8"
-                    title="IELTS Simulation Listening test 1"
-                    duration="40 minutes"
-                    totalParticipants={675321}
-                    totalComments={2319}
-                    numOfParts={4}
-                    numOfQuestions={40}
-                    tags={["Listening", "Reading"]}
-                  />
-                </Grid2>
-                <Grid2>
-                  <ExamCard
-                    id="1"
-                    title="IELTS Simulation Listening test 1"
-                    duration="40 minutes"
-                    totalParticipants={675321}
-                    totalComments={2319}
-                    numOfParts={4}
-                    numOfQuestions={40}
-                    tags={["Listening", "Reading"]}
-                  />
-                </Grid2>
-                <Grid2>
-                  <ExamCard
-                    id="2"
-                    title="IELTS Simulation Listening test 1"
-                    duration="40 minutes"
-                    totalParticipants={675321}
-                    totalComments={2319}
-                    numOfParts={4}
-                    numOfQuestions={40}
-                    tags={["Listening", "Reading"]}
-                  />
-                </Grid2>
-                <Grid2>
-                  <ExamCard
-                    id="3"
-                    title="IELTS Simulation Listening test 1"
-                    duration="40 minutes"
-                    totalParticipants={675321}
-                    totalComments={2319}
-                    numOfParts={4}
-                    numOfQuestions={40}
-                    tags={["Listening", "Reading"]}
-                  />
-                </Grid2>
-                <Grid2>
-                  <ExamCard
-                    id="4"
-                    title="IELTS Simulation Listening test 1"
-                    duration="40 minutes"
-                    totalParticipants={675321}
-                    totalComments={2319}
-                    numOfParts={4}
-                    numOfQuestions={40}
-                    tags={["Listening", "Reading"]}
-                  />
-                </Grid2>
-                <Grid2>
-                  <ExamCard
-                    id="5"
-                    title="IELTS Simulation Listening test 1"
-                    duration="40 minutes"
-                    totalParticipants={675321}
-                    totalComments={2319}
-                    numOfParts={4}
-                    numOfQuestions={40}
-                    tags={["Listening", "Reading"]}
-                  />
-                </Grid2>
-                <Grid2>
-                  <ExamCard
-                    id="6"
-                    title="IELTS Simulation Listening test 1"
-                    duration="40 minutes"
-                    totalParticipants={675321}
-                    totalComments={2319}
-                    numOfParts={4}
-                    numOfQuestions={40}
-                    tags={["Listening", "Reading"]}
-                  />
-                </Grid2> */}
               </Grid2>
             </Box>
           </Box>
@@ -483,10 +387,10 @@ const UserHomePage = () => {
                     onAccept={() => userTargetForm.clearErrors("testDate")}
                     disablePast
                     label="Exam Date"
-                    value={userTargetState.testDate}
+                    value={new Date(userTargetState.testDate)}
                     onChange={(date) => {
                       if (date) {
-                        userTargetForm.setValue("testDate", date, {
+                        userTargetForm.setValue("testDate", date.toISOString().split("T")[0], {
                           shouldValidate: true,
                         });
                       }

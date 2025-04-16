@@ -1,12 +1,13 @@
 footer {
   background: linear-gradient(
     to bottom right,
-    #538cc9 0%,
-    #355ca8 60%,
-    #203a90 100%
+    #6494d1 0%,
+    #4b76c2 50%,
+    #3b5fa8 100%
+
   );
-  min-height: 180px;
-  padding: 32px 64px;
+  min-height: 140px;
+  padding: 24px 64px;
   color: white;
   display: flex;
   flex-direction: column;
@@ -34,7 +35,7 @@ footer {
     display: flex;
     gap: 24px;
     justify-content: center;
-    padding-top: 32px;
+    padding-top: 24px;
   }
 
   a:hover {

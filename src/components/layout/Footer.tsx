@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
         <div className="divider"></div>
         <ul>
           <li>
-            <a>© 2024. All rights reserved.</a>
+            <a>© 2025. All rights reserved.</a>
           </li>
           <li>
             <a>Privacy Policy</a>

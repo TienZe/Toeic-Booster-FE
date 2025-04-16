@@ -1,16 +1,12 @@
 export interface User {
   id: string;
-  username: string;
   name: string;
   email: string;
   avatar?: string;
-  phone?: string;
-  roles: Role[];
+  // roles: Role[];
 
   targetScore: number;
   testDate: string;
-
-  isActive: boolean;
 
   createdAt: string;
 }
@@ -25,8 +21,8 @@ export enum RoleEnum {
 
 export function canAccessAdminPage(user: User) {
   return (
-    user.roles.includes(RoleEnum.Admin) ||
-    user.roles.includes(RoleEnum.Moderator)
+    user.roles?.includes(RoleEnum.Admin) ||
+    user.roles?.includes(RoleEnum.Moderator)
   );
 }
 
