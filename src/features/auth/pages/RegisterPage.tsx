@@ -6,7 +6,7 @@ import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 
 import RoundedInput from "../../../components/UI/RoundedInput";
-import RoundedPasswordInput from "./RoundedPasswordInput";
+import RoundedPasswordInput from "../components/RoundedPasswordInput";
 import { postRegister } from "../api/account-api";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop";
 import { Alert } from "@mui/material";
@@ -66,7 +66,6 @@ const RegisterPage: React.FC = () => {
       navigate("/account/login");
       toast.success("Register successful! Please login to continue.");
     },
-    
   });
 
   let errorMessages;

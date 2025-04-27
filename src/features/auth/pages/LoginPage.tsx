@@ -13,7 +13,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 
 import RoundedInput from "../../../components/UI/RoundedInput";
-import RoundedPasswordInput from "./RoundedPasswordInput";
+import RoundedPasswordInput from "../components/RoundedPasswordInput";
 
 import { authActions } from "../../../stores/authSlice";
 import { AppDispatch } from "../../../stores";
@@ -79,7 +79,7 @@ const LoginPage: React.FC = () => {
         }),
       );
 
-        navigate("/");
+      navigate("/");
 
       // if (canAccessAdminPage(responseData.user)) {
       //   navigate("/admin");
