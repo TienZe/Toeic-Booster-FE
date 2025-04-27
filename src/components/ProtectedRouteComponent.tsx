@@ -19,7 +19,7 @@ const ProtectedRouteComponent: React.FC<ProtectedRouteComponentProps> = ({
   );
   const dispatch = useDispatch();
 
-  const roles = user?.roles || [];
+  const roles = user?.roleNames || [];
 
   if (!isAuthenticated) {
     return <Navigate to="/account/login" />;

@@ -14,7 +14,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ authorizedRoles }) => {
     (state) => state.auth,
   );
 
-  const roles = user?.roles || [];
+  const roles = user?.roleNames || [];
 
   if (!isAuthenticated) {
     return <Navigate to="/account/login" />;

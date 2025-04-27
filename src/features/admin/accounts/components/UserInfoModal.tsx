@@ -51,7 +51,6 @@ interface UserInfoModalProps {
 type FormData = {
   email: string;
   name: string;
-  phone: string;
   newPassword: string;
   confirmNewPassword: string;
 };
@@ -81,7 +80,6 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
     defaultValues: {
       email: defaultUser.email || "",
       name: defaultUser.name || "",
-      phone: defaultUser.phone || "",
       newPassword: "",
       confirmNewPassword: "",
     },

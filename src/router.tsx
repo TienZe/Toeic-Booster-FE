@@ -197,9 +197,7 @@ export const router = createBrowserRouter([
   {
     path: "admin",
     element: (
-      <ProtectedRouteComponent
-        authorizedRoles={[RoleEnum.Admin, RoleEnum.Moderator]}
-      >
+      <ProtectedRouteComponent authorizedRoles={[RoleEnum.Admin]}>
         <Admin />
       </ProtectedRouteComponent>
     ),
@@ -208,10 +206,6 @@ export const router = createBrowserRouter([
         index: true,
         element: <Dashboard />,
       },
-      // {
-      //   path: "exam",
-      //   element: <Exam />,
-      // },
       {
         path: "createExam",
         element: <CreateExam />,

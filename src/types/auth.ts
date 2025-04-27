@@ -3,7 +3,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
-  // roles: Role[];
+  roleNames: RoleEnum[];
 
   targetScore: number;
   testDate: string;
@@ -11,31 +11,23 @@ export interface User {
   createdAt: string;
 }
 
-export type Role = "admin" | "user" | "moderator";
-
 export enum RoleEnum {
   Admin = "admin",
   User = "user",
-  Moderator = "moderator",
 }
 
 export function canAccessAdminPage(user: User) {
-  return (
-    user.roles?.includes(RoleEnum.Admin) ||
-    user.roles?.includes(RoleEnum.Moderator)
-  );
+  return user.roleNames.includes(RoleEnum.Admin);
 }
 
 export function isAdmin(user: User) {
-  return user.roles.includes(RoleEnum.Admin);
+  return user.roleNames.includes(RoleEnum.Admin);
 }
 
 export function getRole(user: User) {
-  if (user.roles.includes(RoleEnum.Admin)) {
+  if (user.roleNames.includes(RoleEnum.Admin)) {
     return RoleEnum.Admin;
   }
-  if (user.roles.includes(RoleEnum.Moderator)) {
-    return RoleEnum.Moderator;
-  }
+
   return RoleEnum.User;
 }

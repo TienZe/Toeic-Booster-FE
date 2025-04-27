@@ -27,6 +27,7 @@ import Link from "../../../components/UI/Link";
 import GoogleIcon from "../../../assets/icons/google.svg";
 import { Image } from "../../../components/UI/Image";
 import { validateEmail } from "../../../utils/helper";
+import { canAccessAdminPage } from "../../../types/auth";
 
 interface FormData {
   email: string;
@@ -81,11 +82,11 @@ const LoginPage: React.FC = () => {
 
       navigate("/");
 
-      // if (canAccessAdminPage(responseData.user)) {
-      //   navigate("/admin");
-      // } else {
-      //   navigate("/");
-      // }
+      if (canAccessAdminPage(responseData.user)) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
 
       toast.success("Login successful!");
     },
