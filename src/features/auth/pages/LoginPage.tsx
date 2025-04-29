@@ -132,6 +132,8 @@ const LoginPage: React.FC = () => {
                   {...field}
                   label="Email"
                   placeholder="Enter your email address"
+                  padding="8px 28px"
+                  borderRadius={28}
                   validationError={errors.email?.message}
                 />
               )}
@@ -146,6 +148,8 @@ const LoginPage: React.FC = () => {
                 <RoundedPasswordInput
                   {...field} // Pass form field props (value, onChange, etc.)
                   label="Password"
+                  padding="8px 28px"
+                  borderRadius={28}
                   placeholder="Enter your password"
                   validationError={errors.password?.message}
                 />

@@ -109,6 +109,8 @@ const RegisterPage: React.FC = () => {
                   placeholder="Enter your email"
                   validationError={errors.email?.message}
                   gap={0.4}
+                  padding="8px 28px"
+                  borderRadius={28}
                 />
               )}
             />
@@ -124,6 +126,8 @@ const RegisterPage: React.FC = () => {
                   placeholder="Enter your name"
                   validationError={errors.name?.message}
                   gap={0.4}
+                  padding="8px 28px"
+                  borderRadius={28}
                 />
               )}
             />
@@ -139,6 +143,8 @@ const RegisterPage: React.FC = () => {
                   placeholder="Enter your password"
                   validationError={errors.password?.message}
                   gap={0.4}
+                  padding="8px 28px"
+                  borderRadius={28}
                 />
               )}
             />
@@ -158,6 +164,8 @@ const RegisterPage: React.FC = () => {
                   placeholder="Retype your password"
                   validationError={errors.passwordConfirmation?.message}
                   gap={0.4}
+                  padding="8px 28px"
+                  borderRadius={28}
                 />
               )}
             />

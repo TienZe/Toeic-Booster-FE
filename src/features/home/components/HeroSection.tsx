@@ -16,7 +16,11 @@ const HeroSection: React.FC = () => {
           sx={{ marginTop: { xs: 3, lg: 0 } }}
         >
           <Stack spacing={1.5}>
-            <Typography variant="h1" color="secondary.dark">
+            <Typography
+              variant="h1"
+              color="secondary.dark"
+              sx={{ fontSize: "3.5rem" }}
+            >
               <Typography
                 component="span"
                 variant="inherit"

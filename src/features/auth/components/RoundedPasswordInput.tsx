@@ -10,13 +10,15 @@ import FormHelperText from "@mui/material/FormHelperText";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
-import InputProps from "../types/InputProps";
+import { RoundedInputProps } from "../../../components/UI/RoundedInput";
 
-const RoundedPasswordInput: React.FC<InputProps> = ({
+const RoundedPasswordInput: React.FC<RoundedInputProps> = ({
   label,
   placeholder = "",
   validationError = "",
   gap = 1,
+  padding = "4px 12px",
+  borderRadius = 6,
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -43,9 +45,9 @@ const RoundedPasswordInput: React.FC<InputProps> = ({
             </InputAdornment>
           }
           sx={{
-            borderRadius: "32px",
+            borderRadius: `${borderRadius}px`,
             "& fieldset": { borderColor: "text.secondary" },
-            "& input": { px: 2, py: 0.75 },
+            "& input": { padding: padding },
           }}
         />
         {hasError && <FormHelperText>{validationError}</FormHelperText>}

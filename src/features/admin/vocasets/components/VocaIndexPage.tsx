@@ -129,12 +129,16 @@ const VocaIndexPage: React.FC = () => {
     defaultValues: DEFAULT_FILTER_FORM_DATA,
   });
 
-  const { data: paginatedVocaSets, isLoading } = usePaginatedVocaSets({
-    page: page,
-    limit: VOCASET_PAGE_SIZE,
-    search: filterName,
-    level: filterLevel,
-  });
+  let paginatedVocaSets = {
+    data: [],
+  };
+  let isLoading = false;
+  // const { data: paginatedVocaSets, isLoading } = usePaginatedVocaSets({
+  //   page: page,
+  //   limit: VOCASET_PAGE_SIZE,
+  //   search: filterName,
+  //   level: filterLevel,
+  // });
 
   const deleteVocaSetMutation = useMutation({
     mutationFn: deleteVocaSet,
@@ -201,7 +205,7 @@ const VocaIndexPage: React.FC = () => {
           alignItems="start"
         >
           <Typography variant="h4" sx={{ marginBottom: 1 }}>
-            Vocabulary Sets
+            Vocabulary Collections
           </Typography>
           <Button
             variant="outlined"
@@ -227,7 +231,6 @@ const VocaIndexPage: React.FC = () => {
                     {...field}
                     label="Name"
                     placeholder="Enter the filter name"
-                    padding="16.5px 14px"
                     borderRadius={4}
                     gap={0.5}
                     labelColor="secondary.main"
@@ -250,27 +253,34 @@ const VocaIndexPage: React.FC = () => {
                 )}
               />
             </Grid2>
-            <Grid2 size={2} display="flex" alignItems="end">
+            <Grid2
+              size={3}
+              display="flex"
+              sx={{
+                columnGap: 1,
+                "& > button": {
+                  flexShrink: 0,
+                },
+              }}
+              alignItems="end"
+            >
               <Button
                 type="submit"
                 variant="contained"
                 startIcon={<FilterAlt />}
-                sx={{ py: "12px", px: 3, marginBottom: "3px" }}
               >
                 Filter
               </Button>
-            </Grid2>
-            <Grid2 size={2} display="flex" alignItems="end">
               <Button
                 onClick={handleResetFilter}
                 type="reset"
                 variant="outlined"
                 startIcon={<FilterAltOff />}
-                sx={{ py: "12px", px: 3, marginBottom: "3px" }}
               >
                 Clear
               </Button>
             </Grid2>
+            <Grid2 size={2} display="flex" alignItems="end"></Grid2>
           </Grid2>
         </form>
 

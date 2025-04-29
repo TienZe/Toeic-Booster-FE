@@ -63,8 +63,8 @@ const AuthLayout: React.FC = () => {
             {/* Nav */}
             <Box sx={{ textAlign: "center", marginBottom: 2 }}>
               <Typography
-                variant="h5"
-                color="primary.main"
+                variant="h4"
+                // color="primary.main"
                 sx={{ marginBottom: 1.25 }}
               >
                 Welcome to EngFlash!

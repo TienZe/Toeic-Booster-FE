@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+When developing or enhancing UI/UX components, ensure consistency by referencing the style guidelines of `shacdn` and `21st.dev`.

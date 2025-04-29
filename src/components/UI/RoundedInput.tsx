@@ -29,8 +29,8 @@ const RoundedInput = forwardRef<
       placeholder = "",
       validationError = "",
       gap = 1,
-      padding = "12px 32px",
-      borderRadius = 32,
+      // padding = "4px 12px",
+      borderRadius = 6,
       labelColor = "secondary.dark",
       requiredSign = false,
       inputSx, // sx pass to OutlinedInput
@@ -66,7 +66,7 @@ const RoundedInput = forwardRef<
             sx={{
               borderRadius: `${borderRadius}px`,
               "& fieldset": { borderColor: "text.secondary" },
-              "& input": { padding: padding },
+              // "& input": { padding: padding },
               ...inputSx,
             }}
           />

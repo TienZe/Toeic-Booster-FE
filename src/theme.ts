@@ -6,27 +6,30 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: "none",
-          fontSize: "1rem",
+          fontSize: "0.875rem",
           whiteSpace: "nowrap",
         },
       },
     },
     MuiTypography: {
       styleOverrides: {
+        root: {
+          fontSize: "0.875rem",
+        },
         h1: {
-          fontSize: "3.5rem",
+          fontSize: "3rem",
           fontWeight: 600,
           letterSpacing: "-0.025em",
           lineHeight: 1.2,
         },
         h2: {
-          fontSize: "2.5rem",
+          fontSize: "2.25rem",
           fontWeight: 600,
           letterSpacing: "-0.025em",
           lineHeight: 1.2,
         },
         h3: {
-          fontSize: "2rem",
+          fontSize: "1.875rem",
           fontWeight: 600,
           letterSpacing: "-0.025em",
           lineHeight: 1.3,
@@ -50,7 +53,7 @@ const theme = createTheme({
           lineHeight: 1.6,
         },
         body1: {
-          fontSize: "1rem",
+          fontSize: "0.875rem",
           lineHeight: 1.5,
         },
         body2: {
@@ -59,12 +62,12 @@ const theme = createTheme({
           color: "rgba(84, 86, 90, 0.6)",
         },
         subtitle1: {
-          fontSize: "1rem",
+          fontSize: "0.875rem",
           lineHeight: 1.5,
           fontWeight: 500,
         },
         subtitle2: {
-          fontSize: "0.875rem",
+          fontSize: "0.75rem",
           lineHeight: 1.5,
           fontWeight: 500,
         },
@@ -73,6 +76,9 @@ const theme = createTheme({
           lineHeight: 1.5,
           fontWeight: 500,
         },
+        inherit: {
+          fontSize: "inherit",
+        }
       },
     },
     MuiChip: {
@@ -137,11 +143,57 @@ const theme = createTheme({
         },
       },
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          fontSize: "0.875rem",
+          lineHeight: "1.25rem"
+        },
+      },
+    },
     MuiTab: {
       defaultProps: {
         disableRipple: true,
       },
     },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          fontSize: "inherit",
+        }
+      }
+    },
+    MuiFormControl: {
+      defaultProps: {
+        size: "small",
+      }
+    },
+    MuiTextField: {
+      defaultProps: {
+        size: "small",
+      },
+      styleOverrides: {
+        root: {
+          variants: [
+            {
+              props: { size: "small" },
+              style: {
+                "& .MuiInputLabel-shrink": {
+                  transform: "translate(12px, -9px) scale(0.85)"
+                }
+              },
+            }
+          ]
+        }
+      }
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          fontSize: "0.875rem",
+        }
+      }
+    }
   },
   palette: {
     primary: {
@@ -166,8 +218,10 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: "'Inter', sans-serif",
+    fontSize: 14,
   },
   spacing: 16,
+  cssVariables: true,
 });
 
 export default theme;

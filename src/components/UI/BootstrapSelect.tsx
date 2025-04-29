@@ -30,6 +30,8 @@ const BootstrapSelect = forwardRef<
     ...rest
   } = props;
 
+  const { sx, ...otherProps } = rest;
+
   return (
     <Stack spacing={gap}>
       <Typography component="label" htmlFor={props.id}>
@@ -40,7 +42,14 @@ const BootstrapSelect = forwardRef<
           </Typography>
         )}
       </Typography>
-      <Select {...rest} inputRef={ref}>
+      <Select
+        {...otherProps}
+        inputRef={ref}
+        size="small"
+        sx={{
+          ...sx,
+        }}
+      >
         {itemLabels.map((label, index) => (
           <MenuItem key={index} value={itemValues[index]}>
             {label}
@@ -51,40 +60,5 @@ const BootstrapSelect = forwardRef<
     </Stack>
   );
 });
-
-// const BootstrapSelect: React.FC<BootstrapSelectProps & SelectProps> = (
-//   props,
-// ) => {
-//   const {
-//     itemLabels,
-//     itemValues,
-//     gap = 0.5,
-//     label,
-//     requiredSign = false,
-//     validationError,
-//     ...rest
-//   } = props;
-
-//   return (
-//     <Stack spacing={gap}>
-//       <Typography component="label" htmlFor={props.id}>
-//         {label}
-//         {requiredSign && (
-//           <Typography color="error" component="span">
-//             *
-//           </Typography>
-//         )}
-//       </Typography>
-//       <Select {...rest}>
-//         {itemLabels.map((label, index) => (
-//           <MenuItem key={index} value={itemValues[index]}>
-//             {label}
-//           </MenuItem>
-//         ))}
-//       </Select>
-//       {validationError && <FormHelperText>{validationError}</FormHelperText>}
-//     </Stack>
-//   );
-// };
 
 export default BootstrapSelect;

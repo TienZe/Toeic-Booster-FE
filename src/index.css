@@ -90,7 +90,7 @@ video {
   margin: 0;
   padding: 0;
   border: 0;
-  font-size: 100%;
+  /* font-size: 100%; */
   font: inherit;
   vertical-align: baseline;
 }
@@ -159,7 +159,9 @@ img {
 body {
   font-family: "Inter", sans-serif;
   font-weight: 400;
-  color: var(--text-primary);
+  color: var(--mui-palette-text-primary);
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
 #google-signin-button div[role="button"] {
