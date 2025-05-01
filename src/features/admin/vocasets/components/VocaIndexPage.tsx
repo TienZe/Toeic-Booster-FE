@@ -45,11 +45,13 @@ import { useNavigate } from "react-router-dom";
 import VocaSetModel from "../../../../types/VocaSetModel.ts";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop.tsx";
 import usePaginatedVocaSets from "../../../../hooks/usePaginatedVocaSets.ts";
+import MultipleSelect from "../../../../components/UI/MultipleSelect.tsx";
+import useCollectionTags from "../../../../hooks/useCollectionTags.ts";
 
 interface NewVocaSetFormData {
   name: string;
-  level: string;
-  thumbnail: string | FileList;
+  categories: string[];
+  thumbnail?: string | FileList;
 }
 
 interface VocaSetFilterFormData {
@@ -61,11 +63,17 @@ const newVocaSetRules = {
   name: {
     required: "Name is required",
   },
-  level: {
-    required: "Level is required",
+  categories: {
+    required: "Categories is required",
+    validate: (value: string[]) => {
+      console.log("value at validation", value);
+      if (value.length === 0) {
+        return "Please select at least one category";
+      }
+    },
   },
   thumbnail: {
-    required: "Thumbnail is required",
+    // required: "Thumbnail is required",
   },
 };
 
@@ -86,9 +94,20 @@ const VocaIndexPage: React.FC = () => {
   const {
     register,
     // control,
+    getValues,
+    setValue,
     formState: { errors: validationErrors },
     handleSubmit,
-  } = useForm<NewVocaSetFormData>();
+  } = useForm<NewVocaSetFormData>({
+    defaultValues: {
+      name: "",
+      categories: [],
+      thumbnail: "",
+    },
+  });
+
+  console.log("getValues", getValues());
+  console.log("validationErrors", validationErrors);
 
   const [newThumbnail, setNewThumbnail] = useState<string>(
     getPlaceholderImage(250, 140),
@@ -96,11 +115,13 @@ const VocaIndexPage: React.FC = () => {
 
   const navigate = useNavigate();
 
+  const { data: collectionTags } = useCollectionTags();
+
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: NewVocaSetFormData) => {
       const responseData = await createVocaSet({
         name: data.name,
-        level: data.level,
+        tags: data.categories,
         thumbnail: data.thumbnail as string,
       });
 
@@ -113,7 +134,7 @@ const VocaIndexPage: React.FC = () => {
         ["vocaSet", { id: responseData.id }],
         responseData,
       );
-      toast.success("Create new vocabulary set successfully!");
+      toast.success("Create new collection successfully!");
     },
   });
 
@@ -164,7 +185,10 @@ const VocaIndexPage: React.FC = () => {
   });
 
   const handleCreateVocaSet = async (data: NewVocaSetFormData) => {
-    data.thumbnail = await fileList2Base64(data.thumbnail as FileList);
+    console.log("data post create new collection", data);
+    if (data.thumbnail) {
+      data.thumbnail = await fileList2Base64(data.thumbnail as FileList);
+    }
 
     mutate(data);
   };
@@ -245,10 +269,16 @@ const VocaIndexPage: React.FC = () => {
                 render={({ field }) => (
                   <BootstrapSelect
                     {...field}
-                    label="Level"
+                    label="Categories"
                     defaultValue="all"
-                    itemLabels={["All", "Beginner", "Intermediate", "Advanced"]}
-                    itemValues={["all", "beginner", "intermediate", "advanced"]}
+                    itemLabels={[
+                      "All",
+                      ...(collectionTags?.map((tag) => tag.tagName) || []),
+                    ]}
+                    itemValues={[
+                      "all",
+                      ...(collectionTags?.map((tag) => tag.id) || []),
+                    ]}
                   />
                 )}
               />
@@ -340,14 +370,14 @@ const VocaIndexPage: React.FC = () => {
       <CustomModal
         open={openNewModal}
         onClose={() => setOpenNewModal(false)}
-        sx={{ minWidth: "500px", padding: 4 }}
+        sx={{ width: "500px", padding: 4 }}
       >
         <Box sx={{}}>
           <Typography
             variant="h5"
             sx={{ marginBottom: 2.5, textAlign: "center" }}
           >
-            New Vocabulary Set
+            New Collection
           </Typography>
 
           <form
@@ -362,20 +392,18 @@ const VocaIndexPage: React.FC = () => {
                 {...register("name", newVocaSetRules.name)}
                 sx={{ width: "100%" }}
               />
-              <TextField
-                label="Level"
-                select
-                helperText={validationErrors.level?.message}
-                error={!!validationErrors.level}
-                {...register("level", newVocaSetRules.level)}
-                sx={{ width: "100%" }}
-              >
-                {Object.values(VocaSetLevel).map((level) => (
-                  <MenuItem key={level} value={level}>
-                    {capitalizeFirstLetter(level)}
-                  </MenuItem>
-                ))}
-              </TextField>
+
+              <MultipleSelect
+                label="Categories"
+                itemLabels={collectionTags?.map((tag) => tag.tagName) || []}
+                itemValues={collectionTags?.map((tag) => tag.id) || []}
+                register={register("categories", newVocaSetRules.categories)}
+                validationError={validationErrors.categories?.message}
+                onChange={(newValue) => {
+                  setValue("categories", newValue as string[]);
+                }}
+              />
+
               <TextFieldFileInput
                 label="Thumbnail"
                 helperText={validationErrors.thumbnail?.message}
@@ -398,7 +426,6 @@ const VocaIndexPage: React.FC = () => {
               <Stack direction="row" spacing={0.5} justifyContent="end">
                 <Button
                   variant="outlined"
-                  sx={{ px: "24px" }}
                   onClick={() => setOpenNewModal(false)}
                 >
                   Cancel
@@ -406,7 +433,7 @@ const VocaIndexPage: React.FC = () => {
                 <Button
                   variant="contained"
                   type="submit"
-                  sx={{ px: "24px", minWidth: "110px" }}
+                  sx={{ minWidth: "110px" }}
                   disabled={isPending}
                 >
                   {isPending ? <CircularProgress size={20} /> : "Create"}
