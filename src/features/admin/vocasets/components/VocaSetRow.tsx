@@ -32,17 +32,17 @@ const VocaSetRow: React.FC<{
       >
         {vocaSet.id}
       </TableCell>
-      <TableCell>
+      <TableCell align="center">
         <Image
           src={vocaSet.thumbnail}
           sx={{
-            width: "150px",
+            width: "auto",
             height: "84px",
           }}
         />
       </TableCell>
       <TableCell>{vocaSet.name}</TableCell>
-      <TableCell align="center">"Test"</TableCell>
+      {/* <TableCell align="center">"Test"</TableCell> */}
       <TableCell align="center">{vocaSet?.userCount}</TableCell>
       <TableCell align="center">{vocaSet?.topicsCount}</TableCell>
       <TableCell

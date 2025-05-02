@@ -17,7 +17,6 @@ import {
 import { useState } from "react";
 
 import RoundedInput from "../../../../components/UI/RoundedInput";
-import BootstrapSelect from "../../../../components/UI/BootstrapSelect";
 import TablePaginationActions from "../../../../components/UI/TablePaginationActions";
 import VocaSetRow from "./VocaSetRow";
 import AdminTableContainer from "./AdminTableContainer";
@@ -160,7 +159,7 @@ const VocaIndexPage: React.FC = () => {
             page: page,
             limit: VOCASET_PAGE_SIZE,
             search: filterName,
-            level: filterLevel,
+            categories: filterCategories,
           },
         ],
       });
@@ -189,6 +188,7 @@ const VocaIndexPage: React.FC = () => {
 
     console.log("filter form data", formData);
 
+    // Set filter state to trigger re-fetch data
     setFilterName(filterName);
     setFilterCategories(filterCategories);
 
@@ -307,31 +307,30 @@ const VocaIndexPage: React.FC = () => {
           </Grid2>
         </form>
 
-        {isLoading ? (
-          <CustomBackdrop open />
-        ) : (
-          <AdminTableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell width={100}>ID</TableCell>
-                  <TableCell>Thumbnail</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Level</TableCell>
-                  <TableCell>Taken Students</TableCell>
-                  <TableCell>Lessons</TableCell>
-                  <TableCell align="center">Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedVocaSets?.items.map((vocaSet: VocaSetModel) => (
-                  <VocaSetRow
-                    key={vocaSet.id}
-                    vocaSet={vocaSet}
-                    onDelete={() => setDeletedVocaSet(vocaSet.id)}
-                  />
-                ))}
-                {/* {emptyRows > 0 && (
+        {isLoading && <CustomBackdrop open />}
+
+        <AdminTableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell width={100}>ID</TableCell>
+                <TableCell>Thumbnail</TableCell>
+                <TableCell>Name</TableCell>
+                {/* <TableCell>Level</TableCell> */}
+                <TableCell width={200}>Taken Students</TableCell>
+                <TableCell width={100}>Lessons</TableCell>
+                <TableCell align="center">Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedVocaSets?.items.map((vocaSet: VocaSetModel) => (
+                <VocaSetRow
+                  key={vocaSet.id}
+                  vocaSet={vocaSet}
+                  onDelete={() => setDeletedVocaSet(vocaSet.id)}
+                />
+              ))}
+              {/* {emptyRows > 0 && (
                   <TableRow
                     style={{
                       height: 106 * emptyRows,
@@ -341,22 +340,21 @@ const VocaIndexPage: React.FC = () => {
                     <TableCell colSpan={7} />
                   </TableRow>
                 )} */}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    rowsPerPageOptions={[VOCASET_PAGE_SIZE]}
-                    count={paginatedVocaSets?.total || 0}
-                    rowsPerPage={VOCASET_PAGE_SIZE}
-                    page={page - 1} // Mui uses 0-based index
-                    onPageChange={(_event, newPage) => setPage(newPage + 1)}
-                    ActionsComponent={TablePaginationActions}
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </AdminTableContainer>
-        )}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[VOCASET_PAGE_SIZE]}
+                  count={paginatedVocaSets?.total || 0}
+                  rowsPerPage={VOCASET_PAGE_SIZE}
+                  page={page - 1} // Mui uses 0-based index
+                  onPageChange={(_event, newPage) => setPage(newPage + 1)}
+                  ActionsComponent={TablePaginationActions}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </AdminTableContainer>
       </Box>
 
       {/*  New voca set modal */}

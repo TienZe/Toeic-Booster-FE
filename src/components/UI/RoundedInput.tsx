@@ -5,7 +5,7 @@ import OutlinedInput, { OutlinedInputProps } from "@mui/material/OutlinedInput";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormControl from "@mui/material/FormControl";
 
-import InputProps from "../../features/auth/types/InputProps";
+import InputProps from "../../types/UI/InputProps";
 import { SxProps } from "@mui/material";
 
 interface CustomRoundedInputProps extends InputProps {
