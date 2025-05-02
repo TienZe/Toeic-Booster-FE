@@ -12,7 +12,6 @@ import {
   TableRow,
   TextField,
   Typography,
-  MenuItem,
   CircularProgress,
 } from "@mui/material";
 import { useState } from "react";
@@ -29,8 +28,6 @@ import {
   FilterAltOff,
 } from "@mui/icons-material";
 import CustomModal from "../../../../components/UI/CustomModal.tsx";
-import VocaSetLevel from "../../../../types/VocaSetLevel.ts";
-import { capitalizeFirstLetter } from "../../../../utils/stringFormatter.ts";
 import TextFieldFileInput from "./TextFieldFileInput.tsx";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { Image } from "../../../../components/UI/Image.tsx";
@@ -47,6 +44,7 @@ import CustomBackdrop from "../../../../components/UI/CustomBackdrop.tsx";
 import usePaginatedVocaSets from "../../../../hooks/usePaginatedVocaSets.ts";
 import MultipleSelect from "../../../../components/UI/MultipleSelect.tsx";
 import useCollectionTags from "../../../../hooks/useCollectionTags.ts";
+import MultipleSelectCheckmarks from "../../../../components/UI/MultipleSelectCheckmarks.tsx";
 
 interface NewVocaSetFormData {
   name: string;
@@ -55,8 +53,8 @@ interface NewVocaSetFormData {
 }
 
 interface VocaSetFilterFormData {
-  filterNameInput: string;
-  filterLevelInput: string;
+  filterName: string;
+  filterCategories: number[];
 }
 
 const newVocaSetRules = {
@@ -66,7 +64,6 @@ const newVocaSetRules = {
   categories: {
     required: "Categories is required",
     validate: (value: string[]) => {
-      console.log("value at validation", value);
       if (value.length === 0) {
         return "Please select at least one category";
       }
@@ -78,8 +75,8 @@ const newVocaSetRules = {
 };
 
 const DEFAULT_FILTER_FORM_DATA: VocaSetFilterFormData = {
-  filterNameInput: "",
-  filterLevelInput: "all",
+  filterName: "",
+  filterCategories: [],
 };
 
 const VOCASET_PAGE_SIZE = 5;
@@ -94,7 +91,6 @@ const VocaIndexPage: React.FC = () => {
   const {
     register,
     // control,
-    getValues,
     setValue,
     formState: { errors: validationErrors },
     handleSubmit,
@@ -105,9 +101,6 @@ const VocaIndexPage: React.FC = () => {
       thumbnail: "",
     },
   });
-
-  console.log("getValues", getValues());
-  console.log("validationErrors", validationErrors);
 
   const [newThumbnail, setNewThumbnail] = useState<string>(
     getPlaceholderImage(250, 140),
@@ -140,7 +133,7 @@ const VocaIndexPage: React.FC = () => {
 
   const [page, setPage] = useState(1);
   const [filterName, setFilterName] = useState<string>();
-  const [filterLevel, setFilterLevel] = useState<string>();
+  const [filterCategories, setFilterCategories] = useState<number[]>();
 
   const {
     reset: resetFilterForm,
@@ -150,16 +143,12 @@ const VocaIndexPage: React.FC = () => {
     defaultValues: DEFAULT_FILTER_FORM_DATA,
   });
 
-  let paginatedVocaSets = {
-    data: [],
-  };
-  let isLoading = false;
-  // const { data: paginatedVocaSets, isLoading } = usePaginatedVocaSets({
-  //   page: page,
-  //   limit: VOCASET_PAGE_SIZE,
-  //   search: filterName,
-  //   level: filterLevel,
-  // });
+  const { data: paginatedVocaSets, isLoading } = usePaginatedVocaSets({
+    page: page,
+    limit: VOCASET_PAGE_SIZE,
+    search: filterName,
+    categories: filterCategories,
+  });
 
   const deleteVocaSetMutation = useMutation({
     mutationFn: deleteVocaSet,
@@ -196,10 +185,12 @@ const VocaIndexPage: React.FC = () => {
   const handleFilterTable: SubmitHandler<VocaSetFilterFormData> = (
     formData,
   ) => {
-    const { filterNameInput, filterLevelInput } = formData;
+    const { filterName, filterCategories } = formData;
 
-    setFilterName(filterNameInput);
-    setFilterLevel(filterLevelInput === "all" ? undefined : filterLevelInput);
+    console.log("filter form data", formData);
+
+    setFilterName(filterName);
+    setFilterCategories(filterCategories);
 
     setPage(1);
   };
@@ -211,7 +202,7 @@ const VocaIndexPage: React.FC = () => {
 
     // Reset filter state to trigger re-fetch data
     setFilterName(undefined);
-    setFilterLevel(undefined);
+    setFilterCategories(undefined);
   };
 
   const handleDeleteVocaSet = () => {
@@ -248,7 +239,7 @@ const VocaIndexPage: React.FC = () => {
           <Grid2 spacing={1} container sx={{ maxWidth: "900px" }}>
             <Grid2 size={5}>
               <Controller
-                name="filterNameInput"
+                name="filterName"
                 control={control}
                 render={({ field }) => (
                   <RoundedInput
@@ -263,22 +254,24 @@ const VocaIndexPage: React.FC = () => {
               />
             </Grid2>
             <Grid2 size={3}>
+              {/* Controlled input, only need 2 way binding: the value and onChange props*/}
+              {/* It's different from the uncontrolled input (via form.register) - the value of the input is not controlled by the 
+                  parent component, and it is managed and obtained by using the ref.*/}
               <Controller
-                name="filterLevelInput"
+                name="filterCategories"
                 control={control}
                 render={({ field }) => (
-                  <BootstrapSelect
-                    {...field}
+                  <MultipleSelectCheckmarks
                     label="Categories"
-                    defaultValue="all"
-                    itemLabels={[
-                      "All",
-                      ...(collectionTags?.map((tag) => tag.tagName) || []),
-                    ]}
-                    itemValues={[
-                      "all",
-                      ...(collectionTags?.map((tag) => tag.id) || []),
-                    ]}
+                    itemLabels={collectionTags?.map((tag) => tag.tagName) || []}
+                    itemValues={collectionTags?.map((tag) => tag.id) || []}
+                    bootstrapSelect={true}
+                    formControlSx={{ width: "100%" }}
+                    onChange={(newValue) =>
+                      field.onChange({ target: { value: newValue } })
+                    }
+                    value={field.value}
+                    onBlur={field.onBlur}
                   />
                 )}
               />
@@ -331,7 +324,7 @@ const VocaIndexPage: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedVocaSets?.data.map((vocaSet: VocaSetModel) => (
+                {paginatedVocaSets?.items.map((vocaSet: VocaSetModel) => (
                   <VocaSetRow
                     key={vocaSet.id}
                     vocaSet={vocaSet}

@@ -1,8 +1,8 @@
-export default interface InputProps {
+export default interface InputProps<TValue = unknown> {
   id?: string;
   name?: string;
   label: string;
-  value?: unknown;
+  value?: TValue;
   placeholder?: string;
   validationError?: string;
   gap?: number;

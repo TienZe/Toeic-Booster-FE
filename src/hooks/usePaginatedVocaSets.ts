@@ -6,7 +6,7 @@ type Options = {
   page: number;
   limit: number;
   search?: string;
-  level?: string;
+  categories?: number[];
 };
 
 export default function usePaginatedVocaSets(options: Options) {
@@ -17,10 +17,10 @@ export default function usePaginatedVocaSets(options: Options) {
         page: options.page,
         limit: options.limit,
         search: options.search,
-        level: options.level,
+        categories: options.categories,
       },
     ],
-    queryFn: ({ queryKey: request }) =>
-      getAllVocaSets(request[1] as GetVocaSetsRequest),
+    queryFn: ({ queryKey }) =>
+      getAllVocaSets(queryKey[1] as GetVocaSetsRequest),
   });
 }

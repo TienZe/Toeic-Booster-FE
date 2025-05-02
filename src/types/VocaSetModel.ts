@@ -3,10 +3,11 @@ import LessonModel, { LessonWithUserProgress } from "./LessonModel";
 export default interface VocaSetModel {
   id: string;
   name: string;
-  level: string;
   thumbnail: string;
   target: string;
-  description: string;
+  description: string|null;
+  
+  tags: string[];
 
   topics: LessonModel[];
   topicsCount: number;

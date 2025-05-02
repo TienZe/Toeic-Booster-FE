@@ -5,7 +5,7 @@ import { GetVocaSetsRequest } from "./types/GetVocaSetsRequest";
 
 export async function getAllVocaSets(request: GetVocaSetsRequest) {
   const response = await axiosClient.get<PaginatedData<VocaSetModel>>(
-    "/group-topic",
+    "/collections",
     {
       params: request,
     },

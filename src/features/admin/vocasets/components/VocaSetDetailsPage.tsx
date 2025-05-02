@@ -220,7 +220,7 @@ const VocaSetDetailsPage = () => {
             alignItems="center"
           >
             <Typography variant="h4" sx={{ marginBottom: 1 }}>
-              Vocabulary Set
+              Vocabulary Collection
             </Typography>
             <GoBackButton />
           </Stack>

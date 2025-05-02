@@ -1,19 +1,19 @@
 export default interface PaginatedData<T> {
-  first: number;
-  last: number;
-  limit: number;
-  total: number;
-  data: T[];
+  items: T[];
+  total: number; // total items
+
+  pageSize: number;
+  currentPage: number;
+  totalPages: number;
+
+  hasNext: boolean;
+  hasPrevious: boolean;
+
+  nextPage: number;
+  previousPage: number;
 }
 
 export interface PageDataRequest {
   page: number;
   limit: number;
-}
-
-export function getTotalPages(data?: PaginatedData<unknown>) {
-  if (!data) {
-    return 0;
-  }
-  return Math.ceil(data.total / data.limit);
 }
