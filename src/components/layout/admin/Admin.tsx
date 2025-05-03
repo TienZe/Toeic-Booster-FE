@@ -56,7 +56,7 @@ const Admin = () => {
               />
             </Link>
             <Typography sx={{ marginBottom: 1, marginTop: 0.25 }}>
-              {collapsed ? " " : user?.name || user?.username}
+              {collapsed ? " " : user?.name}
             </Typography>
 
             <Button

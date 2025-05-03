@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material";
 
 // Use this workaround to make default MUI styles is overridden by the same specificity styles
 import StyledEngineProvider from "@mui/material/StyledEngineProvider";

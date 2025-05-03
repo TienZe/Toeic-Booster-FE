@@ -1,4 +1,20 @@
-import { createTheme } from "@mui/material/styles";
+import { createTheme, PaletteColorOptions } from "@mui/material";
+
+declare module "@mui/material/styles" {
+  interface PaletteColor {
+    extraLight?: string;
+  }
+  interface SimplePaletteColorOptions {
+    extraLight?: string;
+  }
+  interface PaletteOptions {
+    gradient?: PaletteColorOptions;
+  }
+
+  interface Palette {
+    gradient: PaletteColor;
+  }
+}
 
 const theme = createTheme({
   components: {
@@ -216,6 +232,9 @@ const theme = createTheme({
       main: "#00B035",
       contrastText: "#fff",
     },
+    gradient: {
+      main: "linear-gradient(90deg, rgba(59, 130, 246, 1), rgba(30, 58, 138, 1))"
+    }
   },
   typography: {
     fontFamily: "'Inter', sans-serif",

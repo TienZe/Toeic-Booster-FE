@@ -116,7 +116,7 @@ const MultipleSelectCheckmarks: React.FC<MultipleSelectCheckmarksProps> = ({
           >
             ×
           </span>
-          Clear filter
+          Clear
         </Stack>
       </Select>
 

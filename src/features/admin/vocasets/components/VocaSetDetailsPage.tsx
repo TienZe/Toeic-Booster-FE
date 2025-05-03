@@ -13,11 +13,9 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  TextField,
   Typography,
 } from "@mui/material";
 import RoundedInput from "../../../../components/UI/RoundedInput";
-import BootstrapSelect from "../../../../components/UI/BootstrapSelect";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import VocaSet from "../../../../components/VocaSet";
@@ -33,8 +31,6 @@ import { getVocaSetById, updateVocaSet } from "../api/voca-set-api";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
 import useFileInput from "../../../../hooks/useFileInput";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import VocaSetLevel from "../../../../types/VocaSetLevel";
-import { capitalizeFirstLetter } from "../../../../utils/stringFormatter";
 import UpdateVocaSetRequest from "../types/UpdateVocaSetRequest";
 import { toast } from "react-toastify";
 import { fileList2Base64 } from "../../../../utils/helper";
@@ -42,16 +38,15 @@ import NewLessonModal from "./NewLessonModal";
 import LessonModel, { getLessonThumbnail } from "../../../../types/LessonModel";
 import { deleteLesson } from "../api/lesson-api";
 import { Image } from "../../../../components/UI/Image";
-import ListItemRoundedInput from "./TextListRoundedInput";
 import MultipleSelectCheckmarks from "../../../../components/UI/MultipleSelectCheckmarks";
 import useCollectionTags from "../../../../hooks/useCollectionTags";
+import DefaultVocaSetThumbnail from "../../../../assets/images/voca/default.png";
 
 interface VocaSetFormData {
   id: string;
   name: string;
-  categories: string[];
-  thumbnail: string | FileList;
-  target: string;
+  categories: number[];
+  thumbnail: string | FileList | null;
   description: string | null;
 }
 
@@ -71,7 +66,7 @@ const VocaSetDetailsPage = () => {
 
   const { data: collectionTags } = useCollectionTags();
 
-  const { mutate, isPending } = useMutation({
+  const vocaSetUpdateMutation = useMutation({
     mutationFn: async (request: UpdateVocaSetRequest) => {
       const responseData = await updateVocaSet(request);
       return responseData;
@@ -80,7 +75,6 @@ const VocaSetDetailsPage = () => {
       toast.success("Update successfully!");
       queryClient.setQueryData(["vocaSet", { id: vocaSetId }], {
         ...responseData,
-        topics: data?.topics,
       });
     },
   });
@@ -103,22 +97,12 @@ const VocaSetDetailsPage = () => {
     },
   });
 
-  const {
-    control,
-    register,
-    reset,
-    setValue,
-    getValues,
-    formState: { errors },
-    handleSubmit,
-  } = useForm<VocaSetFormData>({
+  const vocaSetUpdateForm = useForm<VocaSetFormData>({
     defaultValues: {
       id: "",
       name: "",
       categories: [],
-      thumbnail: "",
-      // target: "",
-      // description: "",
+      thumbnail: DefaultVocaSetThumbnail,
     },
   });
 
@@ -155,7 +139,7 @@ const VocaSetDetailsPage = () => {
     handleChangeFileInput,
   } = useFileInput();
 
-  const formData = getValues();
+  const formData = vocaSetUpdateForm.getValues();
   console.log("form data", formData);
 
   useEffect(() => {
@@ -164,15 +148,14 @@ const VocaSetDetailsPage = () => {
       const vocaSetFormData: VocaSetFormData = {
         id: vocaSet.id,
         name: vocaSet.name,
-        categories: vocaSet.tags,
+        categories: vocaSet.tags.map((tag) => tag.id),
         thumbnail: vocaSet.thumbnail,
-        target: vocaSet.target,
         description: vocaSet.description,
       };
-      reset(vocaSetFormData);
-      setFileSrc(vocaSet.thumbnail);
+      vocaSetUpdateForm.reset(vocaSetFormData);
+      setFileSrc(vocaSet.thumbnail || DefaultVocaSetThumbnail);
     }
-  }, [vocaSet, reset, setFileSrc]);
+  }, [vocaSet, vocaSetUpdateForm, setFileSrc]);
 
   const handleSearchLessonInputChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -187,8 +170,7 @@ const VocaSetDetailsPage = () => {
     const request: UpdateVocaSetRequest = {
       id: data.id,
       name: data.name,
-      level: data.level as VocaSetLevel,
-      target: data.target,
+      tags: data.categories,
       description: data.description,
     };
 
@@ -196,7 +178,7 @@ const VocaSetDetailsPage = () => {
       request.thumbnail = await fileList2Base64(data.thumbnail);
     }
 
-    mutate(request);
+    vocaSetUpdateMutation.mutate(request);
   };
 
   const handleClickDeleteLesson = (lessonId: string) => {
@@ -231,7 +213,7 @@ const VocaSetDetailsPage = () => {
           </Stack>
           <form
             id="details-voca-set-form"
-            onSubmit={handleSubmit(handleSaveVocaSet)}
+            onSubmit={vocaSetUpdateForm.handleSubmit(handleSaveVocaSet)}
             style={{ marginBottom: "2rem", maxWidth: "1000px" }}
           >
             <Stack direction="row" spacing={2} alignItems="start">
@@ -243,14 +225,14 @@ const VocaSetDetailsPage = () => {
                 />
                 <input
                   type="file"
-                  {...register("thumbnail")}
+                  {...vocaSetUpdateForm.register("thumbnail")}
                   ref={(e) => {
-                    register("thumbnail").ref(e);
+                    vocaSetUpdateForm.register("thumbnail").ref(e);
                     fileInputRef.current = e;
                   }}
                   onChange={(e) => {
                     handleChangeFileInput(e);
-                    register("thumbnail").onChange(e);
+                    vocaSetUpdateForm.register("thumbnail").onChange(e);
                   }}
                   style={{ display: "none" }}
                 />
@@ -266,7 +248,7 @@ const VocaSetDetailsPage = () => {
                 <Grid2 size={6}>
                   <Controller
                     name="name"
-                    control={control}
+                    control={vocaSetUpdateForm.control}
                     rules={{ required: "Name is required" }}
                     render={({ field }) => (
                       <RoundedInput
@@ -277,7 +259,9 @@ const VocaSetDetailsPage = () => {
                         borderRadius={4}
                         gap={0.5}
                         labelColor="secondary.main"
-                        validationError={errors.name?.message}
+                        validationError={
+                          vocaSetUpdateForm.formState.errors.name?.message
+                        }
                       />
                     )}
                   />
@@ -285,8 +269,8 @@ const VocaSetDetailsPage = () => {
                 <Grid2 size={6}>
                   <Controller
                     name="categories"
-                    control={control}
-                    rules={{ required: "Level is required" }}
+                    control={vocaSetUpdateForm.control}
+                    rules={{ required: "Please select at least one category" }}
                     render={({ field }) => (
                       <MultipleSelectCheckmarks
                         label="Categories"
@@ -301,18 +285,23 @@ const VocaSetDetailsPage = () => {
                         }
                         value={field.value}
                         onBlur={field.onBlur}
+                        validationError={
+                          vocaSetUpdateForm.formState.errors.categories?.message
+                        }
                       />
                     )}
                   />
                 </Grid2>
-                <Grid2 size={12}>
+                {/* <Grid2 size={12}>
                   <ListItemRoundedInput
-                    register={register("target", {
+                    register={vocaSetUpdateForm.register("target", {
                       required: "Aim is required",
                     })}
                     defaultTextListValue={vocaSet?.target}
                     onUpdateValue={(newValue) =>
-                      setValue("target", newValue, { shouldValidate: true })
+                      vocaSetUpdateForm.setValue("target", newValue, {
+                        shouldValidate: true,
+                      })
                     }
                     label="Aim"
                     placeholder="Enter new aim of voca set"
@@ -320,13 +309,15 @@ const VocaSetDetailsPage = () => {
                     borderRadius={4}
                     gap={0.5}
                     labelColor="secondary.main"
-                    validationError={errors.target?.message}
+                    validationError={
+                      vocaSetUpdateForm.formState.errors.target?.message
+                    }
                   />
-                </Grid2>
+                </Grid2> */}
                 <Grid2 size={12}>
                   <Controller
                     name="description"
-                    control={control}
+                    control={vocaSetUpdateForm.control}
                     render={({ field }) => (
                       <RoundedInput
                         {...field}
@@ -336,7 +327,10 @@ const VocaSetDetailsPage = () => {
                         borderRadius={4}
                         gap={0.5}
                         labelColor="secondary.main"
-                        validationError={errors.description?.message}
+                        validationError={
+                          vocaSetUpdateForm.formState.errors.description
+                            ?.message
+                        }
                         multiline
                         rows={4}
                       />
@@ -354,11 +348,20 @@ const VocaSetDetailsPage = () => {
                     </Button>
                     <Button
                       variant="contained"
+                      sx={(theme) => ({
+                        float: "right",
+                        px: "24px",
+                        minWidth: "110px",
+                        background: theme.palette.gradient.main,
+                      })}
                       type="submit"
-                      sx={{ float: "right", px: "24px", minWidth: "110px" }}
-                      disabled={isPending}
+                      disabled={vocaSetUpdateMutation.isPending}
                     >
-                      {isPending ? <CircularProgress size={20} /> : "Save"}
+                      {vocaSetUpdateMutation.isPending ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        "Save"
+                      )}
                     </Button>
                   </Stack>
                 </Grid2>
@@ -489,7 +492,7 @@ const VocaSetDetailsPage = () => {
               title={formData.name}
               author={"EngFlash"}
               takenNumber={123}
-              qualification={formData.level}
+              // qualification={formData.level}
               image={fileSrc}
             />
           </CustomModal>

@@ -19,8 +19,8 @@ export async function getVocaSetById(id: string) {
 }
 
 export async function updateVocaSet(data: UpdateVocaSetRequest) {
-  const response = await axiosClient.patch<VocaSetModel>(
-    `/group-topic/${data.id}`,
+  const response = await axiosClient.put<VocaSetModel>(
+    `/collections/${data.id}`,
     data,
   );
 
