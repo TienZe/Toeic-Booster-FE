@@ -13,6 +13,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TextField,
   Typography,
 } from "@mui/material";
 import RoundedInput from "../../../../components/UI/RoundedInput";
@@ -42,14 +43,16 @@ import LessonModel, { getLessonThumbnail } from "../../../../types/LessonModel";
 import { deleteLesson } from "../api/lesson-api";
 import { Image } from "../../../../components/UI/Image";
 import ListItemRoundedInput from "./TextListRoundedInput";
+import MultipleSelectCheckmarks from "../../../../components/UI/MultipleSelectCheckmarks";
+import useCollectionTags from "../../../../hooks/useCollectionTags";
 
 interface VocaSetFormData {
   id: string;
   name: string;
-  level: string;
+  categories: string[];
   thumbnail: string | FileList;
   target: string;
-  description: string;
+  description: string | null;
 }
 
 const LESSON_PAGE_SIZE = 4;
@@ -60,11 +63,13 @@ const VocaSetDetailsPage = () => {
 
   const vocaSetId = searchParams.get("id");
 
-  const { data, isLoading } = useQuery({
+  const { data: vocaSet, isLoading } = useQuery({
     queryKey: ["vocaSet", { id: vocaSetId }],
     queryFn: () => getVocaSetById(vocaSetId!),
     enabled: !!vocaSetId,
   });
+
+  const { data: collectionTags } = useCollectionTags();
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (request: UpdateVocaSetRequest) => {
@@ -89,7 +94,7 @@ const VocaSetDetailsPage = () => {
         exact: true,
       });
 
-      invalidatePage(data!.topics.length - 1);
+      invalidatePage(vocaSet!.topics.length - 1);
     },
     onSettled: () => {
       // reset state
@@ -110,7 +115,7 @@ const VocaSetDetailsPage = () => {
     defaultValues: {
       id: "",
       name: "",
-      level: VocaSetLevel.BEGINNER,
+      categories: [],
       thumbnail: "",
       // target: "",
       // description: "",
@@ -124,7 +129,7 @@ const VocaSetDetailsPage = () => {
 
   const openDeleteModal = Boolean(deletedLessonId);
 
-  const lessons = data?.topics || [];
+  const lessons = vocaSet?.topics || [];
 
   const filteredLessons = lessons.filter((lesson) =>
     lesson.name.toLowerCase().includes(searchLesson.toLowerCase()),
@@ -154,20 +159,20 @@ const VocaSetDetailsPage = () => {
   console.log("form data", formData);
 
   useEffect(() => {
-    if (data) {
+    if (vocaSet) {
       //  Reset form data
       const vocaSetFormData: VocaSetFormData = {
-        id: data.id,
-        name: data.name,
-        level: data.level,
-        thumbnail: data.thumbnail,
-        target: data.target,
-        description: data.description,
+        id: vocaSet.id,
+        name: vocaSet.name,
+        categories: vocaSet.tags,
+        thumbnail: vocaSet.thumbnail,
+        target: vocaSet.target,
+        description: vocaSet.description,
       };
       reset(vocaSetFormData);
-      setFileSrc(data.thumbnail);
+      setFileSrc(vocaSet.thumbnail);
     }
-  }, [data, reset, setFileSrc]);
+  }, [vocaSet, reset, setFileSrc]);
 
   const handleSearchLessonInputChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -227,14 +232,14 @@ const VocaSetDetailsPage = () => {
           <form
             id="details-voca-set-form"
             onSubmit={handleSubmit(handleSaveVocaSet)}
-            style={{ marginBottom: "2rem" }}
+            style={{ marginBottom: "2rem", maxWidth: "1000px" }}
           >
             <Stack direction="row" spacing={2} alignItems="start">
               <Stack spacing={0.5}>
                 <CardMedia
                   component="img"
                   src={fileSrc}
-                  sx={{ width: "250px", height: "140px" }}
+                  sx={{ width: "240px", height: "auto" }}
                 />
                 <input
                   type="file"
@@ -279,19 +284,23 @@ const VocaSetDetailsPage = () => {
                 </Grid2>
                 <Grid2 size={6}>
                   <Controller
-                    name="level"
+                    name="categories"
                     control={control}
                     rules={{ required: "Level is required" }}
                     render={({ field }) => (
-                      <BootstrapSelect
-                        {...field}
-                        label="Level"
-                        itemLabels={Object.values(VocaSetLevel).map(
-                          capitalizeFirstLetter,
-                        )}
-                        itemValues={Object.values(VocaSetLevel)}
-                        defaultValue={data?.level}
-                        validationError={errors.level?.message}
+                      <MultipleSelectCheckmarks
+                        label="Categories"
+                        itemLabels={
+                          collectionTags?.map((tag) => tag.tagName) || []
+                        }
+                        itemValues={collectionTags?.map((tag) => tag.id) || []}
+                        bootstrapSelect={true}
+                        formControlSx={{ width: "100%" }}
+                        onChange={(newValue) =>
+                          field.onChange({ target: { value: newValue } })
+                        }
+                        value={field.value}
+                        onBlur={field.onBlur}
                       />
                     )}
                   />
@@ -301,7 +310,7 @@ const VocaSetDetailsPage = () => {
                     register={register("target", {
                       required: "Aim is required",
                     })}
-                    defaultTextListValue={data?.target}
+                    defaultTextListValue={vocaSet?.target}
                     onUpdateValue={(newValue) =>
                       setValue("target", newValue, { shouldValidate: true })
                     }
@@ -315,23 +324,23 @@ const VocaSetDetailsPage = () => {
                   />
                 </Grid2>
                 <Grid2 size={12}>
-                  <ListItemRoundedInput
-                    register={register("description", {
-                      required: "Description is required",
-                    })}
-                    defaultTextListValue={data?.description}
-                    onUpdateValue={(newValue) =>
-                      setValue("description", newValue, {
-                        shouldValidate: true,
-                      })
-                    }
-                    label="Description"
-                    placeholder="Enter new description of voca set"
-                    padding="16.5px 14px"
-                    borderRadius={4}
-                    gap={0.5}
-                    labelColor="secondary.main"
-                    validationError={errors.description?.message}
+                  <Controller
+                    name="description"
+                    control={control}
+                    render={({ field }) => (
+                      <RoundedInput
+                        {...field}
+                        label="Description"
+                        placeholder="Describe your collection here"
+                        padding="16.5px 14px"
+                        borderRadius={4}
+                        gap={0.5}
+                        labelColor="secondary.main"
+                        validationError={errors.description?.message}
+                        multiline
+                        rows={4}
+                      />
+                    )}
                   />
                 </Grid2>
                 <Grid2 size={12}>
@@ -453,7 +462,7 @@ const VocaSetDetailsPage = () => {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[LESSON_PAGE_SIZE]}
-                    count={data?.topics?.length || 0}
+                    count={vocaSet?.topics?.length || 0}
                     rowsPerPage={LESSON_PAGE_SIZE}
                     page={page}
                     onPageChange={handleChangePage}
@@ -492,12 +501,16 @@ const VocaSetDetailsPage = () => {
             onCancel={() => setOpenNewModal(false)}
           />
 
+          {/* Delete lesson modal */}
           <CustomModal
             open={openDeleteModal}
             onClose={() => setDeletedLessonId(null)}
           >
             <Box sx={{ padding: 3 }}>
-              <Typography variant="h6" sx={{ marginBottom: 1 }}>
+              <Typography
+                variant="h6"
+                sx={{ marginBottom: 1, fontWeight: "400" }}
+              >
                 Do you want to delete this lesson?
               </Typography>
               <Stack direction="row" spacing={0.5} justifyContent="flex-end">

@@ -1,10 +1,14 @@
 import { styled, TableContainer } from "@mui/material";
 
-const AdminTableContainer = styled(TableContainer)(() => ({
+const AdminTableContainer = styled(TableContainer)(({ theme }) => ({
   // border: `1px solid ${theme.palette.divider}`,
   boxShadow: "0 0 29px rgba(100,100,111,.2)",
   borderRadius: "8px",
   padding: "20px",
+
+  "& .MuiTableRow-head th": {
+    borderBottom: `2px solid ${theme.palette.primary.light}`,
+  },
 
   "& .MuiTableBody-root .MuiTableRow-root:nth-of-type(odd)": {
     // backgroundColor: theme.palette.action.hover,

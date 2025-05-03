@@ -102,7 +102,7 @@ const VocaIndexPage: React.FC = () => {
   });
 
   const [newThumbnail, setNewThumbnail] = useState<string>(
-    getPlaceholderImage(250, 140),
+    getPlaceholderImage(300, 500),
   );
 
   const navigate = useNavigate();
@@ -327,7 +327,7 @@ const VocaIndexPage: React.FC = () => {
                 <VocaSetRow
                   key={vocaSet.id}
                   vocaSet={vocaSet}
-                  onDelete={() => setDeletedVocaSet(vocaSet.id)}
+                  onDelete={(deletedId) => setDeletedVocaSet(deletedId)}
                 />
               ))}
               {/* {emptyRows > 0 && (
@@ -408,8 +408,8 @@ const VocaIndexPage: React.FC = () => {
               <Image
                 src={newThumbnail}
                 sx={{
-                  width: "250px",
-                  height: "140px",
+                  width: "120px",
+                  height: "200px",
                   mx: "auto !important",
                 }}
               />
@@ -424,7 +424,7 @@ const VocaIndexPage: React.FC = () => {
                 <Button
                   variant="contained"
                   type="submit"
-                  sx={{ minWidth: "110px" }}
+                  sx={{ minWidth: "110px", boxShadow: "none" }}
                   disabled={isPending}
                 >
                   {isPending ? <CircularProgress size={20} /> : "Create"}
@@ -441,24 +441,27 @@ const VocaIndexPage: React.FC = () => {
         onClose={() => setDeletedVocaSet(null)}
       >
         <Box sx={{ padding: 3 }}>
-          <Typography variant="h6" sx={{ marginBottom: 1 }}>
-            Do you want to delete this voca set?
+          <Typography variant="h6" sx={{ marginBottom: 1, fontWeight: "400" }}>
+            Do you want to delete this collection?
           </Typography>
           <Stack direction="row" spacing={0.5} justifyContent="flex-end">
             <Button
+              variant="contained"
+              onClick={() => setDeletedVocaSet(null)}
+              sx={{ boxShadow: "none" }}
+            >
+              Cancel
+            </Button>
+            <Button
               variant="outlined"
-              color="error"
               onClick={handleDeleteVocaSet}
               sx={{ width: "80px" }}
             >
               {deleteVocaSetMutation.isPending ? (
-                <CircularProgress size={20} color="error" />
+                <CircularProgress size={20} />
               ) : (
                 "Delete"
               )}
-            </Button>
-            <Button variant="contained" onClick={() => setDeletedVocaSet(null)}>
-              Cancel
             </Button>
           </Stack>
         </Box>

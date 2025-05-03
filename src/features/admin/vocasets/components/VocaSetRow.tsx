@@ -1,24 +1,27 @@
-import { Menu, MenuItem, MenuList, TableCell, TableRow } from "@mui/material";
-import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { capitalizeFirstLetter } from "../../../../utils/stringFormatter";
+import { TableCell, TableRow } from "@mui/material";
 import VocaSetModel from "../../../../types/VocaSetModel";
 import { Image } from "../../../../components/UI/Image";
+import ActionDropdown, {
+  ActionDropdownAction,
+} from "../../../../components/UI/ActionDropdown";
+import { DeleteOutline, Tune } from "@mui/icons-material";
 
 const VocaSetRow: React.FC<{
   vocaSet: VocaSetModel;
-  onDelete?: () => void;
+  onDelete: (vocaSetId: string) => void;
 }> = ({ vocaSet, onDelete }) => {
-  const actionRef = useRef<HTMLSpanElement>(null);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = () => {
-    setAnchorEl(actionRef.current);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const actions: ActionDropdownAction[] = [
+    {
+      label: "Manage",
+      icon: <Tune />,
+      link: `details?id=${vocaSet.id}`,
+    },
+    {
+      label: "Delete",
+      icon: <DeleteOutline />,
+      onClick: () => onDelete(vocaSet.id),
+    },
+  ];
 
   return (
     <TableRow>
@@ -42,41 +45,11 @@ const VocaSetRow: React.FC<{
         />
       </TableCell>
       <TableCell>{vocaSet.name}</TableCell>
-      {/* <TableCell align="center">"Test"</TableCell> */}
       <TableCell align="center">{vocaSet?.userCount}</TableCell>
       <TableCell align="center">{vocaSet?.topicsCount}</TableCell>
-      <TableCell
-        onClick={handleClick}
-        align="center"
-        sx={{
-          color: "primary.main",
-          cursor: "pointer",
-          "&:hover": {
-            color: "primary.main",
-          },
-          textDecoration: open ? "underline" : "none",
-        }}
-      >
-        <span ref={actionRef}>Action</span>
+      <TableCell align="center">
+        <ActionDropdown actions={actions} />
       </TableCell>
-
-      <Menu
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        sx={{
-          transform: "translateY(10px) translateX(-20px)",
-          "& .MuiList-dense": { py: 0 },
-          "& a": { textDecoration: "none", color: "inherit" },
-        }}
-      >
-        <MenuList dense>
-          <Link to={`details?id=${vocaSet.id}`}>
-            <MenuItem>Manage</MenuItem>
-          </Link>
-          <MenuItem onClick={onDelete}>Delete</MenuItem>
-        </MenuList>
-      </Menu>
     </TableRow>
   );
 };

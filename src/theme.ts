@@ -200,6 +200,7 @@ const theme = createTheme({
       light: "#4A82C3",
       main: "#203A90",
       dark: "#102774",
+      extraLight: "#F0F5FF"
     },
     secondary: {
       light: "rgba(84, 86, 90, 0.6)",
