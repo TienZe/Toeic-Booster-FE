@@ -29,7 +29,7 @@ interface NewLessonModalProps extends CustomModalProps {
 
 interface NewLessonFormData {
   name: string;
-  thumbnail: FileList;
+  thumbnail?: FileList;
 }
 
 const NewLessonModal: React.FC<NewLessonModalProps> = ({
@@ -62,13 +62,17 @@ const NewLessonModal: React.FC<NewLessonModalProps> = ({
   const handleCreateNewLesson: SubmitHandler<NewLessonFormData> = async (
     data,
   ) => {
-    const thumbnailBase64 = await fileList2Base64(data.thumbnail);
-    console.log(data);
-    mutate({
-      ...data,
-      thumbnail: thumbnailBase64,
+    const request: NewLessonRequest = {
+      name: data.name,
       vocaSetId,
-    });
+    };
+
+    if (data.thumbnail) {
+      const thumbnailBase64 = await fileList2Base64(data.thumbnail);
+      request.thumbnail = thumbnailBase64;
+    }
+
+    mutate(request);
   };
 
   return (

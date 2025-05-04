@@ -130,10 +130,6 @@ const VocaSetDetailsPage = () => {
     invalidatePage,
   } = useAdminTablePagination<Lesson>(filteredLessons || [], LESSON_PAGE_SIZE);
 
-  // console.log("pageData", pageData);
-  // console.log("data.topic", data?.topics);
-  // console.log("data", data);
-
   const {
     fileInputRef,
     fileSrc,
@@ -456,6 +452,8 @@ const VocaSetDetailsPage = () => {
               </TableFooter>
             </Table>
           </AdminTableContainer>
+
+          {/* Preview modal */}
           <CustomModal
             open={preview}
             onClose={() => setPreview(false)}
@@ -499,22 +497,21 @@ const VocaSetDetailsPage = () => {
               </Typography>
               <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                 <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={handleDeleteLesson}
-                  sx={{ width: "80px" }}
-                >
-                  {deleteLessonMutation.isPending ? (
-                    <CircularProgress size={20} color="error" />
-                  ) : (
-                    "Delete"
-                  )}
-                </Button>
-                <Button
                   variant="contained"
                   onClick={() => setDeletedLessonId(null)}
                 >
                   Cancel
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={handleDeleteLesson}
+                  sx={{ width: "80px" }}
+                >
+                  {deleteLessonMutation.isPending ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    "Delete"
+                  )}
                 </Button>
               </Stack>
             </Box>
