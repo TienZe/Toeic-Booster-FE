@@ -54,7 +54,12 @@ const LoginPage: React.FC = () => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>();
+  } = useForm<FormData>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();

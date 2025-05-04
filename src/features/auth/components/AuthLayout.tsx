@@ -69,7 +69,10 @@ const AuthLayout: React.FC = () => {
               >
                 Welcome to EngFlash!
               </Typography>
-              <Box className={classes.tabGroup}>
+              <Box
+                className={classes.tabGroup}
+                sx={{ backgroundColor: "primary.extraLight" }}
+              >
                 <Link to="login">
                   <TabItem isActive={isOnLoginPage}>Login</TabItem>
                 </Link>

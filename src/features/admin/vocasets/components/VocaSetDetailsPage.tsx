@@ -35,12 +35,13 @@ import UpdateVocaSetRequest from "../types/UpdateVocaSetRequest";
 import { toast } from "react-toastify";
 import { fileList2Base64 } from "../../../../utils/helper";
 import NewLessonModal from "./NewLessonModal";
-import LessonModel, { getLessonThumbnail } from "../../../../types/LessonModel";
+import Lesson, { getLessonThumbnail } from "../../../../types/Lesson";
 import { deleteLesson } from "../api/lesson-api";
 import { Image } from "../../../../components/UI/Image";
 import MultipleSelectCheckmarks from "../../../../components/UI/MultipleSelectCheckmarks";
 import useCollectionTags from "../../../../hooks/useCollectionTags";
 import DefaultVocaSetThumbnail from "../../../../assets/images/voca/default.png";
+import useCollectionLessons from "../../../../hooks/useCollectionLessons";
 
 interface VocaSetFormData {
   id: string;
@@ -50,7 +51,7 @@ interface VocaSetFormData {
   description: string | null;
 }
 
-const LESSON_PAGE_SIZE = 4;
+const LESSON_PAGE_SIZE = 5;
 
 const VocaSetDetailsPage = () => {
   const [searchParams] = useSearchParams();
@@ -65,6 +66,10 @@ const VocaSetDetailsPage = () => {
   });
 
   const { data: collectionTags } = useCollectionTags();
+
+  const { data: lessons } = useCollectionLessons(vocaSetId!, {
+    enabled: !!vocaSetId,
+  });
 
   const vocaSetUpdateMutation = useMutation({
     mutationFn: async (request: UpdateVocaSetRequest) => {
@@ -84,11 +89,11 @@ const VocaSetDetailsPage = () => {
     onSuccess: () => {
       toast.success("Delete lesson successfully!");
       queryClient.invalidateQueries({
-        queryKey: ["vocaSet", { id: vocaSetId }],
+        queryKey: ["lessons", { vocaSetId: vocaSetId }],
         exact: true,
       });
 
-      invalidatePage(vocaSet!.topics.length - 1);
+      invalidatePage(lessons!.length - 1);
     },
     onSettled: () => {
       // reset state
@@ -113,9 +118,7 @@ const VocaSetDetailsPage = () => {
 
   const openDeleteModal = Boolean(deletedLessonId);
 
-  const lessons = vocaSet?.topics || [];
-
-  const filteredLessons = lessons.filter((lesson) =>
+  const filteredLessons = lessons?.filter((lesson) =>
     lesson.name.toLowerCase().includes(searchLesson.toLowerCase()),
   );
   const {
@@ -125,7 +128,7 @@ const VocaSetDetailsPage = () => {
     pageData,
     handleChangePage,
     invalidatePage,
-  } = useAdminTablePagination<LessonModel>(filteredLessons, LESSON_PAGE_SIZE);
+  } = useAdminTablePagination<Lesson>(filteredLessons || [], LESSON_PAGE_SIZE);
 
   // console.log("pageData", pageData);
   // console.log("data.topic", data?.topics);
@@ -292,28 +295,6 @@ const VocaSetDetailsPage = () => {
                     )}
                   />
                 </Grid2>
-                {/* <Grid2 size={12}>
-                  <ListItemRoundedInput
-                    register={vocaSetUpdateForm.register("target", {
-                      required: "Aim is required",
-                    })}
-                    defaultTextListValue={vocaSet?.target}
-                    onUpdateValue={(newValue) =>
-                      vocaSetUpdateForm.setValue("target", newValue, {
-                        shouldValidate: true,
-                      })
-                    }
-                    label="Aim"
-                    placeholder="Enter new aim of voca set"
-                    padding="16.5px 14px"
-                    borderRadius={4}
-                    gap={0.5}
-                    labelColor="secondary.main"
-                    validationError={
-                      vocaSetUpdateForm.formState.errors.target?.message
-                    }
-                  />
-                </Grid2> */}
                 <Grid2 size={12}>
                   <Controller
                     name="description"
@@ -393,6 +374,8 @@ const VocaSetDetailsPage = () => {
               New
             </Button>
           </Stack>
+
+          {/* Lesson table */}
           <AdminTableContainer>
             <Table>
               <TableHead>
@@ -407,7 +390,7 @@ const VocaSetDetailsPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {pageData.map((lesson: LessonModel) => (
+                {pageData.map((lesson: Lesson) => (
                   <TableRow key={lesson.id}>
                     <TableCell
                       sx={{
@@ -430,9 +413,7 @@ const VocaSetDetailsPage = () => {
                       />
                     </TableCell>
                     <TableCell>{lesson.name}</TableCell>
-                    <TableCell align="center">
-                      {lesson?.listWord.length || 0}
-                    </TableCell>
+                    <TableCell align="center">{0}</TableCell>
                     <TableCell align="right">
                       <Stack direction="row" justifyContent="center">
                         <Link to={`/admin/lesson?id=${lesson.id}`}>
@@ -465,7 +446,7 @@ const VocaSetDetailsPage = () => {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[LESSON_PAGE_SIZE]}
-                    count={vocaSet?.topics?.length || 0}
+                    count={lessons?.length || 0}
                     rowsPerPage={LESSON_PAGE_SIZE}
                     page={page}
                     onPageChange={handleChangePage}

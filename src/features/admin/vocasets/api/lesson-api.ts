@@ -1,12 +1,12 @@
 import axiosClient from "../../../../axios";
-import LessonModel from "../../../../types/LessonModel";
+import Lesson from "../../../../types/Lesson";
 import NewLessonRequest from "../types/NewLessonRequest";
 import UpdateLessonRequest from "../types/UpdateLessonRequest";
 import UpdateLessonResponse from "../types/UpdateLessonResponse";
 
 export async function createNewLesson(request: NewLessonRequest) {
   const { vocaSetId, ...data } = request;
-  const response = await axiosClient.post<LessonModel>(
+  const response = await axiosClient.post<Lesson>(
     "/topic/" + vocaSetId,
     data,
   );
@@ -15,7 +15,7 @@ export async function createNewLesson(request: NewLessonRequest) {
 }
 
 export async function getLessonById(id: string) {
-  const response = await axiosClient.get<LessonModel>("/topic/" + id);
+  const response = await axiosClient.get<Lesson>("/topic/" + id);
 
   return response.data;
 }

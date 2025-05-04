@@ -1,5 +1,5 @@
 import { CollectionTag } from "./CollectionTag";
-import LessonModel, { LessonWithUserProgress } from "./LessonModel";
+import { LessonWithUserProgress } from "./Lesson";
 
 export default interface VocaSetModel {
   id: string;
@@ -9,7 +9,6 @@ export default interface VocaSetModel {
   
   tags: CollectionTag[];
 
-  topics: LessonModel[];
   topicsCount: number;
   userCount: number;
 }

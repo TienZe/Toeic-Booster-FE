@@ -32,7 +32,7 @@ import { UserProgress } from "../types/UserProgress";
 import VocaSetRatingModal from "./VocaSetRatingModal";
 import { format } from "date-fns";
 import DefaultAvatar from "../../../assets/avatars/default.svg";
-import { getLessonThumbnail } from "../../../types/LessonModel";
+import { getLessonThumbnail } from "../../../types/Lesson";
 
 const LessonsPage: React.FC = () => {
   const queryClient = useQueryClient();

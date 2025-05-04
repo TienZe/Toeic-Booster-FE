@@ -40,7 +40,7 @@ import {
 } from "../../../../utils/helper";
 import queryClient from "../../../../queryClient";
 import UpdateLessonResponse from "../types/UpdateLessonResponse";
-import LessonModel, { getLessonThumbnail } from "../../../../types/LessonModel";
+import Lesson, { getLessonThumbnail } from "../../../../types/Lesson";
 import CustomModal from "../../../../components/UI/CustomModal";
 import { deleteVoca } from "../api/vocabulary-api";
 import { Image } from "../../../../components/UI/Image";
@@ -88,7 +88,7 @@ const LessonDetailsPage = () => {
       toast.success("Lesson updated successfully");
       queryClient.setQueryData(
         ["lesson", { id: lessonId }],
-        (oldData: LessonModel) => ({
+        (oldData: Lesson) => ({
           ...oldData,
           name: responseData.name,
           thumbnail: responseData.thumbnail,

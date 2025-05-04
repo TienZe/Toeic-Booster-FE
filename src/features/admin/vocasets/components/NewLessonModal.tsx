@@ -18,7 +18,7 @@ import { AddPhotoAlternate } from "@mui/icons-material";
 import { fileList2Base64, getPlaceholderImage } from "../../../../utils/helper";
 import { useState } from "react";
 import { Image } from "../../../../components/UI/Image";
-import LessonModel from "../../../../types/LessonModel";
+import Lesson from "../../../../types/Lesson";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -47,7 +47,7 @@ const NewLessonModal: React.FC<NewLessonModalProps> = ({
 
   const { mutate, isPending } = useMutation({
     mutationFn: (request: NewLessonRequest) => createNewLesson(request),
-    onSuccess: (responseData: LessonModel) => {
+    onSuccess: (responseData: Lesson) => {
       console.log("New lesson created: ", responseData);
 
       navigate("/admin/lesson?id=" + responseData.id);
