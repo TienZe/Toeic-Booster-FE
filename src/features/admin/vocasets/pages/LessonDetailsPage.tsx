@@ -22,13 +22,13 @@ import { Add, AddPhotoAlternate, Delete, Edit } from "@mui/icons-material";
 // import DefaultLessonImage from "../assets/default-lesson-img.webp";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { LessonCard } from "../../../../components/LessonCard";
-import AdminTableContainer from "./AdminTableContainer";
+import AdminTableContainer from "../components/AdminTableContainer";
 import useAdminTablePagination from "../../hooks/useAdminTablePagination";
 import TablePaginationActions from "../../../../components/UI/TablePaginationActions";
 import { useMutation } from "@tanstack/react-query";
 import { updateLesson } from "../api/lesson-api";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
-import RoundedFileInput from "./RoundedFileInput";
+import RoundedFileInput from "../components/RoundedFileInput";
 import { useEffect, useState } from "react";
 import VocabularyModel from "../../../../types/VocabularyModel";
 import UpdateLessonRequest from "../types/UpdateLessonRequest";
@@ -108,7 +108,7 @@ const LessonDetailsPage = () => {
 
   const lessonName = watch("name");
 
-  const vocabularies = lesson?.listWord || [];
+  const vocabularies = lesson?.words || [];
 
   const { page, setPage, emptyRows, pageData, handleChangePage } =
     useAdminTablePagination<VocabularyModel>(vocabularies, VOCA_PAGE_SIZE);

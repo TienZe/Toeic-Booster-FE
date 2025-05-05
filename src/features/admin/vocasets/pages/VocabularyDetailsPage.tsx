@@ -9,7 +9,7 @@ import {
 import { GoBackButton } from "../../../../components/UI/GoBackButton";
 import { AddPhotoAlternate } from "@mui/icons-material";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import RoundedFileInput from "./RoundedFileInput";
+import RoundedFileInput from "../components/RoundedFileInput";
 import VocabularyCardWrapper from "../../../../components/VocabularyCardWrapper";
 import VocabularyFrontSide from "../../../../components/VocabularyFrontSide";
 import { useEffect, useState } from "react";

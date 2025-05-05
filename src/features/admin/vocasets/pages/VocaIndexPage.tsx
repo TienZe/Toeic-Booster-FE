@@ -18,8 +18,8 @@ import { useState } from "react";
 
 import RoundedInput from "../../../../components/UI/RoundedInput";
 import TablePaginationActions from "../../../../components/UI/TablePaginationActions";
-import VocaSetRow from "./VocaSetRow";
-import AdminTableContainer from "./AdminTableContainer";
+import VocaSetRow from "../components/VocaSetRow";
+import AdminTableContainer from "../components/AdminTableContainer";
 import {
   Add,
   AddPhotoAlternate,
@@ -27,7 +27,7 @@ import {
   FilterAltOff,
 } from "@mui/icons-material";
 import CustomModal from "../../../../components/UI/CustomModal.tsx";
-import TextFieldFileInput from "./TextFieldFileInput.tsx";
+import TextFieldFileInput from "../components/TextFieldFileInput";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { Image } from "../../../../components/UI/Image.tsx";
 import {
