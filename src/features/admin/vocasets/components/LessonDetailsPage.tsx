@@ -25,8 +25,8 @@ import { LessonCard } from "../../../../components/LessonCard";
 import AdminTableContainer from "./AdminTableContainer";
 import useAdminTablePagination from "../../hooks/useAdminTablePagination";
 import TablePaginationActions from "../../../../components/UI/TablePaginationActions";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getLessonById, updateLesson } from "../api/lesson-api";
+import { useMutation } from "@tanstack/react-query";
+import { updateLesson } from "../api/lesson-api";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
 import RoundedFileInput from "./RoundedFileInput";
 import { useEffect, useState } from "react";
@@ -45,6 +45,7 @@ import CustomModal from "../../../../components/UI/CustomModal";
 import { deleteVoca } from "../api/vocabulary-api";
 import { Image } from "../../../../components/UI/Image";
 import DefaultLessonThumbnail from "../../../../assets/images/voca/default-lesson-image.svg";
+import useLesson from "../../../../hooks/useLesson";
 
 interface LessonFormData {
   name: string;
@@ -62,11 +63,15 @@ const LessonDetailsPage = () => {
   const [deletedVocaId, setDeletedVocaId] = useState<string | null>(null);
   const openDeleteModal = Boolean(deletedVocaId);
 
-  const { data: lesson, isLoading } = useQuery({
-    queryKey: ["lesson", { id: lessonId }],
-    queryFn: () => getLessonById(lessonId!),
-    enabled: !!lessonId,
-  });
+  const { data: lesson, isLoading: isLoadingLesson } = useLesson(
+    lessonId!,
+    {
+      enabled: !!lessonId,
+    },
+    {
+      withWords: true,
+    },
+  );
 
   const {
     register,
@@ -171,7 +176,7 @@ const LessonDetailsPage = () => {
 
   return (
     <>
-      {isLoading ? (
+      {isLoadingLesson ? (
         <CustomBackdrop open />
       ) : (
         <Box sx={{ padding: 2 }}>

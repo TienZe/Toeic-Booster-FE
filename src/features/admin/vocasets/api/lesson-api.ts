@@ -31,8 +31,8 @@ export async function deleteLesson(id: string) {
 
 export async function updateLesson(request: UpdateLessonRequest) {
   const { id, ...data } = request;
-  const response = await axiosClient.patch<UpdateLessonResponse>(
-    "/topic/" + id,
+  const response = await axiosClient.put<UpdateLessonResponse>(
+    "/lessons/" + id,
     data,
   );
 
