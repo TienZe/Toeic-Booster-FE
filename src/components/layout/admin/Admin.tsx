@@ -1,10 +1,6 @@
 import { Avatar, Box, Button, Stack, Typography } from "@mui/material";
 import SideBar from "./SideBar";
-import { FaBars } from "react-icons/fa";
-import { useState } from "react";
-// import HeaderAdmin from "./HeaderAdmin";
 import { Outlet } from "react-router-dom";
-import PerfectScrollbar from "react-perfect-scrollbar";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../stores";
 import { authActions, AuthState } from "../../../stores/authSlice";
@@ -13,7 +9,8 @@ import { Logout } from "@mui/icons-material";
 import Link from "../../UI/Link";
 
 const Admin = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  // const [collapsed, setCollapsed] = useState(false);
+  const collapsed = false;
   const { user } = useSelector<RootState, AuthState>((state) => state.auth);
   const dispatch = useDispatch();
 
@@ -74,6 +71,7 @@ const Admin = () => {
           </Box>
         </Box>
       </Box>
+
       <Box
         sx={{
           flexGrow: 1,
@@ -81,22 +79,21 @@ const Admin = () => {
         }}
       >
         <Stack>
-          <Box
+          {/* <Box
             sx={{
               height: "50px",
               boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
             }}
           >
             <FaBars onClick={() => setCollapsed(!collapsed)} />
-          </Box>
+          </Box> */}
           <Box
             sx={{
-              height: "calc(100vh - 55px)",
+              pt: 0.5,
+              px: 1,
             }}
           >
-            <PerfectScrollbar>
-              <Outlet />
-            </PerfectScrollbar>
+            <Outlet />
           </Box>
         </Stack>
       </Box>

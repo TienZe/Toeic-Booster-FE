@@ -1,5 +1,5 @@
-import { Box } from "@mui/material";
-import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
+import { Box, ListItemIcon, ListItemText, Stack } from "@mui/material";
+import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../../assets/logos/logo.svg";
 import LogoMini from "../../../assets/logos/logomini.png";
@@ -8,14 +8,15 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../stores";
 import { AuthState } from "../../../stores/authSlice";
 import { isAdmin } from "../../../types/auth";
+import { Book, Home, SupervisorAccount, Translate } from "@mui/icons-material";
 
-const SideBar = (props: any) => {
-  const { collapsed, toggled } = props;
+const SideBar = (props: { collapsed: boolean }) => {
+  const { collapsed } = props;
   const navigate = useNavigate();
   const { user } = useSelector<RootState, AuthState>((state) => state.auth);
 
   return (
-    <Sidebar collapsed={collapsed} toggled={toggled}>
+    <Sidebar collapsed={collapsed} width="240px">
       <Box
         sx={{
           display: "flex",
@@ -53,24 +54,24 @@ const SideBar = (props: any) => {
           },
         }}
       >
-        <MenuItem onClick={() => navigate("/admin")}>Dashboard</MenuItem>
+        <MenuItem onClick={() => navigate("/admin")} icon={<Home />}>
+          Dashboard
+        </MenuItem>
         {user && isAdmin(user) && (
           <Link to="/admin/account">
-            <MenuItem>Accounts</MenuItem>
+            <MenuItem icon={<SupervisorAccount />}>Accounts</MenuItem>
           </Link>
         )}
-        <MenuItem onClick={() => navigate("/admin/exam-set")}>
-          {/* <MenuItem onClick={() => navigate("/admin/exam")}>Exam</MenuItem> */}
+        <MenuItem onClick={() => navigate("/admin/exam-set")} icon={<Book />}>
           Exams
         </MenuItem>
 
-        <MenuItem onClick={() => navigate("/admin/voca-set")}>
-          Vocabularies
-        </MenuItem>
-
-        <MenuItem onClick={() => navigate("/admin/listen-group")}>
-          Listen Practices
-        </MenuItem>
+        <SubMenu label="Vocabularies" icon={<Translate />}>
+          <MenuItem onClick={() => navigate("/admin/voca-set")}>
+            Collections
+          </MenuItem>
+          <MenuItem onClick={() => navigate("/admin/word")}>Words</MenuItem>
+        </SubMenu>
       </Menu>
     </Sidebar>
   );
