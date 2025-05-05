@@ -1,98 +1,154 @@
-import { Box, Grid2, Pagination, Tab, Tabs, Typography } from "@mui/material";
-import { useCallback, useState } from "react";
+import {
+  Box,
+  Pagination,
+  Typography,
+  Paper,
+  InputBase,
+  IconButton,
+  Divider,
+  Stack,
+  Grid2,
+} from "@mui/material";
+import { useState } from "react";
+import SearchIcon from "@mui/icons-material/Search";
+import TranslateIcon from "@mui/icons-material/Translate";
 
 import Content from "../../../components/layout/Content";
-import VocaSet from "../../../components/VocaSet";
-import SearchInput from "../../../components/UI/SearchInput";
+import MultipleSelectCheckmarks from "../../../components/UI/MultipleSelectCheckmarks";
+import RatingFilterDropdown from "../../../components/UI/RatingFilterDropdown";
+import CollectionCard from "../../../components/CollectionCard";
+import usePaginatedVocaSets from "../../../hooks/usePaginatedVocaSets";
 import DotLoadingProgress from "../../../components/UI/DotLoadingProgress";
 import Link from "../../../components/UI/Link";
-import usePaginatedVocaSets from "../../../hooks/usePaginatedVocaSets";
-import useDebounce from "../../../hooks/useDebounce";
-// import { getTotalPages } from "../../../types/PaginatedData";
 
-const VOCA_TAB_INDEX_2_LEVEL = ["all", "beginner", "intermediate", "advanced"];
+const ratingOptions = [
+  { value: 4.5, label: "4.5 & up", count: 10000 },
+  { value: 4.0, label: "4.0 & up", count: 10000 },
+  { value: 3.5, label: "3.5 & up", count: 10000 },
+  { value: 3.0, label: "3.0 & up", count: 10000 },
+];
+
+const languageOptions = [
+  { label: "English", value: "en", count: 9402 },
+  { label: "Español", value: "es", count: 516 },
+  { label: "Türkçe", value: "tr", count: 164 },
+  { label: "Português", value: "pt", count: 736 },
+  { label: "العربية", value: "ar", count: 202 },
+];
 
 const VocaLibraryPage: React.FC = () => {
-  const [tabIndex, setTabIndex] = useState(0);
-  const [searchValue, setSearchValue] = useState<string>();
   const [page, setPage] = useState(1);
 
-  const resetPage = useCallback(() => setPage(1), [setPage]);
-  const debouncedSearchValue = useDebounce(searchValue, {
-    callbackFn: resetPage,
-  });
+  const [selectedLanguages] = useState<string[]>(["en", "tr"]);
 
-  const filterLevel = VOCA_TAB_INDEX_2_LEVEL[tabIndex];
+  const [selectedRating, setSelectedRating] = useState<number | null>(4.5);
 
-  const { data: paginatedVocaSets, isLoading } = usePaginatedVocaSets({
-    page: page,
-    limit: 12,
-    search: debouncedSearchValue,
-    level: filterLevel,
-  });
-  const handleChangeTab = (
-    _event: React.SyntheticEvent,
-    newTabIndex: number,
-  ) => {
-    setTabIndex(newTabIndex);
-  };
-
-  const handleSearchInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setSearchValue(event.target.value);
-  };
+  const { data: vocaSets, isLoading: isLoadingVocaSets } = usePaginatedVocaSets(
+    {
+      page: 1,
+      limit: 10,
+    },
+  );
 
   return (
     <Content>
       <Box sx={{ maxWidth: "1200px", mx: "auto", py: 3, px: 2 }}>
-        <Box></Box>
-        <Typography variant="h4" sx={{ marginBottom: 1 }}>
-          Vocabulary Library
-        </Typography>
-
-        <Box sx={{ position: "relative" }}>
-          <Tabs
-            value={tabIndex}
-            onChange={handleChangeTab}
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <Typography variant="h4" fontWeight={500} gutterBottom>
+            Vocabulary Library
+          </Typography>
+          <Typography variant="subtitle1" mb={4}>
+            Explore our library of over 15,000 curated lists.
+          </Typography>
+          <Paper
+            component="form"
             sx={{
-              "& .MuiTab-root": { px: 0.75 },
-              borderColor: "divider",
+              p: "2px 16px",
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              borderRadius: 8,
+              boxShadow: "none",
+              backgroundColor: "#f6f8fa",
             }}
+            elevation={0}
           >
-            <Tab label="All" />
-            <Tab label="Beginner" />
-            <Tab label="Intermediate" />
-            <Tab label="Advanced" />
-          </Tabs>
-          <Box sx={{ position: "absolute", right: 0, top: 0 }}>
-            <SearchInput onChange={handleSearchInputChange} />
-          </Box>
-        </Box>
-        {isLoading && (
-          <Box sx={{ marginTop: 2 }}>
-            <DotLoadingProgress />
-          </Box>
-        )}
-
-        <Grid2 container rowGap={1.5} sx={{ marginTop: 1.5 }}>
-          {paginatedVocaSets?.data.map((vocaSet) => (
-            <Grid2
-              key={vocaSet.id}
-              sx={{ width: "250px", marginRight: 1, display: "flex" }}
+            <InputBase
+              sx={{ ml: 1, flex: 1 }}
+              placeholder="Search vocabulary lists"
+            />
+            <IconButton type="submit" sx={{ p: "10px", color: "primary.main" }}>
+              <SearchIcon />
+            </IconButton>
+            <Divider sx={{ height: 28, mx: 1 }} orientation="vertical" />
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                color: "primary.main",
+                fontWeight: 500,
+                fontSize: 16,
+                ml: 1,
+              }}
+              aria-label="Word Finder"
             >
+              <TranslateIcon sx={{ mr: 0.5 }} />
+              Collection Finder
+            </Box>
+          </Paper>
+
+          {/* Filter */}
+
+          <Stack direction="row" gap={1} mt={1}>
+            <MultipleSelectCheckmarks
+              label="Language"
+              itemLabels={languageOptions.map((option) => option.label)}
+              itemValues={languageOptions.map((option) => option.value)}
+              value={selectedLanguages}
+              menuProps={{
+                anchorOrigin: {
+                  vertical: "bottom",
+                  horizontal: "left",
+                },
+                transformOrigin: {
+                  vertical: "top",
+                  horizontal: "left",
+                },
+              }}
+              menuWidth="240px"
+              sx={{ borderRadius: "20px" }}
+              labelType="inside"
+            />
+
+            <RatingFilterDropdown
+              options={ratingOptions}
+              value={selectedRating}
+              onChange={setSelectedRating}
+              label="Rating"
+            />
+          </Stack>
+        </Box>
+
+        <Grid2 container rowGap={1.5} sx={{ marginTop: 3 }}>
+          {vocaSets?.items?.map((vocaSet) => (
+            <Grid2 key={vocaSet.id} size={6}>
               <Link to={`${vocaSet.id}/lessons`} style={{ display: "flex" }}>
-                <VocaSet
-                  id={vocaSet.id}
-                  title={vocaSet.name}
-                  qualification={vocaSet.level}
-                  takenNumber={vocaSet.userCount}
+                <CollectionCard
                   image={vocaSet.thumbnail}
+                  title={vocaSet.name}
+                  author={"TienZe"}
+                  description={vocaSet.description}
                 />
               </Link>
             </Grid2>
           ))}
         </Grid2>
+
+        {isLoadingVocaSets && (
+          <Box sx={{ marginTop: 2 }}>
+            <DotLoadingProgress />
+          </Box>
+        )}
 
         <Box
           sx={{
@@ -102,7 +158,7 @@ const VocaLibraryPage: React.FC = () => {
           }}
         >
           <Pagination
-            count={getTotalPages(paginatedVocaSets)}
+            count={0}
             page={page}
             onChange={(_, value) => setPage(value)}
             color="primary"

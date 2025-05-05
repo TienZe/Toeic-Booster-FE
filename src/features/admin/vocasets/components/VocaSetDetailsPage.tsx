@@ -277,7 +277,7 @@ const VocaSetDetailsPage = () => {
                           collectionTags?.map((tag) => tag.tagName) || []
                         }
                         itemValues={collectionTags?.map((tag) => tag.id) || []}
-                        bootstrapSelect={true}
+                        labelType="bootstrap"
                         formControlSx={{ width: "100%" }}
                         onChange={(newValue) =>
                           field.onChange({ target: { value: newValue } })
