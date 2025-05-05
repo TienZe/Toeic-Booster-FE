@@ -32,7 +32,9 @@ import { UserProgress } from "../types/UserProgress";
 import VocaSetRatingModal from "./VocaSetRatingModal";
 import { format } from "date-fns";
 import DefaultAvatar from "../../../assets/avatars/default.svg";
-import { getLessonThumbnail } from "../../../types/Lesson";
+import Lesson, { getLessonThumbnail } from "../../../types/Lesson";
+import { getVocaSetById } from "../../admin/vocasets/api/voca-set-api";
+import useCollectionLessons from "../../../hooks/useCollectionLessons";
 
 const LessonsPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -40,11 +42,18 @@ const LessonsPage: React.FC = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const [openRatingModal, setOpenRatingModal] = useState(false);
 
-  const { data: vocaSet, isLoading } = useQuery({
+  const { data: vocaSet, isLoading: isLoadingVocaSet } = useQuery({
     queryKey: ["vocaSet", { id: vocaSetId }],
-    queryFn: () => getVocaSetWithUserProgress(vocaSetId!),
+    queryFn: () => getVocaSetById(vocaSetId!),
     enabled: !!vocaSetId,
   });
+
+  const { data: lessons, isLoading: isLoadingLessons } = useCollectionLessons(
+    vocaSetId!,
+    {
+      enabled: !!vocaSetId,
+    },
+  );
 
   const { data: ratings } = useQuery({
     queryKey: ["vocaSetRating", { vocaSetId: vocaSetId }],
@@ -53,24 +62,31 @@ const LessonsPage: React.FC = () => {
   });
 
   const userProgress: UserProgress = useMemo(() => {
-    const lessons = vocaSet?.topics || [];
+    // const lessons = vocaSet?.topics || [];
+    const lessons: Lesson[] = [];
 
-    const totalWords = lessons.reduce(
-      (acc, lesson) => acc + lesson.listWord.length,
-      0,
-    );
+    // const totalWords = lessons.reduce(
+    //   (acc, lesson) => acc + lesson.listWord.length,
+    //   0,
+    // );
 
-    const retainedWords = lessons.reduce(
-      (acc, lesson) => acc + lesson.retainedWord,
-      0,
-    );
+    const totalWords = 10;
 
-    const learnedLessons = lessons.reduce((acc, lesson) => {
-      if (lesson.isLearned) {
-        return acc + 1;
-      }
-      return acc;
-    }, 0);
+    // const retainedWords = lessons.reduce(
+    //   (acc, lesson) => acc + lesson.retainedWord,
+    //   0,
+    // );
+
+    const retainedWords = 10;
+
+    // const learnedLessons = lessons.reduce((acc, lesson) => {
+    //   if (lesson.isLearned) {
+    //     return acc + 1;
+    //   }
+    //   return acc;
+    // }, 0);
+
+    const learnedLessons = 10;
 
     return {
       learnedLessons,
@@ -80,19 +96,18 @@ const LessonsPage: React.FC = () => {
     };
   }, [vocaSet?.topics]);
 
-  const lessons = vocaSet?.topics || [];
-
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);
   };
 
   return (
     <Content>
-      {isLoading ? (
+      {isLoadingVocaSet ? (
         <CustomBackdrop open />
       ) : (
         <Box sx={{ maxWidth: "1200px", mx: "auto", px: 1, py: 3 }}>
           <Stack direction="row" justifyContent="space-between">
+            {/* List of lessons */}
             <Box>
               <Typography variant="h5">
                 Lesson{" "}
@@ -114,21 +129,21 @@ const LessonsPage: React.FC = () => {
                       alpha(theme.palette.primary.main, 0.1),
                   }}
                 >
-                  {lessons.length}
+                  {lessons?.length || 0}
                 </Typography>
               </Typography>
               <Box sx={{ marginTop: "40px", maxWidth: "800px" }}>
                 <Box display="flex" flexWrap="wrap" sx={{ gap: 3 }}>
-                  {lessons.length > 0 ? (
+                  {lessons?.length && lessons.length > 0 ? (
                     lessons.map((lesson) => (
                       <LessonCourse
                         key={lesson.id}
                         id={lesson.id}
                         name={lesson.name}
                         thumbnail={getLessonThumbnail(lesson)}
-                        totalWords={lesson.listWord.length}
-                        retainedWords={lesson.retainedWord}
-                        reviewable={lesson.isLearned}
+                        totalWords={10}
+                        retainedWords={10}
+                        reviewable={true}
                         vocaSetId={vocaSetId}
                       />
                     ))
@@ -140,6 +155,8 @@ const LessonsPage: React.FC = () => {
                 </Box>
               </Box>
             </Box>
+
+            {/* Collection bar */}
             <Stack
               spacing={2}
               sx={{
@@ -153,13 +170,16 @@ const LessonsPage: React.FC = () => {
             >
               <Paper variant="outlined">
                 <Box sx={{ px: "24px" }}>
-                  <Image
-                    src={vocaSet?.thumbnail || ""}
-                    sx={{
-                      aspectRatio: "250/140",
-                      borderRadius: "8px",
-                    }}
-                  />
+                  <Stack direction="row" justifyContent="center">
+                    <Image
+                      src={vocaSet?.thumbnail || ""}
+                      sx={{
+                        borderRadius: "8px",
+                        maxWidth: "180px",
+                        mx: "auto",
+                      }}
+                    />
+                  </Stack>
                   <Typography
                     variant="h4"
                     color="secondary.dark"
@@ -206,21 +226,14 @@ const LessonsPage: React.FC = () => {
                   sx={{ padding: "20px" }}
                 >
                   <VocaSetTextList>
-                    {(vocaSet?.target &&
-                      vocaSet?.target
-                        .split(",")
-                        .map((item) => <li>{item}</li>)) || (
-                      <>
-                        <li>
-                          Helping you get familiar with smart vocabulary
-                          learning with EngFlash.
-                        </li>
-                        <li>
-                          Helping you improve your communication and expression
-                          skills in English for common situations.
-                        </li>
-                      </>
-                    )}
+                    <li>
+                      Helping you get familiar with smart vocabulary learning
+                      with EngFlash.
+                    </li>
+                    <li>
+                      Helping you improve your communication and expression
+                      skills in English for common situations.
+                    </li>
                   </VocaSetTextList>
                 </TabPanel>
 
@@ -231,14 +244,11 @@ const LessonsPage: React.FC = () => {
                   sx={{ padding: "20px" }}
                 >
                   <VocaSetTextList>
-                    {(vocaSet?.description &&
-                      vocaSet?.description
-                        .split(",")
-                        .map((item) => <li>{item}</li>)) || (
+                    {vocaSet?.description || (
                       <>
                         <li>
                           Includes a wide range of vocabulary from{" "}
-                          {lessons.length || "many"} common and relatable
+                          {lessons?.length || "many"} common and relatable
                           topics.
                         </li>
                         <li>
