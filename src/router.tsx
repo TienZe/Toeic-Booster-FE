@@ -71,7 +71,6 @@ export const router = createBrowserRouter([
     path: "reset-password/:token",
     element: <ResetPasswordPage />,
   },
-  {},
   {
     path: "exams",
     element: <ProtectedRoute />,

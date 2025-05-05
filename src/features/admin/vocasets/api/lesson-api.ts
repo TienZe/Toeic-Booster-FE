@@ -1,5 +1,6 @@
 import axiosClient from "../../../../axios";
 import Lesson from "../../../../types/Lesson";
+import GetLessonRequest from "../types/GetLessonRequest";
 import NewLessonRequest from "../types/NewLessonRequest";
 import UpdateLessonRequest from "../types/UpdateLessonRequest";
 import UpdateLessonResponse from "../types/UpdateLessonResponse";
@@ -7,15 +8,17 @@ import UpdateLessonResponse from "../types/UpdateLessonResponse";
 export async function createNewLesson(request: NewLessonRequest) {
   const { vocaSetId, ...data } = request;
   const response = await axiosClient.post<Lesson>(
-    "/topic/" + vocaSetId,
+    `/collections/${vocaSetId}/lessons`,
     data,
   );
 
   return response.data;
 }
 
-export async function getLessonById(id: string) {
-  const response = await axiosClient.get<Lesson>("/topic/" + id);
+export async function getLessonById(id: string|number, request?: GetLessonRequest) {
+  const response = await axiosClient.get<Lesson>("/lessons/" + id, {
+    params: request,
+  });
 
   return response.data;
 }
