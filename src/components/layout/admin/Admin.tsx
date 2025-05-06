@@ -91,6 +91,9 @@ const Admin = () => {
             sx={{
               pt: 0.5,
               px: 1,
+              overflowY: "scroll",
+              minHeight: "100vh",
+              boxSizing: "border-box",
             }}
           >
             <Outlet />
