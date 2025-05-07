@@ -43,6 +43,7 @@ import ListenLessonUpdateAdmin from "./features/admin/listen/pages/ListenLessonU
 
 import { RoleEnum } from "./types/auth.ts";
 import AccountIndexPage from "./features/admin/accounts/components/AccountIndexPage.tsx";
+import WordIndexPage from "./features/admin/vocasets/pages/WordIndexPage.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -236,6 +237,10 @@ export const router = createBrowserRouter([
       {
         path: "voca/create",
         element: <VocabularyDetailsPage />,
+      },
+      {
+        path: "word",
+        element: <WordIndexPage />,
       },
       {
         path: "listen-group",

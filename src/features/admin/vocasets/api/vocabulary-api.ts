@@ -1,33 +1,54 @@
 import axiosClient from "../../../../axios";
+import PaginatedData from "../../../../types/PaginatedData";
 import VocabularyModel from "../../../../types/VocabularyModel";
+import { GetSystemWordsRequest } from "../types/GetSystemWordsRequest";
 import CreateVocabularyRequest from "../types/CreateVocabularyRequest";
 import UpdateVocabularyRequest from "../types/UpdateVocabularyRequest";
 
-export async function createNewVocabulary(request: CreateVocabularyRequest) {
-  const { lessonId, ...data } = request;
+export async function createNewWord(request: CreateVocabularyRequest) {
+  const { ...data } = request;
   const response = await axiosClient.post<VocabularyModel>(
-    "word/" + lessonId,
+    "vocabularies",
     data,
   );
 
   return response.data;
 }
 
-export async function getVocaById(id: string) {
-  const response = await axiosClient.get<VocabularyModel>("word/" + id);
+export async function getVocaById(id: string|number) {
+  const response = await axiosClient.get<VocabularyModel>(
+    "vocabularies/" + id,
+  );
+
+  return response.data;
+}
+
+export async function getSystemWords(request: GetSystemWordsRequest) {
+  const response = await axiosClient.get<PaginatedData<VocabularyModel>>(
+    "vocabularies",
+    {
+      params: request,
+    },
+  );
 
   return response.data;
 }
 
 export async function updateVoca(request: UpdateVocabularyRequest) {
   const { id, ...data } = request;
-  const response = await axiosClient.patch<VocabularyModel>("word/" + id, data);
+  const response = await axiosClient.put<VocabularyModel>("vocabularies/" + id, data);
 
   return response.data;
 }
 
 export async function deleteVoca(id: string) {
   const response = await axiosClient.delete("/word/" + id);
+
+  return response.data;
+}
+
+export async function deleteWord(id: string|number) {
+  const response = await axiosClient.delete("/vocabularies/" + id);
 
   return response.data;
 }

@@ -130,7 +130,7 @@ const VocaIndexPage: React.FC = () => {
     },
   });
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [filterName, setFilterName] = useState<string>();
   const [filterCategories, setFilterCategories] = useState<number[]>();
 
@@ -347,8 +347,8 @@ const VocaIndexPage: React.FC = () => {
                   rowsPerPageOptions={[VOCASET_PAGE_SIZE]}
                   count={paginatedVocaSets?.total || 0}
                   rowsPerPage={VOCASET_PAGE_SIZE}
-                  page={page - 1} // Mui uses 0-based index
-                  onPageChange={(_event, newPage) => setPage(newPage + 1)}
+                  page={page}
+                  onPageChange={(_event, newPage) => setPage(newPage)}
                   ActionsComponent={TablePaginationActions}
                 />
               </TableRow>

@@ -1,13 +1,5 @@
-export default interface UpdateVocabularyRequest {
-  id: string;
-  thumbnail?: string;
-  audio?: string;
-  translate: string;
-  pronunciation: string;
-  wordClass: string;
-  word: string;
-  example: string;
-  exampleMeaning: string;
-  exampleAudio?: string;
-  definition: string;
+import CreateVocabularyRequest from "./CreateVocabularyRequest";
+
+export default interface UpdateVocabularyRequest extends CreateVocabularyRequest {
+  id: number|string;
 }

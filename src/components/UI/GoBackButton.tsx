@@ -2,11 +2,14 @@ import { Button, SvgIcon, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-export const GoBackButton: React.FC = () => {
+interface GoBackButtonProps {
+  onClick?: () => void;
+}
+export const GoBackButton: React.FC<GoBackButtonProps> = ({ onClick }) => {
   const navigate = useNavigate();
 
   return (
-    <Button sx={{ gap: 0.5 }} onClick={() => navigate(-1)}>
+    <Button sx={{ gap: 0.5 }} onClick={onClick ? onClick : () => navigate(-1)}>
       <Typography>Back</Typography>
 
       <SvgIcon sx={{ fontSize: "1.3rem" }}>

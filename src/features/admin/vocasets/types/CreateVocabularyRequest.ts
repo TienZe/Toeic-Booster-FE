@@ -1,13 +1,13 @@
 export default interface CreateVocabularyRequest {
-  lessonId: string;
-  thumbnail: string;
-  audio: string;
-  translate: string;
-  pronunciation: string;
-  wordClass: string;
   word: string;
-  example: string;
-  exampleMeaning: string;
-  exampleAudio: string;
-  definition: string;
+  thumbnail?: string;
+  partOfSpeech: string;
+  meaning?: string;
+  definition?: string;
+  pronunciation: string;
+  pronunciationAudio?: string;
+  
+  example?: string | null;
+  exampleMeaning?: string | null;
+  exampleAudio?: string | null;
 }

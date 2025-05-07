@@ -25,11 +25,7 @@ import {
   vocaWordClassAbrr2FullName,
 } from "../../../../utils/helper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  createNewVocabulary,
-  getVocaById,
-  updateVoca,
-} from "../api/vocabulary-api";
+import { createNewWord, getVocaById, updateVoca } from "../api/vocabulary-api";
 import CreateVocabularyRequest from "../types/CreateVocabularyRequest";
 import { toast } from "react-toastify";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
@@ -49,8 +45,8 @@ interface VocaFormData {
 
   thumbnail?: FileList;
   exampleAudio?: FileList;
-  example: string;
-  exampleMeaning: string;
+  example?: string | null;
+  exampleMeaning?: string | null;
 }
 
 type MediaFileSrcs = {
@@ -77,35 +73,37 @@ const validationRules = {
   meaning: {
     required: "Meaning is required",
   },
-  example: {
-    required: "Example is required",
-  },
-  exampleMeaning: {
-    required: "Example meaning is required",
-  },
-
-  // Sau này tính tiếp, validatio cho file input, 2 th: trường hợp có defaultFileSrc (get), và th tạo mới
-  // phoneticAudio: {
-  //   required: "Phonetic audio is required",
-  // },
-  // exampleAudio: {
-  //   required: "Example audio is required",
-  // },
 };
 
-const VocabularyDetailsPage = () => {
+export type VocabularyDetailsPageMode = "create" | "update";
+
+interface VocabularyDetailsPageProps {
+  onClose?: () => void;
+  mode?: VocabularyDetailsPageMode;
+  wordId?: string | number;
+  lessonId?: string | number;
+  onWordUpdatedSuccess?: (wordId: string | number) => void;
+}
+
+const VocabularyDetailsPage: React.FC<VocabularyDetailsPageProps> = ({
+  onClose,
+  mode,
+  wordId,
+  lessonId,
+  onWordUpdatedSuccess,
+}) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const createMode = pathname.includes("create");
+  const createMode = mode == "create" || pathname.includes("create");
 
   const [searchParams] = useSearchParams();
-  const lessonId = searchParams.get("lessonId");
-  const vocaId = searchParams.get("id");
+  lessonId = lessonId ?? searchParams.get("lessonId");
+  const vocaId = wordId ?? searchParams.get("id");
 
   const queryClient = useQueryClient();
 
   const { data: voca, isLoading: isLoadingVoca } = useQuery({
-    queryKey: ["voca", { id: vocaId }],
+    queryKey: ["word", { id: vocaId }],
     queryFn: () => getVocaById(vocaId!),
     enabled: !!vocaId,
   });
@@ -130,7 +128,7 @@ const VocabularyDetailsPage = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: createNewVocabulary,
+    mutationFn: createNewWord,
     onSuccess: (responseData: VocabularyModel) => {
       toast.success("Create vocabulary successfully");
       navigate("/admin/voca?id=" + responseData.id);
@@ -145,9 +143,10 @@ const VocabularyDetailsPage = () => {
 
   const updateMutation = useMutation({
     mutationFn: updateVoca,
-    onSuccess: (reponseData: VocabularyModel) => {
+    onSuccess: (responseData: VocabularyModel) => {
       toast.success("Update vocabulary successfully");
-      queryClient.setQueryData(["voca", { id: vocaId }], reponseData);
+      queryClient.setQueryData(["word", { id: vocaId }], responseData);
+      onWordUpdatedSuccess?.(responseData.id);
     },
     onError: (error: { message: string | string[] }) => {
       let errorMessage = "Update vocabulary failed";
@@ -167,7 +166,7 @@ const VocabularyDetailsPage = () => {
 
   const [mediaInput, setMediaInput] = useState<MediaFileSrcs>({
     imageSrc: voca?.thumbnail || getPlaceholderImage(150, 150),
-    phoneticAudioSrc: voca?.audio || "",
+    phoneticAudioSrc: voca?.pronunciationAudio || "",
     exampleAudioSrc: voca?.exampleAudio || "",
   });
 
@@ -176,18 +175,30 @@ const VocabularyDetailsPage = () => {
 
     if (createMode) {
       const request: CreateVocabularyRequest = {
-        lessonId: lessonId as string,
-        thumbnail: await fileList2Base64(data.thumbnail as FileList),
-        audio: await fileList2Base64(data.phoneticAudio as FileList),
-        translate: data.meaning,
+        meaning: data.meaning,
         pronunciation: data.phonetic,
-        wordClass: vocaWordClassAbrr2FullName(data.type),
+        partOfSpeech: vocaWordClassAbrr2FullName(data.type),
         word: data.word,
+        definition: data.definition,
         example: data.example,
         exampleMeaning: data.exampleMeaning,
-        exampleAudio: await fileList2Base64(data.exampleAudio as FileList),
-        definition: data.definition,
       };
+
+      if (hasFileData(data.thumbnail)) {
+        request.thumbnail = await fileList2Base64(data.thumbnail as FileList);
+      }
+
+      if (hasFileData(data.phoneticAudio)) {
+        request.pronunciationAudio = await fileList2Base64(
+          data.phoneticAudio as FileList,
+        );
+      }
+
+      if (hasFileData(data.exampleAudio)) {
+        request.exampleAudio = await fileList2Base64(
+          data.exampleAudio as FileList,
+        );
+      }
 
       console.log("CreateVocaRequest: ", request);
 
@@ -199,8 +210,8 @@ const VocabularyDetailsPage = () => {
         id: vocaId!,
         word: data.word,
         pronunciation: data.phonetic,
-        translate: data.meaning,
-        wordClass: vocaWordClassAbrr2FullName(data.type),
+        meaning: data.meaning,
+        partOfSpeech: vocaWordClassAbrr2FullName(data.type),
         definition: data.definition,
         example: data.example,
         exampleMeaning: data.exampleMeaning,
@@ -211,7 +222,9 @@ const VocabularyDetailsPage = () => {
       }
 
       if (hasFileData(data.phoneticAudio)) {
-        request.audio = await fileList2Base64(data.phoneticAudio as FileList);
+        request.pronunciationAudio = await fileList2Base64(
+          data.phoneticAudio as FileList,
+        );
       }
 
       if (hasFileData(data.exampleAudio)) {
@@ -236,26 +249,26 @@ const VocabularyDetailsPage = () => {
         word: voca.word,
         phonetic: voca.pronunciation,
         definition: voca.definition,
-        type: voca.wordClass,
-        meaning: voca.translate,
+        type: voca.partOfSpeech,
+        meaning: voca.meaning,
         example: voca.example,
         exampleMeaning: voca.exampleMeaning,
       });
 
       setMediaInput({
         imageSrc: getWordThumbnail(voca),
-        phoneticAudioSrc: voca.audio,
-        exampleAudioSrc: voca.exampleAudio,
+        phoneticAudioSrc: voca.pronunciationAudio || "",
+        exampleAudioSrc: voca.exampleAudio || "",
       });
     }
   }, [voca, resetVocaForm]);
 
-  if (createMode && !lessonId) {
-    return <Navigate to="/admin/voca-set" />;
-  }
+  // if (createMode && !lessonId) {
+  //   return <Navigate to="/admin/voca-set" />;
+  // }
 
   if (!createMode && !vocaId) {
-    return <Navigate to="/admin/voca-set" />;
+    return <Navigate to="/admin" />;
   }
 
   return (
@@ -272,7 +285,7 @@ const VocabularyDetailsPage = () => {
           <Typography variant="h4" sx={{ marginBottom: 1 }}>
             {createMode ? "New Vocabulary" : "Vocabulary Details"}
           </Typography>
-          <GoBackButton />
+          <GoBackButton onClick={onClose} />
         </Stack>
 
         <Stack direction="row" spacing={4}>
@@ -387,10 +400,6 @@ const VocabularyDetailsPage = () => {
                 <Grid2 size={8}>
                   <RoundedFileInput
                     register={register("phoneticAudio", {
-                      required: {
-                        value: createMode,
-                        message: "Phonetic audio is required",
-                      },
                       validate: (value) =>
                         mustBeAudioIfExistValue(value) ||
                         "Please choose an audio file",
@@ -401,7 +410,7 @@ const VocabularyDetailsPage = () => {
                     borderRadius={4}
                     gap={0.5}
                     padding="16.5px 14px"
-                    defaultFileSrc={voca?.audio}
+                    defaultFileSrc={voca?.pronunciationAudio || ""}
                     onChangeFile={(newFileSrc) =>
                       handleChangeMediaInput("phoneticAudioSrc", newFileSrc)
                     }
@@ -433,7 +442,6 @@ const VocabularyDetailsPage = () => {
                   <Controller
                     name="example"
                     control={control}
-                    rules={validationRules.example}
                     render={({ field }) => (
                       <RoundedInput
                         {...field}
@@ -443,7 +451,6 @@ const VocabularyDetailsPage = () => {
                         padding="16.5px 14px"
                         multiline
                         rows={2}
-                        requiredSign
                         validationError={errors.example?.message}
                       />
                     )}
@@ -453,10 +460,6 @@ const VocabularyDetailsPage = () => {
                 <Grid2 size={12}>
                   <RoundedFileInput
                     register={register("exampleAudio", {
-                      required: {
-                        value: createMode,
-                        message: "Example audio is required",
-                      },
                       validate: (value) =>
                         mustBeAudioIfExistValue(value) ||
                         "Please choose an audio file",
@@ -465,9 +468,8 @@ const VocabularyDetailsPage = () => {
                     borderRadius={4}
                     gap={0.5}
                     padding="16.5px 14px"
-                    requiredSign
                     validationError={errors.exampleAudio?.message}
-                    defaultFileSrc={voca?.exampleAudio}
+                    defaultFileSrc={voca?.exampleAudio || ""}
                     onChangeFile={(newFileSrc) =>
                       handleChangeMediaInput("exampleAudioSrc", newFileSrc)
                     }
@@ -478,7 +480,6 @@ const VocabularyDetailsPage = () => {
                   <Controller
                     name="exampleMeaning"
                     control={control}
-                    rules={validationRules.exampleMeaning}
                     render={({ field }) => (
                       <RoundedInput
                         {...field}
@@ -488,7 +489,6 @@ const VocabularyDetailsPage = () => {
                         padding="16.5px 14px"
                         multiline
                         rows={2}
-                        requiredSign
                         validationError={errors.exampleMeaning?.message}
                       />
                     )}

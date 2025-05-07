@@ -1,15 +1,19 @@
 export default interface VocabularyModel {
   id: string;
-  audio: string;
-  definition: string;
-  example: string;
-  exampleAudio: string;
-  exampleMeaning: string;
-  pronunciation: string;
-  thumbnail: string | null;
-  translate: string;
   word: string;
-  wordClass: VocabularyWordClass;
+
+  definition: string;
+  meaning: string;
+  partOfSpeech: VocabularyWordClass;
+
+  pronunciation: string;
+  pronunciationAudio: string | null;
+
+  thumbnail: string | null;
+
+  example: string | null;
+  exampleAudio: string | null;
+  exampleMeaning: string | null;
 }
 
 export enum VocabularyWordClassAbbr {
@@ -25,13 +29,13 @@ export enum VocabularyWordClassAbbr {
 }
 
 export enum VocabularyWordClass {
-  NOUN = "nouns",
-  VERB = "verbs",
-  ADJECTIVE = "adjectives",
-  ADVERB = "adverbs",
-  PRONOUN = "pronouns",
-  PREPOSITION = "prepositions",
-  CONJUNCTION = "conjunctions",
-  INTERJECTION = "interjections",
-  DETERMINER = "determiners",
+  NOUN = "noun",
+  VERB = "verb",
+  ADJECTIVE = "adjective",
+  ADVERB = "adverb",
+  PRONOUN = "pronoun",
+  PREPOSITION = "preposition",
+  CONJUNCTION = "conjunction",
+  INTERJECTION = "interjection",
+  DETERMINER = "determiner",
 }
