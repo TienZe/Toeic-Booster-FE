@@ -32,28 +32,16 @@ import { getWordThumbnail } from "../../../../utils/helper.ts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop.tsx";
 import VocabularyDetailsPage from "./VocabularyDetailsPage.tsx";
-import { AnimatePresence, motion } from "framer-motion";
 import { deleteWord, getSystemWords } from "../api/vocabulary-api.ts";
 import { GetSystemWordsRequest } from "../types/GetSystemWordsRequest.ts";
 import VocabularyModel from "../../../../types/VocabularyModel.ts";
 import CustomModal from "../../../../components/UI/CustomModal.tsx";
 import { toast } from "react-toastify";
+import SideDrawer from "../../../../components/UI/SideDrawer.tsx";
 
 interface WordFilterFormData {
   filterName: string;
 }
-
-const drawerVariants = {
-  open: {
-    x: 0,
-    y: 0,
-    display: "block",
-  },
-  closed: {
-    x: "100%",
-    y: 0,
-  },
-};
 
 const DEFAULT_FILTER_FORM_DATA: WordFilterFormData = {
   filterName: "",
@@ -296,70 +284,33 @@ const WordIndexPage: React.FC = () => {
       </Box>
 
       {/* Drawer creating new word */}
-      <AnimatePresence>
-        {openNewModal && (
-          <motion.div
-            initial={{ x: "100%", y: 0, display: "none" }} // start state to animate when component is mounted
-            animate={"open"} // mount animation
-            exit={"closed"} // unmount animation
-            variants={drawerVariants}
-            transition={{ duration: 0.3, type: "tween" }}
-            style={{ position: "absolute", left: 0, top: 0, zIndex: 1000 }}
-          >
-            <Box
-              sx={{
-                backgroundColor: "white",
-                minHeight: "100%",
-              }}
-            >
-              <VocabularyDetailsPage
-                mode="create"
-                onClose={() => setOpenNewModal(false)}
-              />
-            </Box>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SideDrawer open={openNewModal}>
+        <VocabularyDetailsPage
+          mode="create"
+          onClose={() => setOpenNewModal(false)}
+        />
+      </SideDrawer>
 
       {/* Drawer updating word */}
-      <AnimatePresence>
-        {openUpdateDrawer && (
-          <motion.div
-            key={updatedWordId}
-            initial={{ x: "100%", y: 0, display: "none" }} // start state to animate when component is mounted
-            animate={"open"} // mount animation
-            exit={"closed"} // unmount animation
-            variants={drawerVariants}
-            transition={{ duration: 0.3, type: "tween" }}
-            style={{ position: "absolute", left: 0, top: 0, zIndex: 1000 }}
-          >
-            <Box
-              sx={{
-                backgroundColor: "white",
-                minHeight: "100%",
-              }}
-            >
-              <VocabularyDetailsPage
-                mode="update"
-                wordId={updatedWordId!}
-                onClose={() => setUpdatedWordId(null)}
-                onWordUpdatedSuccess={() => {
-                  queryClient.invalidateQueries({
-                    queryKey: [
-                      "word",
-                      {
-                        page: page,
-                        limit: WORD_PAGE_SIZE,
-                        search: filterName,
-                      },
-                    ],
-                  });
-                }}
-              />
-            </Box>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SideDrawer open={openUpdateDrawer}>
+        <VocabularyDetailsPage
+          mode="update"
+          wordId={updatedWordId!}
+          onClose={() => setUpdatedWordId(null)}
+          onWordUpdatedSuccess={() => {
+            queryClient.invalidateQueries({
+              queryKey: [
+                "word",
+                {
+                  page: page,
+                  limit: WORD_PAGE_SIZE,
+                  search: filterName,
+                },
+              ],
+            });
+          }}
+        />
+      </SideDrawer>
 
       {/* Delete word modal */}
       <CustomModal
