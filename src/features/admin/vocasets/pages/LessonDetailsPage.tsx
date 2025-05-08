@@ -46,6 +46,7 @@ import { deleteVoca } from "../api/vocabulary-api";
 import { Image } from "../../../../components/UI/Image";
 import DefaultLessonThumbnail from "../../../../assets/images/voca/default-lesson-image.svg";
 import useLesson from "../../../../hooks/useLesson";
+import AttachingLessonVocabularyModal from "../components/AttachingLessonVocabularyModal";
 
 interface LessonFormData {
   name: string;
@@ -62,6 +63,8 @@ const LessonDetailsPage = () => {
 
   const [deletedVocaId, setDeletedVocaId] = useState<string | null>(null);
   const openDeleteModal = Boolean(deletedVocaId);
+
+  const [openAttachingVocaModal, setOpenAttachingVocaModal] = useState(false);
 
   const { data: lesson, isLoading: isLoadingLesson } = useLesson(
     lessonId!,
@@ -271,14 +274,24 @@ const LessonDetailsPage = () => {
                 Vocabularies
               </Typography>
             </Stack>
-            <Button
-              variant="outlined"
-              startIcon={<Add />}
-              size="small"
-              onClick={handleClickNewVocaBtn}
-            >
-              New
-            </Button>
+
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => setOpenAttachingVocaModal(true)}
+              >
+                Add word
+              </Button>
+              <Typography>or just</Typography>
+              <Button
+                // startIcon={<Add />}
+                size="small"
+                onClick={handleClickNewVocaBtn}
+              >
+                Create new word
+              </Button>
+            </Stack>
           </Stack>
           <AdminTableContainer>
             <Table>
@@ -362,6 +375,7 @@ const LessonDetailsPage = () => {
             </Table>
           </AdminTableContainer>
 
+          {/* Detach word modal */}
           <CustomModal
             open={openDeleteModal}
             onClose={() => setDeletedVocaId(null)}
@@ -392,6 +406,11 @@ const LessonDetailsPage = () => {
               </Stack>
             </Box>
           </CustomModal>
+
+          <AttachingLessonVocabularyModal
+            open={openAttachingVocaModal}
+            onClose={() => setOpenAttachingVocaModal(false)}
+          />
         </Box>
       )}
     </>

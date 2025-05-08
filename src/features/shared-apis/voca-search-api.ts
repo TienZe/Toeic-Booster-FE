@@ -41,12 +41,12 @@ export async function searchWord(word: string) {
   }
 
   // Translate the definition to get the meaning
-  const definitions = wordItems.map((item) => item.definition);
-  const meanings = await translateListOfText(definitions);
+  // const definitions = wordItems.map((item) => item.definition);
+  // const meanings = await translateListOfText(definitions);
 
-  wordItems.forEach((item, index) => {
-    item.meaning = meanings[index].text;
-  });
+  // wordItems.forEach((item, index) => {
+  //   item.meaning = meanings[index].text;
+  // });
 
   return wordItems;
 }

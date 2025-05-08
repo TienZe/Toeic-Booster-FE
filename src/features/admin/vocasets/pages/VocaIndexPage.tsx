@@ -192,11 +192,11 @@ const VocaIndexPage: React.FC = () => {
     setFilterName(filterName);
     setFilterCategories(filterCategories);
 
-    setPage(1);
+    setPage(0);
   };
 
   const handleResetFilter = () => {
-    setPage(1);
+    setPage(0);
 
     resetFilterForm(DEFAULT_FILTER_FORM_DATA);
 

@@ -20,6 +20,7 @@ const SideBar = (props: { collapsed: boolean }) => {
   // Helper for submenu active state
   const isVocaActive =
     location.pathname.startsWith("/admin/voca-set") ||
+    location.pathname.startsWith("/admin/lesson") ||
     location.pathname.startsWith("/admin/word");
 
   return (
@@ -98,7 +99,10 @@ const SideBar = (props: { collapsed: boolean }) => {
         >
           <MenuItem
             onClick={() => navigate("/admin/voca-set")}
-            active={location.pathname === "/admin/voca-set"}
+            active={
+              location.pathname === "/admin/voca-set" ||
+              location.pathname === "/admin/lesson"
+            }
           >
             Collections
           </MenuItem>

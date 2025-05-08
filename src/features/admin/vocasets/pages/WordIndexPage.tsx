@@ -127,11 +127,11 @@ const WordIndexPage: React.FC = () => {
     // Set filter state to trigger re-fetch data
     setFilterName(filterName);
 
-    setPage(1);
+    setPage(0);
   };
 
   const handleResetFilter = () => {
-    setPage(1);
+    setPage(0);
 
     resetFilterForm(DEFAULT_FILTER_FORM_DATA);
 

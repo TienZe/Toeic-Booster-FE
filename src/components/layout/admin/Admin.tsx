@@ -76,24 +76,17 @@ const Admin = () => {
         sx={{
           flexGrow: 1,
           width: "100%",
+          overflowY: "auto",
         }}
       >
         <Stack>
-          {/* <Box
-            sx={{
-              height: "50px",
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            <FaBars onClick={() => setCollapsed(!collapsed)} />
-          </Box> */}
           <Box
             sx={{
               pt: 0.5,
               px: 1,
-              overflowY: "scroll",
               minHeight: "100vh",
               boxSizing: "border-box",
+              overflowX: "hidden",
             }}
           >
             <Outlet />
