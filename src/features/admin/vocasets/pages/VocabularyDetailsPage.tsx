@@ -500,7 +500,12 @@ const VocabularyDetailsPage: React.FC<VocabularyDetailsPageProps> = ({
                     <Button
                       variant="contained"
                       type="submit"
-                      sx={{ float: "right", px: "24px", minWidth: "110px" }}
+                      sx={{
+                        float: "right",
+                        px: "24px",
+                        minWidth: "110px",
+                        boxShadow: "none",
+                      }}
                     >
                       {createMode ? "Create" : "Save"}
                     </Button>

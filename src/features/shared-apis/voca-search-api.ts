@@ -1,7 +1,10 @@
 import axiosClient from "../../axios";
+import ApiResponse from "../../types/ApiResponse";
+import PaginatedData from "../../types/PaginatedData";
 import { TranslationResult } from "../../types/translate";
 import { WordItem, WordResult } from "../../types/voca-search";
-import { VocabularyWordClassAbbr } from "../../types/VocabularyModel";
+import VocabularyModel, { VocabularyWordClassAbbr } from "../../types/VocabularyModel";
+import { GetSystemWordsRequest } from "./types/GetSystemWordsRequest";
 
 const VOCA_SEARCH_API = "https://api.dictionaryapi.dev/api/v2/entries/en/";
 
@@ -31,8 +34,8 @@ export async function searchWord(word: string) {
     for (const definition of meaning.definitions) {
       wordItems.push({
         word: wordResult.word,
-        phonetic,
-        phoneticAudio,
+        pronunciation: phonetic,
+        pronunciationAudio: phoneticAudio,
         partOfSpeech,
         definition: definition.definition,
         example: definition.example,
@@ -85,4 +88,16 @@ function shortenPartOfSpeech(partOfSpeech: string) {
   }
 
   return partOfSpeech;
+}
+
+
+export async function getSystemWords(request: GetSystemWordsRequest) {
+  const response = await axiosClient.get<ApiResponse<PaginatedData<VocabularyModel>>>(
+    "vocabularies",
+    {
+      params: request,
+    },
+  );
+
+  return response.data.data;
 }

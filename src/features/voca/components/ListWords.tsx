@@ -10,8 +10,8 @@ type ListWordsProps = {
   vocabularies: VocabularyModel[];
   status: VocabularyCardState;
   sx?: SxProps;
-  onCloseWordCard?: (vocabularyId: string) => void;
-  onEditWordCard?: (vocabularyId: string) => void;
+  onCloseWordCard?: (vocabularyId: number) => void;
+  onEditWordCard?: (vocabularyId: number) => void;
 };
 
 const ListWords: React.FC<ListWordsProps> = ({
@@ -23,8 +23,8 @@ const ListWords: React.FC<ListWordsProps> = ({
   onEditWordCard,
 }) => {
   let badgeTypoStyle = {
-    color: "#58CC02",
-    backgroundColor: "#EAFFD9",
+    backgroundColor: "primary.extraLight",
+    color: "primary.main",
   };
 
   if (status === VocabularyCardState.ERROR) {
@@ -32,11 +32,16 @@ const ListWords: React.FC<ListWordsProps> = ({
       color: "#FF4B4B",
       backgroundColor: "#FFEEEE",
     };
+  } else if (status === VocabularyCardState.SUCCESS) {
+    badgeTypoStyle = {
+      color: "#58CC02",
+      backgroundColor: "#EAFFD9",
+    };
   }
 
   return (
     <Box sx={{ ...sx }}>
-      <Typography sx={{ fontSize: "20px", color: "#777777" }}>
+      <Typography sx={{ fontSize: "16px", color: "#777777" }}>
         {title}
         <Typography
           component="span"
@@ -67,9 +72,9 @@ const ListWords: React.FC<ListWordsProps> = ({
             word={vocabulary.word}
             phonetic={vocabulary.pronunciation}
             thumbnail={vocabulary.thumbnail}
-            type={vocaWordClassFullName2Abbr(vocabulary.wordClass)}
-            meaning={vocabulary.translate}
-            audio={vocabulary.audio}
+            type={vocaWordClassFullName2Abbr(vocabulary.partOfSpeech)}
+            meaning={vocabulary.meaning}
+            audio={vocabulary.pronunciationAudio || undefined}
             state={status}
             onDelete={onCloseWordCard && (() => onCloseWordCard(vocabulary.id))}
             onEdit={onEditWordCard && (() => onEditWordCard(vocabulary.id))}

@@ -32,12 +32,13 @@ import { getWordThumbnail } from "../../../../utils/helper.ts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop.tsx";
 import VocabularyDetailsPage from "./VocabularyDetailsPage.tsx";
-import { deleteWord, getSystemWords } from "../api/vocabulary-api.ts";
-import { GetSystemWordsRequest } from "../types/GetSystemWordsRequest.ts";
+import { deleteWord } from "../api/vocabulary-api.ts";
+import { GetSystemWordsRequest } from "../../../shared-apis/types/GetSystemWordsRequest.ts";
 import VocabularyModel from "../../../../types/VocabularyModel.ts";
 import CustomModal from "../../../../components/UI/CustomModal.tsx";
 import { toast } from "react-toastify";
 import SideDrawer from "../../../../components/UI/SideDrawer.tsx";
+import { getSystemWords } from "../../../shared-apis/voca-search-api.ts";
 
 interface WordFilterFormData {
   filterName: string;

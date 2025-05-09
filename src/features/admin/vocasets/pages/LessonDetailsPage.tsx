@@ -18,7 +18,7 @@ import {
 import RoundedInput from "../../../../components/UI/RoundedInput";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { GoBackButton } from "../../../../components/UI/GoBackButton";
-import { Add, AddPhotoAlternate, Delete, Edit } from "@mui/icons-material";
+import { AddPhotoAlternate, Delete, Edit } from "@mui/icons-material";
 // import DefaultLessonImage from "../assets/default-lesson-img.webp";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { LessonCard } from "../../../../components/LessonCard";
@@ -42,11 +42,11 @@ import queryClient from "../../../../queryClient";
 import UpdateLessonResponse from "../types/UpdateLessonResponse";
 import Lesson, { getLessonThumbnail } from "../../../../types/Lesson";
 import CustomModal from "../../../../components/UI/CustomModal";
-import { deleteVoca } from "../api/vocabulary-api";
 import { Image } from "../../../../components/UI/Image";
 import DefaultLessonThumbnail from "../../../../assets/images/voca/default-lesson-image.svg";
 import useLesson from "../../../../hooks/useLesson";
-import AttachingLessonVocabularyModal from "../components/AttachingLessonVocabularyModal";
+import AttachingLessonVocabularyDrawer from "../components/AttachingLessonVocabularyDrawer";
+import { attachNewWordsToLesson } from "../api/lesson-vocabulary-api";
 
 interface LessonFormData {
   name: string;
@@ -105,6 +105,19 @@ const LessonDetailsPage = () => {
     },
   });
 
+  const attachNewWordsMutation = useMutation({
+    mutationFn: attachNewWordsToLesson,
+    onSuccess: () => {
+      toast.success("Words attached successfully");
+      // queryClient.invalidateQueries({
+      //   queryKey: ["lesson", { id: lessonId }],
+      // });
+    },
+    onSettled: () => {
+      attachNewWordsMutation.reset();
+    },
+  });
+
   const [lessonImageSrc, setLessonImageSrc] = useState<string>(
     lesson?.thumbnail || DefaultLessonThumbnail,
   );
@@ -116,22 +129,22 @@ const LessonDetailsPage = () => {
   const { page, setPage, emptyRows, pageData, handleChangePage } =
     useAdminTablePagination<VocabularyModel>(vocabularies, VOCA_PAGE_SIZE);
 
-  const deleteVocaMutation = useMutation({
-    mutationFn: deleteVoca,
-    onSuccess: () => {
-      toast.success("Delete word successfully!");
-      queryClient.invalidateQueries({
-        queryKey: ["lesson", { id: lessonId }],
-        exact: true,
-      });
-      setPage(0);
-    },
-    onSettled: () => {
-      // reset state
-      setDeletedVocaId(null);
-      deleteVocaMutation.reset();
-    },
-  });
+  // const deleteVocaMutation = useMutation({
+  //   mutationFn: deleteVoca,
+  //   onSuccess: () => {
+  //     toast.success("Delete word successfully!");
+  //     queryClient.invalidateQueries({
+  //       queryKey: ["lesson", { id: lessonId }],
+  //       exact: true,
+  //     });
+  //     setPage(0);
+  //   },
+  //   onSettled: () => {
+  //     // reset state
+  //     setDeletedVocaId(null);
+  //     deleteVocaMutation.reset();
+  //   },
+  // });
 
   const handleSaveForm: SubmitHandler<LessonFormData> = async (data) => {
     console.log("Form data:", data);
@@ -158,8 +171,17 @@ const LessonDetailsPage = () => {
 
   const handleDeleteLesson = () => {
     if (deletedVocaId) {
-      deleteVocaMutation.mutate(deletedVocaId);
+      // deleteVocaMutation.mutate(deletedVocaId);
     }
+  };
+
+  const handleAttachNewWords = (newAttachedWords: VocabularyModel[]) => {
+    console.log("New attached words:", newAttachedWords);
+
+    attachNewWordsMutation.mutate({
+      lessonId: lessonId!,
+      wordIds: newAttachedWords.map((word) => word.id),
+    });
   };
 
   useEffect(() => {
@@ -182,7 +204,7 @@ const LessonDetailsPage = () => {
       {isLoadingLesson ? (
         <CustomBackdrop open />
       ) : (
-        <Box sx={{ padding: 2 }}>
+        <Box sx={{ padding: 2, position: "relative" }}>
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -391,11 +413,12 @@ const LessonDetailsPage = () => {
                   onClick={handleDeleteLesson}
                   sx={{ width: "80px" }}
                 >
-                  {deleteVocaMutation.isPending ? (
+                  {/* {deleteVocaMutation.isPending ? (
                     <CircularProgress size={20} color="error" />
                   ) : (
                     "Delete"
-                  )}
+                  )} */}
+                  Delete
                 </Button>
                 <Button
                   variant="contained"
@@ -407,9 +430,10 @@ const LessonDetailsPage = () => {
             </Box>
           </CustomModal>
 
-          <AttachingLessonVocabularyModal
+          <AttachingLessonVocabularyDrawer
             open={openAttachingVocaModal}
             onClose={() => setOpenAttachingVocaModal(false)}
+            onSubmit={handleAttachNewWords}
           />
         </Box>
       )}

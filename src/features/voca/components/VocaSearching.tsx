@@ -6,28 +6,51 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useRef, useState } from "react";
-import { searchWord } from "../../shared-apis/voca-search-api";
+import { useMemo, useRef, useState } from "react";
+import { getSystemWords, searchWord } from "../../shared-apis/voca-search-api";
 import useDebounce from "../../../hooks/useDebounce";
 import Popup from "../../../components/UI/Popup";
 import VocaSearchResultItem from "./VocaSearchResultItem";
 import { WordItem } from "../../../types/voca-search";
+import VocabularyModel from "../../../types/VocabularyModel";
 
 type VocaSearchingProps = {
   containerSx?: SxProps;
-  onClickWord?: (wordItem: WordItem) => void;
+  onClickWord?: (selectedWord: WordItem | VocabularyModel) => void;
+  title?: string;
+  searchMode?: "dictionary-api" | "system";
 };
 
 const VocaSearching: React.FC<VocaSearchingProps> = ({
   containerSx,
   onClickWord,
+  title,
+  searchMode = "dictionary-api",
 }) => {
   const anchorEle = useRef<HTMLDivElement>(null);
 
   const [wordInput, setWordInput] = useState("");
-  const wordInputDebounce = useDebounce(wordInput, { delay: 400 });
+  const wordInputDebounce = useDebounce(wordInput.toLowerCase(), {
+    delay: 400,
+  });
 
   const openPopup = wordInput !== "";
+
+  const searchWordFn = useMemo(() => {
+    if (searchMode === "dictionary-api") {
+      return searchWord;
+    }
+
+    return async (searchKey: string) => {
+      const paginatedWords = await getSystemWords({
+        page: 0,
+        limit: 10,
+        search: searchKey,
+      });
+
+      return paginatedWords.items;
+    };
+  }, [searchMode]);
 
   const {
     data: wordItems,
@@ -35,14 +58,18 @@ const VocaSearching: React.FC<VocaSearchingProps> = ({
     isError,
     isSuccess,
     error,
-  } = useQuery({
+  } = useQuery<WordItem[] | VocabularyModel[]>({
     queryKey: ["voca-search", { word: wordInputDebounce }],
-    queryFn: () => searchWord(wordInputDebounce),
+    queryFn: () => searchWordFn(wordInputDebounce),
     enabled: wordInputDebounce.length > 0,
     retry: false,
   });
 
-  const handleClickWordItem = (wordItem: WordItem) => {
+  console.log("query error", error);
+
+  console.log("word items", wordItems);
+
+  const handleClickWordItem = (wordItem: WordItem | VocabularyModel) => {
     onClickWord?.(wordItem);
     setWordInput(""); // close the popup
   };
@@ -52,13 +79,13 @@ const VocaSearching: React.FC<VocaSearchingProps> = ({
       <Box sx={{ position: "relative" }} ref={anchorEle}>
         <Typography
           sx={{
-            fontSize: "20px",
-            color: "#4C4C4C",
+            fontSize: "18px",
+            // color: "#4C4C4C",
             fontWeight: 500,
             marginBottom: 1,
           }}
         >
-          Search for the word you want to pin
+          {title || "Search for the word you want to pin"}
         </Typography>
         <OutlinedInput
           placeholder="Enter the word in English"
@@ -146,9 +173,9 @@ const VocaSearching: React.FC<VocaSearchingProps> = ({
                     />
                   </svg>
                 </SvgIcon>
-                <Typography>{error.message}</Typography>
+                <Typography>{error?.message}</Typography>
                 <Typography>
-                  You can try the search again at later time
+                  Something went wrong. Please try again at later time
                 </Typography>
               </Box>
             )}

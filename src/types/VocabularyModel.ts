@@ -1,5 +1,5 @@
 export default interface VocabularyModel {
-  id: string;
+  id: number;
   word: string;
 
   definition: string;

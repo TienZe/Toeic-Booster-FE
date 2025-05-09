@@ -22,10 +22,12 @@ type DefinitionDetail = {
 
 export type WordItem = {
   word: string;
-  phonetic?: string;
-  phoneticAudio: string;
+  pronunciation?: string;
+  pronunciationAudio?: string;
   partOfSpeech: string;
   definition: string;
   example?: string;
   meaning?: string;
+
+  vocabularyId?: string|number; // only for system words if this type represent a DTO for vocabulary model
 };

@@ -1,9 +1,11 @@
+import { Close } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
 
-interface SideDrawerProps {
+export interface SideDrawerProps {
   open: boolean;
   onClose?: () => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 // Open from the right side
@@ -19,7 +21,7 @@ const drawerVariants = {
   },
 };
 
-const SideDrawer: React.FC<SideDrawerProps> = ({ open, children }) => {
+const SideDrawer: React.FC<SideDrawerProps> = ({ open, children, onClose }) => {
   return (
     <AnimatePresence>
       {open && (
@@ -39,6 +41,19 @@ const SideDrawer: React.FC<SideDrawerProps> = ({ open, children }) => {
             minHeight: "100%",
           }}
         >
+          {onClose && (
+            <IconButton
+              onClick={onClose}
+              sx={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                transform: "translate(-50%, 50%)",
+              }}
+            >
+              <Close sx={{ fontSize: "2rem" }} />
+            </IconButton>
+          )}
           {children}
         </motion.div>
       )}
