@@ -8,20 +8,27 @@ import ListWords from "../../../voca/components/ListWords";
 import VocabularyModel from "../../../../types/VocabularyModel";
 import { useState } from "react";
 import { WordItem } from "../../../../types/voca-search";
+import { toast } from "react-toastify";
 
 interface AttachingLessonVocabularyDrawerProps
   extends Omit<SideDrawerProps, "children"> {
   onSubmit?: (words: VocabularyModel[]) => void;
+  exceptedVocabularyIds?: number[];
 }
 
 const AttachingLessonVocabularyDrawer: React.FC<
   AttachingLessonVocabularyDrawerProps
-> = ({ open, onClose, onSubmit }) => {
+> = ({ open, onClose, onSubmit, exceptedVocabularyIds }) => {
   const [selectedVocabularies, setSelectedVocabularies] = useState<
     VocabularyModel[]
   >([]);
   const handleSelectWord = (selectedWord: VocabularyModel | WordItem) => {
     if ("id" in selectedWord) {
+      if (exceptedVocabularyIds?.includes(selectedWord.id)) {
+        toast.info("This word is already attached to the lesson");
+        return;
+      }
+
       setSelectedVocabularies((prev) => {
         return [
           ...prev.filter((word) => word.id !== selectedWord.id),
@@ -54,6 +61,7 @@ const AttachingLessonVocabularyDrawer: React.FC<
           title="Search for the word you want to attach"
           searchMode="system"
           onClickWord={handleSelectWord}
+          highlightVocabularyIds={exceptedVocabularyIds}
         />
 
         {/* Action buttons */}

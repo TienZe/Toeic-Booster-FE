@@ -5,6 +5,7 @@ type VocaSearchResultItemProps = {
   partOfSpeech: string;
   meaning: string;
   onClick: () => void;
+  endIcon?: React.ReactNode;
 };
 
 const VocaSearchResultItem: React.FC<VocaSearchResultItemProps> = ({
@@ -12,11 +13,17 @@ const VocaSearchResultItem: React.FC<VocaSearchResultItemProps> = ({
   partOfSpeech,
   meaning,
   onClick,
+  endIcon,
 }) => {
   return (
     <Box
       onClick={onClick}
-      sx={{ my: "16px", "&:hover": { color: "primary.main" } }}
+      sx={{
+        my: "16px",
+        "&:hover": { color: "primary.main" },
+        display: "flex",
+        justifyContent: "space-between",
+      }}
     >
       <Typography sx={{ fontSize: "16px" }}>
         {word}:{" "}
@@ -25,6 +32,8 @@ const VocaSearchResultItem: React.FC<VocaSearchResultItemProps> = ({
         </Typography>
         {meaning}
       </Typography>
+
+      {endIcon}
     </Box>
   );
 };

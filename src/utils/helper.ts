@@ -3,6 +3,7 @@ import VocabularyModel, {
   VocabularyWordClassAbbr,
 } from "../types/VocabularyModel";
 import VocaDefaultThumbnail from "../assets/images/voca/default-voca-image.jpg";
+import { LessonVocabulary } from "../types/LessonVocabulary";
 
 export function getPlaceholderImage(width: number, height: number) {
   return `https://placehold.co/${width}x${height}`;
@@ -137,7 +138,7 @@ export function getPhoneValidator(errorMessage?: string) {
   };
 }
 
-export function getWordThumbnail(voca: VocabularyModel) {
+export function getWordThumbnail(voca: VocabularyModel | LessonVocabulary) {
   return voca.thumbnail || VocaDefaultThumbnail;
 }
 

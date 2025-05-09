@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  CircularProgress,
   Divider,
   Grid2,
   IconButton,
@@ -47,6 +46,9 @@ import DefaultLessonThumbnail from "../../../../assets/images/voca/default-lesso
 import useLesson from "../../../../hooks/useLesson";
 import AttachingLessonVocabularyDrawer from "../components/AttachingLessonVocabularyDrawer";
 import { attachNewWordsToLesson } from "../api/lesson-vocabulary-api";
+import { useLessonVocabularies } from "../../../../hooks/useLessonVocabularies";
+import { LessonVocabulary } from "../../../../types/LessonVocabulary";
+import { deleteLessonVocabulary } from "../../../shared-apis/lesson-vocabulary-api";
 
 interface LessonFormData {
   name: string;
@@ -57,11 +59,11 @@ const VOCA_PAGE_SIZE = 4;
 
 const LessonDetailsPage = () => {
   const [searchParams] = useSearchParams();
-  const lessonId = searchParams.get("id");
+  const lessonId = Number(searchParams.get("id"));
 
   const navigate = useNavigate();
 
-  const [deletedVocaId, setDeletedVocaId] = useState<string | null>(null);
+  const [deletedVocaId, setDeletedVocaId] = useState<number | null>(null);
   const openDeleteModal = Boolean(deletedVocaId);
 
   const [openAttachingVocaModal, setOpenAttachingVocaModal] = useState(false);
@@ -75,6 +77,10 @@ const LessonDetailsPage = () => {
       withWords: true,
     },
   );
+
+  const { data: lessonVocabularies } = useLessonVocabularies(lessonId, {
+    enabled: !!lessonId,
+  });
 
   const {
     register,
@@ -109,9 +115,10 @@ const LessonDetailsPage = () => {
     mutationFn: attachNewWordsToLesson,
     onSuccess: () => {
       toast.success("Words attached successfully");
-      // queryClient.invalidateQueries({
-      //   queryKey: ["lesson", { id: lessonId }],
-      // });
+
+      const newLessonVocaLength = lessonVocabularies?.length || 0;
+      const newLastPage = Math.ceil(newLessonVocaLength / VOCA_PAGE_SIZE) - 1;
+      setPage(newLastPage); // go to the last page to see the new attached words
     },
     onSettled: () => {
       attachNewWordsMutation.reset();
@@ -124,27 +131,28 @@ const LessonDetailsPage = () => {
 
   const lessonName = watch("name");
 
-  const vocabularies = lesson?.words || [];
-
   const { page, setPage, emptyRows, pageData, handleChangePage } =
-    useAdminTablePagination<VocabularyModel>(vocabularies, VOCA_PAGE_SIZE);
+    useAdminTablePagination<LessonVocabulary>(
+      lessonVocabularies || [],
+      VOCA_PAGE_SIZE,
+    );
 
-  // const deleteVocaMutation = useMutation({
-  //   mutationFn: deleteVoca,
-  //   onSuccess: () => {
-  //     toast.success("Delete word successfully!");
-  //     queryClient.invalidateQueries({
-  //       queryKey: ["lesson", { id: lessonId }],
-  //       exact: true,
-  //     });
-  //     setPage(0);
-  //   },
-  //   onSettled: () => {
-  //     // reset state
-  //     setDeletedVocaId(null);
-  //     deleteVocaMutation.reset();
-  //   },
-  // });
+  const detachWordMutation = useMutation({
+    mutationFn: deleteLessonVocabulary,
+    onSuccess: () => {
+      toast.success("Delete word successfully!");
+      queryClient.invalidateQueries({
+        queryKey: ["lesson-vocabularies", { lessonId: lessonId }],
+        exact: true,
+      });
+      setPage(0);
+    },
+    onSettled: () => {
+      // reset state
+      setDeletedVocaId(null);
+      detachWordMutation.reset();
+    },
+  });
 
   const handleSaveForm: SubmitHandler<LessonFormData> = async (data) => {
     console.log("Form data:", data);
@@ -165,13 +173,12 @@ const LessonDetailsPage = () => {
     navigate("/admin/voca/create?lessonId=" + lessonId);
   };
 
-  const handleClickDeleteVoca = (vocaId: string) => {
-    setDeletedVocaId(vocaId);
-  };
-
-  const handleDeleteLesson = () => {
-    if (deletedVocaId) {
-      // deleteVocaMutation.mutate(deletedVocaId);
+  const handleDetachWord = () => {
+    if (deletedVocaId && lessonId) {
+      detachWordMutation.mutate({
+        lessonId: lessonId,
+        vocabularyId: deletedVocaId,
+      });
     }
   };
 
@@ -330,7 +337,7 @@ const LessonDetailsPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {pageData.map((voca: VocabularyModel) => (
+                {pageData.map((voca: LessonVocabulary) => (
                   <TableRow>
                     <TableCell
                       sx={{
@@ -354,9 +361,9 @@ const LessonDetailsPage = () => {
                     </TableCell>
                     <TableCell>{voca.word}</TableCell>
                     <TableCell align="center">
-                      {vocaWordClassFullName2Abbr(voca.wordClass)}
+                      {vocaWordClassFullName2Abbr(voca.partOfSpeech || "")}
                     </TableCell>
-                    <TableCell>{voca.translate}</TableCell>
+                    <TableCell>{voca.meaning}</TableCell>
                     <TableCell align="right">
                       <Stack direction="row" justifyContent="center">
                         <Link to={`/admin/voca?id=${voca.id}`}>
@@ -366,7 +373,7 @@ const LessonDetailsPage = () => {
                         </Link>
                         <IconButton
                           color="error"
-                          onClick={() => handleClickDeleteVoca(voca.id)}
+                          onClick={() => setDeletedVocaId(voca.id)}
                         >
                           <Delete />
                         </IconButton>
@@ -386,7 +393,7 @@ const LessonDetailsPage = () => {
                 <TableRow>
                   <TablePagination
                     rowsPerPageOptions={[VOCA_PAGE_SIZE]}
-                    count={vocabularies.length}
+                    count={lessonVocabularies?.length || 0}
                     rowsPerPage={VOCA_PAGE_SIZE}
                     page={page}
                     onPageChange={handleChangePage}
@@ -408,9 +415,14 @@ const LessonDetailsPage = () => {
               </Typography>
               <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                 <Button
+                  variant="contained"
+                  onClick={() => setDeletedVocaId(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
                   variant="outlined"
-                  color="error"
-                  onClick={handleDeleteLesson}
+                  onClick={handleDetachWord}
                   sx={{ width: "80px" }}
                 >
                   {/* {deleteVocaMutation.isPending ? (
@@ -420,12 +432,6 @@ const LessonDetailsPage = () => {
                   )} */}
                   Delete
                 </Button>
-                <Button
-                  variant="contained"
-                  onClick={() => setDeletedVocaId(null)}
-                >
-                  Cancel
-                </Button>
               </Stack>
             </Box>
           </CustomModal>
@@ -434,6 +440,7 @@ const LessonDetailsPage = () => {
             open={openAttachingVocaModal}
             onClose={() => setOpenAttachingVocaModal(false)}
             onSubmit={handleAttachNewWords}
+            exceptedVocabularyIds={lessonVocabularies?.map((voca) => voca.id)}
           />
         </Box>
       )}

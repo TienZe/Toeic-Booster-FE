@@ -6,19 +6,21 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { getSystemWords, searchWord } from "../../shared-apis/voca-search-api";
 import useDebounce from "../../../hooks/useDebounce";
 import Popup from "../../../components/UI/Popup";
 import VocaSearchResultItem from "./VocaSearchResultItem";
 import { WordItem } from "../../../types/voca-search";
 import VocabularyModel from "../../../types/VocabularyModel";
+import { CheckCircle } from "@mui/icons-material";
 
 type VocaSearchingProps = {
   containerSx?: SxProps;
   onClickWord?: (selectedWord: WordItem | VocabularyModel) => void;
   title?: string;
   searchMode?: "dictionary-api" | "system";
+  highlightVocabularyIds?: number[];
 };
 
 const VocaSearching: React.FC<VocaSearchingProps> = ({
@@ -26,6 +28,7 @@ const VocaSearching: React.FC<VocaSearchingProps> = ({
   onClickWord,
   title,
   searchMode = "dictionary-api",
+  highlightVocabularyIds,
 }) => {
   const anchorEle = useRef<HTMLDivElement>(null);
 
@@ -65,14 +68,23 @@ const VocaSearching: React.FC<VocaSearchingProps> = ({
     retry: false,
   });
 
-  console.log("query error", error);
-
   console.log("word items", wordItems);
 
   const handleClickWordItem = (wordItem: WordItem | VocabularyModel) => {
     onClickWord?.(wordItem);
     setWordInput(""); // close the popup
   };
+
+  const getHighlightIcon = useCallback(
+    (wordItem: WordItem | VocabularyModel) => {
+      if ("id" in wordItem && highlightVocabularyIds?.includes(wordItem.id)) {
+        return <CheckCircle sx={{ color: "green" }} />;
+      }
+
+      return null;
+    },
+    [highlightVocabularyIds],
+  );
 
   return (
     <Box sx={containerSx}>
@@ -146,6 +158,7 @@ const VocaSearching: React.FC<VocaSearchingProps> = ({
                   partOfSpeech={wordItem.partOfSpeech}
                   meaning={wordItem.meaning || wordItem.definition}
                   onClick={() => handleClickWordItem?.(wordItem)}
+                  endIcon={getHighlightIcon(wordItem)}
                 />
               ))}
 

@@ -4,6 +4,7 @@ export interface LessonVocabulary {
   id: number;
   lessonId: number;
   vocabularyId: string;
+  word: string;
   thumbnail?: string | null;
 
   partOfSpeech?: VocabularyWordClass;
