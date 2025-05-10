@@ -2,11 +2,9 @@ import { Clear } from "@mui/icons-material";
 import { Box, IconButton, Stack } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getExerciseSet } from "../utils/exercise-helper";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import { getLessonById } from "../../admin/vocasets/api/lesson-api";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop";
-import VocabularyModel from "../../../types/VocabularyModel";
 import TestingExercise from "./TestingExercise";
 import { Exercise } from "../types/Exercise";
 import ClockTimer, { ClockTimerRef } from "./ClockTimer";
@@ -16,6 +14,8 @@ import { PostLearningResultRequest } from "../types/LearningResultRequest";
 import { createLearningResult } from "../api/voca-learning";
 import PracticeProgressBar from "./PracticeProgressBar";
 import AnswerSound from "./AnswerSound";
+import useLesson from "../../../hooks/useLesson";
+import { LessonVocabulary } from "../../../types/LessonVocabulary";
 
 const MIN_NUMBER_OF_EXERCISES = 4;
 const DURATION_PER_EXERCISE = 15; // seconds
@@ -25,7 +25,7 @@ const VocaPracticePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const lessonId = searchParams.get("id");
 
-  const [vocabularies, setVocabularies] = useState<VocabularyModel[]>([]);
+  const [vocabularies, setVocabularies] = useState<LessonVocabulary[]>([]);
   // console.log("vocabularies", vocabularies);
 
   const [correctVocaIds, setCorrectVocaIds] = useState<string[]>([]);
@@ -33,12 +33,16 @@ const VocaPracticePage: React.FC = () => {
 
   const [openExitDrawer, setOpenExitDrawer] = useState(false);
 
-  const { data: lesson, isLoading } = useQuery({
-    queryKey: ["lesson", { id: lessonId }],
-    queryFn: () => getLessonById(lessonId!),
-    enabled: !!lessonId,
-    refetchOnWindowFocus: false,
-  });
+  const { data: lesson, isLoading } = useLesson(
+    lessonId!,
+    {
+      enabled: !!lessonId,
+      refetchOnWindowFocus: false,
+    },
+    {
+      withWords: 1,
+    },
+  );
 
   const [exerciseIdx, setExerciseIdx] = useState(0);
 
@@ -67,7 +71,7 @@ const VocaPracticePage: React.FC = () => {
     onSuccess: () => {
       console.log("Post learning result successfully");
       navigate(
-        `/lesson/learning-result?id=${lessonId}&vocaSetId=${lesson?.groupTopic.id}`,
+        `/lesson/learning-result?id=${lessonId}&vocaSetId=${lesson?.collectionId}`,
       );
     },
   });
@@ -133,7 +137,7 @@ const VocaPracticePage: React.FC = () => {
 
   useEffect(() => {
     if (lesson) {
-      setVocabularies(lesson.listWord || []);
+      setVocabularies(lesson.words || []);
     }
   }, [lesson]);
 
@@ -205,7 +209,7 @@ const VocaPracticePage: React.FC = () => {
             open={openExitDrawer}
             onClose={() => setOpenExitDrawer(false)} // onCloseDrawer
             onClickStay={() => setOpenExitDrawer(false)}
-            exitLink={`/voca/${lesson?.groupTopic.id}/lessons`}
+            exitLink={`/voca/${lesson?.collectionId}/lessons`}
           />
         </Box>
       )}

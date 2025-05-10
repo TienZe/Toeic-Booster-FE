@@ -1,3 +1,3 @@
 export default interface GetLessonRequest {
-    withWords?: boolean;
+    withWords?: number;
 }

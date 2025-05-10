@@ -6,8 +6,6 @@ import WrongAnswerAudio from "../assets/learning_wrong.mp3";
 import CorrectAnswerAudio from "../assets/learning_right.mp3";
 import FlashCardCompositionAnimationType from "../types/FlashCardCompositionAnimationType";
 import { AnimationType } from "../types/FlashCardCompositionAnimationType";
-import { useQuery } from "@tanstack/react-query";
-import { getLessonById } from "../../admin/vocasets/api/lesson-api.ts";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import Vocabulary from "../../../types/Vocabulary.ts";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop.tsx";
@@ -19,6 +17,7 @@ import PinIcon from "./PinIcon.tsx";
 import NewWordFolderModal from "./NewFolderModal.tsx";
 import PinWordModalModal from "./PinWordModal.tsx";
 import { getWordThumbnail } from "../../../utils/helper.ts";
+import useLesson from "../../../hooks/useLesson.ts";
 
 const LearningVocaPage: React.FC = () => {
   const navigate = useNavigate();
@@ -45,14 +44,17 @@ const LearningVocaPage: React.FC = () => {
     data: lesson,
     isLoading,
     isSuccess,
-  } = useQuery({
-    queryKey: ["lesson", { lessonId: lessonId }],
-    queryFn: () => getLessonById(lessonId!),
-    enabled: !!lessonId,
-    refetchOnWindowFocus: false,
-  });
+  } = useLesson(
+    lessonId!,
+    {
+      enabled: !!lessonId,
+    },
+    {
+      withWords: 1,
+    },
+  );
 
-  const vocabularies = lesson?.listWord || [];
+  const vocabularies = lesson?.words || [];
   const vocaLength = vocabularies.length;
 
   const currentVocaId = vocabularies[currentVocaIdx]?.id;
@@ -71,7 +73,7 @@ const LearningVocaPage: React.FC = () => {
     if (currentVocaIdx === vocaLength - 1 && lesson) {
       // Finish learning
       navigate(
-        `/lesson/complete-learning?id=${lesson.id}&name=${lesson.name}&vocaSetId=${lesson.groupTopic.id}`,
+        `/lesson/complete-learning?id=${lesson.id}&name=${lesson.name}&vocaSetId=${lesson.collectionId}`,
       );
     }
     setCurrentVocaIdx((prev) => Math.min(prev + 1, vocaLength - 1));
@@ -104,11 +106,11 @@ const LearningVocaPage: React.FC = () => {
 
   if (
     isSuccess &&
-    (!lesson?.listWord || lesson.listWord.length === 0 || !currentVocaId)
+    (!lesson?.words || lesson.words.length === 0 || !currentVocaId)
   ) {
     let redirectLink = "/";
-    if (lesson.groupTopic) {
-      redirectLink = `/voca/${lesson.groupTopic.id}/lessons`;
+    if (lesson.collectionId) {
+      redirectLink = `/voca/${lesson.collectionId}/lessons`;
     }
 
     return <Navigate to={redirectLink} />;
@@ -175,15 +177,15 @@ const LearningVocaPage: React.FC = () => {
               const dto: Vocabulary = {
                 id: voca.id,
                 word: voca.word,
-                type: voca.wordClass,
-                definition: voca.definition,
-                example: voca.example,
-                exampleMeaning: voca.exampleMeaning,
-                meaning: voca.translate,
-                phonetic: voca.pronunciation,
+                type: voca.partOfSpeech,
+                definition: voca.definition || "",
+                example: voca.example || "",
+                exampleMeaning: voca.exampleMeaning || "",
+                meaning: voca.meaning || "",
+                phonetic: voca.pronunciation || "",
                 image: getWordThumbnail(voca),
-                phoneticAudio: voca.audio,
-                exampleAudio: voca.exampleAudio,
+                phoneticAudio: voca.pronunciationAudio || "",
+                exampleAudio: voca.exampleAudio || "",
               };
 
               return (
@@ -242,7 +244,7 @@ const LearningVocaPage: React.FC = () => {
         open={openExitDrawer}
         onClose={() => setOpenExitDrawer(false)}
         onClickStay={() => setOpenExitDrawer(false)}
-        exitLink={isLoading ? "/" : `/voca/${lesson?.groupTopic.id}/lessons`}
+        exitLink={isLoading ? "/" : `/voca/${lesson?.collectionId}/lessons`}
       />
       {pinModal === "newFolder" && (
         <NewWordFolderModal

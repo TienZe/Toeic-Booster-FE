@@ -1,12 +1,15 @@
 import DefaultLessonThumbnail from "../assets/images/voca/default-lesson-image.svg";
+import { LessonVocabulary } from "./LessonVocabulary";
 export default interface Lesson {
-  id: string;
+  id: number;
   name: string;
   thumbnail: string | null;
-  // listWord: VocabularyModel[];
-  // groupTopic: VocaSetModel;
   createdAt: string;
+
+  collectionId: number|null;
+
   numOfWords: number;
+  words: LessonVocabulary[];
 }
 
 export interface LessonWithUserProgress extends Lesson {

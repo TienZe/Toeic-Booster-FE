@@ -18,7 +18,7 @@ const Slide1: React.FC<Slide1> = ({ onClick, voca }) => {
       <Typography
         sx={{
           my: "10px",
-          fontSize: "24px",
+          fontSize: "20px",
           lineHeight: "29px",
           color: "#4C4C4C",
         }}

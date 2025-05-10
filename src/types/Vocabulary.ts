@@ -1,10 +1,12 @@
+import { VocabularyWordClass } from "./VocabularyModel";
+
 export default interface Vocabulary {
-  id: string;
+  id: string|number;
   word: string;
   phonetic: string;
   phoneticAudio?: string;
   definition: string;
-  type: string;
+  type: VocabularyWordClass;
   meaning: string;
 
   image?: string;

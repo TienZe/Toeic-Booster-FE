@@ -40,11 +40,11 @@ const Slide3: React.FC<Slide3> = ({ onClick, voca, phoneticAudioRef }) => {
     <FlashCard onClick={onClick} vocaImage={voca.image}>
       <Typography
         color="#4C4C4C"
-        fontSize={35}
+        fontSize={30}
         sx={{ marginTop: "-10px", fontWeight: "600" }}
       >
         {voca.word}
-        <Typography component="span" color="#B4B4B4" sx={{ fontSize: 20 }}>
+        <Typography component="span" color="#B4B4B4" sx={{ fontSize: 16 }}>
           {" "}
           {`(${voca.type})`}
         </Typography>
@@ -78,7 +78,7 @@ const Slide3: React.FC<Slide3> = ({ onClick, voca, phoneticAudioRef }) => {
             <Typography
               component="span"
               color="#4C4C4C"
-              sx={{ fontSize: "20px" }}
+              sx={{ fontSize: "16px" }}
             >
               {displayExample}
             </Typography>

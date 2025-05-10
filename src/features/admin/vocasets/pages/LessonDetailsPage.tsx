@@ -74,7 +74,7 @@ const LessonDetailsPage = () => {
       enabled: !!lessonId,
     },
     {
-      withWords: true,
+      withWords: 1,
     },
   );
 

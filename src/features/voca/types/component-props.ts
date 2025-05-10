@@ -1,5 +1,5 @@
-import VocabularyModel from "../../../types/VocabularyModel";
+import { LessonVocabulary } from "../../../types/LessonVocabulary";
 
 export interface QuestionSlideProps {
-  voca: VocabularyModel;
+  voca: LessonVocabulary;
 }

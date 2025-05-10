@@ -1,11 +1,11 @@
-import VocabularyModel from "../../../types/VocabularyModel";
+import { LessonVocabulary } from "../../../types/LessonVocabulary";
 import { randInt, shuffleArray } from "../../../utils/helper";
 import { Exercise } from "../types/Exercise";
 import { ExerciseType } from "../types/ExerciseType";
 
 // Generate random exercises based on the practice vocas, each voca will have a random exercise
 export function generateRandomExercises(
-  practiceVocas: VocabularyModel[],
+  practiceVocas: LessonVocabulary[],
   exerciseKind: "guess" | "fill" | "both" = "both",
 ): Exercise[] {
   const numExerciseType = Object.keys(ExerciseType).length;
@@ -79,7 +79,7 @@ export function generateRandomExercises(
 
 // Generate a set of exercises, each vocabulary will have 2 exercises, one for guessing and one for filling
 export function getExerciseSet(
-  practiceVocas: VocabularyModel[],
+  practiceVocas: LessonVocabulary[],
   repeatTimes: number,
 ) {
   console.log("repeat times", repeatTimes);
@@ -103,9 +103,9 @@ export function getExerciseSet(
 }
 
 export function generateQuestion(
-  voca: VocabularyModel,
+  voca: LessonVocabulary,
   type: ExerciseType,
-  practiceVocas: VocabularyModel[],
+  practiceVocas: LessonVocabulary[],
 ): Exercise {
   switch (type) {
     case ExerciseType.CHOOSE_WORD_BASED_ON_PHONETIC:
@@ -125,8 +125,8 @@ export function generateQuestion(
         question: getQuestion(type),
         voca: voca,
         type: type,
-        correctAnswer: voca.translate,
-        options: getAnswerOptions(voca, practiceVocas, "translate"),
+        correctAnswer: voca.meaning,
+        options: getAnswerOptions(voca, practiceVocas, "meaning"),
       };
     }
     case ExerciseType.FILL_WORD_BASED_ON_SUGGESTION:
@@ -153,18 +153,18 @@ export function generateQuestion(
 }
 
 export function getAnswerOptions(
-  voca: VocabularyModel,
-  practiceVocas: VocabularyModel[],
-  prop: Exclude<keyof VocabularyModel, "thumbnail">,
+  voca: LessonVocabulary,
+  practiceVocas: LessonVocabulary[],
+  prop: Exclude<keyof LessonVocabulary, "thumbnail">,
 ): string[] {
   const anotherVocas = practiceVocas.filter((v) => v.id !== voca.id);
   const options = shuffleArray(anotherVocas)
     .slice(0, 3)
-    .map((v) => v[prop]);
+    .map((v) => v[prop] || "");
 
-  options.push(voca[prop]);
+  options.push(voca[prop] || "");
 
-  return shuffleArray(options);
+  return shuffleArray(options as string[]);
 }
 
 export function getQuestion(exerciseType: ExerciseType) {

@@ -21,7 +21,10 @@ interface TestingExerciseProps {
   exercise: Exercise;
   onFulfilled?: () => void; // Trigger when the exercise has been fulfilled (after displaying the result)
   onAnswered?: () => void; // Trigger when the user has answered the question
-  onCorrectAnswer?: (correctVocaId: string, type: ExerciseType) => void;
+  onCorrectAnswer?: (
+    correctVocaId: string | number,
+    type: ExerciseType,
+  ) => void;
   onWrongAnswer?: () => void;
 }
 
@@ -162,8 +165,8 @@ const TestingExercise: React.FC<TestingExerciseProps> = ({
             secondSlide={
               <PracticeResultSlide
                 word={mainVoca.word}
-                audio={mainVoca.audio}
-                meaning={mainVoca.translate}
+                audio={mainVoca.pronunciationAudio}
+                meaning={mainVoca.meaning}
                 phonetic={mainVoca.pronunciation}
                 thumbnail={mainVoca.thumbnail || DefaultVocaThumbnail}
                 playAudio={hasAnswered}

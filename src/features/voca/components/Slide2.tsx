@@ -15,7 +15,7 @@ const Slide2: React.FC<Slide2> = ({ onClick, voca }) => {
     <FlashCard onClick={onClick} vocaImage={voca.image}>
       <Typography
         color="primary.main"
-        fontSize={30}
+        fontSize={24}
         fontWeight={600}
         sx={{ marginTop: "5px", marginBottom: "10px" }}
       >
