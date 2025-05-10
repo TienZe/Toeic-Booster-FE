@@ -6,6 +6,8 @@ import ActionDropdown, {
 } from "../../../../components/UI/ActionDropdown";
 import { DeleteOutline, Tune } from "@mui/icons-material";
 
+import DefaultVocaSetThumbnail from "../../../../assets/images/voca/default.png";
+
 const VocaSetRow: React.FC<{
   vocaSet: VocaSetModel;
   onDelete: (vocaSetId: string) => void;
@@ -37,7 +39,7 @@ const VocaSetRow: React.FC<{
       </TableCell>
       <TableCell align="center">
         <Image
-          src={vocaSet.thumbnail}
+          src={vocaSet.thumbnail || DefaultVocaSetThumbnail}
           sx={{
             width: "auto",
             height: "84px",
@@ -45,8 +47,8 @@ const VocaSetRow: React.FC<{
         />
       </TableCell>
       <TableCell>{vocaSet.name}</TableCell>
-      <TableCell align="center">{vocaSet?.userCount}</TableCell>
-      <TableCell align="center">{vocaSet?.topicsCount}</TableCell>
+      <TableCell align="center">{vocaSet?.userCount || 0}</TableCell>
+      <TableCell align="center">{vocaSet?.lessonsCount || 0}</TableCell>
       <TableCell align="center">
         <ActionDropdown actions={actions} />
       </TableCell>

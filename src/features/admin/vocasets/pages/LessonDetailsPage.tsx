@@ -63,8 +63,8 @@ const LessonDetailsPage = () => {
 
   const navigate = useNavigate();
 
-  const [deletedVocaId, setDeletedVocaId] = useState<number | null>(null);
-  const openDeleteModal = Boolean(deletedVocaId);
+  const [detachedVocaId, setDetachedVocaId] = useState<number>();
+  const openDeleteModal = Boolean(detachedVocaId);
 
   const [openAttachingVocaModal, setOpenAttachingVocaModal] = useState(false);
 
@@ -116,9 +116,10 @@ const LessonDetailsPage = () => {
     onSuccess: () => {
       toast.success("Words attached successfully");
 
-      const newLessonVocaLength = lessonVocabularies?.length || 0;
-      const newLastPage = Math.ceil(newLessonVocaLength / VOCA_PAGE_SIZE) - 1;
-      setPage(newLastPage); // go to the last page to see the new attached words
+      queryClient.invalidateQueries({
+        queryKey: ["lesson-vocabularies", { lessonId: lessonId }],
+        exact: true,
+      });
     },
     onSettled: () => {
       attachNewWordsMutation.reset();
@@ -149,7 +150,7 @@ const LessonDetailsPage = () => {
     },
     onSettled: () => {
       // reset state
-      setDeletedVocaId(null);
+      setDetachedVocaId(undefined);
       detachWordMutation.reset();
     },
   });
@@ -174,10 +175,10 @@ const LessonDetailsPage = () => {
   };
 
   const handleDetachWord = () => {
-    if (deletedVocaId && lessonId) {
+    if (detachedVocaId && lessonId) {
       detachWordMutation.mutate({
         lessonId: lessonId,
-        vocabularyId: deletedVocaId,
+        vocabularyId: detachedVocaId,
       });
     }
   };
@@ -337,7 +338,7 @@ const LessonDetailsPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {pageData.map((voca: LessonVocabulary) => (
+                {pageData.map((lessonWord: LessonVocabulary) => (
                   <TableRow>
                     <TableCell
                       sx={{
@@ -347,11 +348,11 @@ const LessonDetailsPage = () => {
                         overflow: "hidden",
                       }}
                     >
-                      {voca.id}
+                      {lessonWord.id}
                     </TableCell>
                     <TableCell align="center">
                       <Image
-                        src={getWordThumbnail(voca)}
+                        src={getWordThumbnail(lessonWord)}
                         sx={{
                           width: "80px",
                           height: "80px",
@@ -359,21 +360,25 @@ const LessonDetailsPage = () => {
                         }}
                       />
                     </TableCell>
-                    <TableCell>{voca.word}</TableCell>
+                    <TableCell>{lessonWord.word}</TableCell>
                     <TableCell align="center">
-                      {vocaWordClassFullName2Abbr(voca.partOfSpeech || "")}
+                      {vocaWordClassFullName2Abbr(
+                        lessonWord.partOfSpeech || "",
+                      )}
                     </TableCell>
-                    <TableCell>{voca.meaning}</TableCell>
+                    <TableCell>{lessonWord.meaning}</TableCell>
                     <TableCell align="right">
                       <Stack direction="row" justifyContent="center">
-                        <Link to={`/admin/voca?id=${voca.id}`}>
+                        <Link to={`/admin/voca?id=${lessonWord.id}`}>
                           <IconButton color="primary">
                             <Edit />
                           </IconButton>
                         </Link>
                         <IconButton
                           color="error"
-                          onClick={() => setDeletedVocaId(voca.id)}
+                          onClick={() =>
+                            setDetachedVocaId(lessonWord.vocabularyId)
+                          }
                         >
                           <Delete />
                         </IconButton>
@@ -407,7 +412,7 @@ const LessonDetailsPage = () => {
           {/* Detach word modal */}
           <CustomModal
             open={openDeleteModal}
-            onClose={() => setDeletedVocaId(null)}
+            onClose={() => setDetachedVocaId(undefined)}
           >
             <Box sx={{ padding: 3 }}>
               <Typography variant="h6" sx={{ marginBottom: 1 }}>
@@ -416,7 +421,7 @@ const LessonDetailsPage = () => {
               <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                 <Button
                   variant="contained"
-                  onClick={() => setDeletedVocaId(null)}
+                  onClick={() => setDetachedVocaId(undefined)}
                 >
                   Cancel
                 </Button>
@@ -440,7 +445,9 @@ const LessonDetailsPage = () => {
             open={openAttachingVocaModal}
             onClose={() => setOpenAttachingVocaModal(false)}
             onSubmit={handleAttachNewWords}
-            exceptedVocabularyIds={lessonVocabularies?.map((voca) => voca.id)}
+            exceptedVocabularyIds={lessonVocabularies?.map(
+              (lessonWord) => +lessonWord.vocabularyId,
+            )}
           />
         </Box>
       )}

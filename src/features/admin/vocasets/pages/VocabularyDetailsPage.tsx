@@ -353,7 +353,7 @@ const VocabularyDetailsPage: React.FC<VocabularyDetailsPageProps> = ({
                     gap={0.5}
                     padding="16.5px 14px"
                     iconButton={<AddPhotoAlternate />}
-                    defaultFileSrc={voca?.thumbnail as string} // update/create voca at admin cannot be null
+                    defaultFileSrc={(voca?.thumbnail as string) || ""} // update/create voca at admin cannot be null
                     onChangeFile={(newFileSrc) =>
                       handleChangeMediaInput("imageSrc", newFileSrc)
                     }

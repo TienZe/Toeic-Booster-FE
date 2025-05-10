@@ -6,6 +6,7 @@ export default interface Lesson {
   // listWord: VocabularyModel[];
   // groupTopic: VocaSetModel;
   createdAt: string;
+  numOfWords: number;
 }
 
 export interface LessonWithUserProgress extends Lesson {

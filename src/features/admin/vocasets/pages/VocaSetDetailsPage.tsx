@@ -409,7 +409,7 @@ const VocaSetDetailsPage = () => {
                       />
                     </TableCell>
                     <TableCell>{lesson.name}</TableCell>
-                    <TableCell align="center">{0}</TableCell>
+                    <TableCell align="center">{lesson.numOfWords}</TableCell>
                     <TableCell align="right">
                       <Stack direction="row" justifyContent="center">
                         <Link to={`/admin/lesson?id=${lesson.id}`}>

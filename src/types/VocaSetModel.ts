@@ -9,6 +9,8 @@ export default interface VocaSetModel {
   
   tags: CollectionTag[];
 
+  lessonsCount?: number;
+
   topicsCount: number;
   userCount: number;
 }

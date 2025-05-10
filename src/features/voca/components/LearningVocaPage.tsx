@@ -46,7 +46,7 @@ const LearningVocaPage: React.FC = () => {
     isLoading,
     isSuccess,
   } = useQuery({
-    queryKey: ["lesson", { id: lessonId }],
+    queryKey: ["lesson", { lessonId: lessonId }],
     queryFn: () => getLessonById(lessonId!),
     enabled: !!lessonId,
     refetchOnWindowFocus: false,

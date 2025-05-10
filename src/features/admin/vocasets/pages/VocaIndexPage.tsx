@@ -14,7 +14,7 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import RoundedInput from "../../../../components/UI/RoundedInput";
 import TablePaginationActions from "../../../../components/UI/TablePaginationActions";
@@ -44,6 +44,7 @@ import usePaginatedVocaSets from "../../../../hooks/usePaginatedVocaSets.ts";
 import MultipleSelect from "../../../../components/UI/MultipleSelect.tsx";
 import useCollectionTags from "../../../../hooks/useCollectionTags.ts";
 import MultipleSelectCheckmarks from "../../../../components/UI/MultipleSelectCheckmarks.tsx";
+import { tts } from "../../../shared-apis/azure-tts.ts";
 
 interface NewVocaSetFormData {
   name: string;
@@ -147,6 +148,7 @@ const VocaIndexPage: React.FC = () => {
     limit: VOCASET_PAGE_SIZE,
     search: filterName,
     categories: filterCategories,
+    withStats: 1,
   });
 
   const deleteVocaSetMutation = useMutation({
@@ -211,6 +213,16 @@ const VocaIndexPage: React.FC = () => {
     }
   };
 
+  // const [audioUrl, setAudioUrl] = useState<string | undefined>();
+
+  // useEffect(() => {
+  //   const fetchAudioUrl = async () => {
+  //     const url = await tts("Hello");
+  //     setAudioUrl(url);
+  //   };
+  //   fetchAudioUrl();
+  // }, []);
+
   return (
     <>
       <Box sx={{ padding: 2 }}>
@@ -222,6 +234,8 @@ const VocaIndexPage: React.FC = () => {
           <Typography variant="h4" sx={{ marginBottom: 1 }}>
             Vocabulary Collections
           </Typography>
+
+          {/* <audio src={audioUrl} controls /> */}
           <Button
             variant="outlined"
             startIcon={<Add />}

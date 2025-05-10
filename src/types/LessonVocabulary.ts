@@ -3,7 +3,7 @@ import { VocabularyWordClass } from "./VocabularyModel";
 export interface LessonVocabulary {
   id: number;
   lessonId: number;
-  vocabularyId: string;
+  vocabularyId: number;
   word: string;
   thumbnail?: string | null;
 

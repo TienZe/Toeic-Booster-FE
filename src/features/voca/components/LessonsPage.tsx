@@ -143,7 +143,7 @@ const LessonsPage: React.FC = () => {
                         thumbnail={getLessonThumbnail(lesson)}
                         totalWords={10}
                         retainedWords={10}
-                        reviewable={true}
+                        reviewable={false}
                         vocaSetId={vocaSetId}
                       />
                     ))

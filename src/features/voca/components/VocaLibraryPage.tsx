@@ -37,7 +37,7 @@ const languageOptions = [
 ];
 
 const VocaLibraryPage: React.FC = () => {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
 
   const [selectedLanguages] = useState<string[]>(["en", "tr"]);
 
@@ -45,7 +45,7 @@ const VocaLibraryPage: React.FC = () => {
 
   const { data: vocaSets, isLoading: isLoadingVocaSets } = usePaginatedVocaSets(
     {
-      page: 1,
+      page: 0,
       limit: 10,
     },
   );

@@ -7,6 +7,7 @@ type Options = {
   limit: number;
   search?: string;
   categories?: number[];
+  withStats?: number;
 };
 
 export default function usePaginatedVocaSets(options: Options) {
@@ -18,6 +19,7 @@ export default function usePaginatedVocaSets(options: Options) {
         limit: options.limit,
         search: options.search,
         categories: options.categories,
+        withStats: options.withStats,
       },
     ],
     queryFn: ({ queryKey }) =>

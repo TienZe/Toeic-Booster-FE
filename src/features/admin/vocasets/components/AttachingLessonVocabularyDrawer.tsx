@@ -6,7 +6,7 @@ import SideDrawer, {
 import { VocabularyCardState } from "../../../../components/VocabularyCard";
 import ListWords from "../../../voca/components/ListWords";
 import VocabularyModel from "../../../../types/VocabularyModel";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { WordItem } from "../../../../types/voca-search";
 import { toast } from "react-toastify";
 
@@ -49,6 +49,10 @@ const AttachingLessonVocabularyDrawer: React.FC<
     onClose?.();
   };
 
+  useEffect(() => {
+    setSelectedVocabularies([]);
+  }, [open]);
+
   return (
     <SideDrawer open={open} onClose={onClose}>
       <Box sx={{ padding: 2, minWidth: "800px" }}>
@@ -75,6 +79,7 @@ const AttachingLessonVocabularyDrawer: React.FC<
             variant="contained"
             sx={{ width: "80px", boxShadow: "none" }}
             onClick={handleClickAttach}
+            disabled={selectedVocabularies.length === 0}
           >
             Attach
           </Button>

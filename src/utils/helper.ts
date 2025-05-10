@@ -138,8 +138,12 @@ export function getPhoneValidator(errorMessage?: string) {
   };
 }
 
+export function getBingImageByKeyword(keyword: string) {
+  return `https://th.bing.com/th?q=${keyword}&c=7&rs=1&p=0&o=5&dpr=2&pid=1.7&mkt=en-WW&cc=VN&setlang=en&adlt=moderate&t=1`;
+}
+
 export function getWordThumbnail(voca: VocabularyModel | LessonVocabulary) {
-  return voca.thumbnail || VocaDefaultThumbnail;
+  return voca.thumbnail || getBingImageByKeyword(voca.word) || VocaDefaultThumbnail;
 }
 
 export function strEqualIgnoreCase(str1: string, str2: string) {
