@@ -1,12 +1,8 @@
 import { Box, LinearProgress, Stack, Typography } from "@mui/material";
 import FlashCardCompositionAnimationType from "../types/FlashCardCompositionAnimationType";
 import { AnimationType } from "../types/FlashCardCompositionAnimationType";
-import { Navigate, useSearchParams } from "react-router-dom";
-import CustomBackdrop from "../../../components/UI/CustomBackdrop.tsx";
-import LessonHeader from "./LessonHeader.tsx";
 import LessonMainContent from "./LessonMainContent.tsx";
 import SuspendLearningDrawer from "./SuspendLearningDrawer.tsx";
-import useLesson from "../../../hooks/useLesson.ts";
 import FlashCardAnimationWrapper from "./FlashCardAnimationWrapper.tsx";
 import VocaPresentationSlide from "./VocaPresentationSlide.tsx";
 import BoldStrokeButton from "./BoldStrokeButton.tsx";
@@ -14,17 +10,22 @@ import { useState } from "react";
 import { saveLessonLearning } from "../api/voca-learning.ts";
 import { useMutation } from "@tanstack/react-query";
 import { SaveLessonLearningRequest } from "../types/SaveLessonLearningRequest.ts";
-import { toast } from "react-toastify";
+import Lesson from "../../../types/Lesson.ts";
+
+interface VocaFilteringProcessProps {
+  onFinish?: () => void;
+  lesson: Lesson;
+}
 
 interface UserKnowledge {
   alreadyKnown: boolean;
   lessonVocabularyId: number;
 }
 
-const VocaFilteringProcess: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const lessonId = searchParams.get("id");
-
+const VocaFilteringProcess: React.FC<VocaFilteringProcessProps> = ({
+  onFinish,
+  lesson,
+}) => {
   // store the index of current lesson vocabulary in the vocabularies array
   const [currentVocaIdx, setCurrentVocaIdx] = useState(0);
 
@@ -40,20 +41,6 @@ const VocaFilteringProcess: React.FC = () => {
     direction = "Left";
   }
 
-  const {
-    data: lesson,
-    isLoading,
-    isSuccess,
-  } = useLesson(
-    lessonId!,
-    {
-      enabled: !!lessonId,
-    },
-    {
-      withWords: 1,
-    },
-  );
-
   const vocabularies = lesson?.words || [];
   const vocaLength = vocabularies.length;
 
@@ -64,7 +51,7 @@ const VocaFilteringProcess: React.FC = () => {
   const saveLessonLearningMutation = useMutation({
     mutationFn: saveLessonLearning,
     onSuccess: () => {
-      toast.success("Save lesson learning successfully");
+      onFinish?.();
     },
   });
 
@@ -96,116 +83,95 @@ const VocaFilteringProcess: React.FC = () => {
     setCurrentVocaIdx((prev) => Math.min(prev + 1, vocaLength - 1));
   };
 
-  if (
-    isSuccess &&
-    (!lesson?.words || lesson.words.length === 0 || !currentLessonVocabularyId)
-  ) {
-    let redirectLink = "/";
-    if (lesson.collectionId) {
-      redirectLink = `/voca/${lesson.collectionId}/lessons`;
-    }
-
-    return <Navigate to={redirectLink} />;
-  }
-
   return (
     <Stack sx={{ flex: 1 }}>
-      {isLoading ? (
-        <>
-          <CustomBackdrop />
-
-          {/* Placeholder space */}
-          <Box sx={{ flexGrow: 1 }}></Box>
-        </>
-      ) : (
-        <LessonMainContent sx={{ minHeight: "600px" }}>
-          {/* Question progress */}
-          <Stack
-            direction="row"
-            alignItems="center"
-            sx={{ padding: "30px 15px", marginBottom: "24px" }}
-            spacing={1}
-          >
-            <Typography fontSize={22} fontWeight={700} color="#B4B4B4">
-              {currentVocaIdx + 1}/{vocaLength}
-            </Typography>
-            <LinearProgress
-              variant="determinate"
-              value={((currentVocaIdx + 1) / vocaLength) * 100}
-              color="success"
-              sx={{
-                height: "15px",
-                borderRadius: "10px",
-                backgroundColor: "#f0f0f0",
-                flexGrow: 1,
-              }}
-            />
-          </Stack>
-
-          {/* Flashcard */}
-          <div style={{ position: "relative" }}>
-            {vocabularies.map((voca, idx) => {
-              let animate: FlashCardCompositionAnimationType = undefined;
-
-              if (direction !== "Unchanged") {
-                if (idx === currentVocaIdx) {
-                  animate =
-                    direction === "Right"
-                      ? AnimationType.EnterRight
-                      : AnimationType.EnterLeft;
-                } else if (idx === prevVocaIdx) {
-                  animate =
-                    direction === "Right"
-                      ? AnimationType.ExitLeft
-                      : AnimationType.ExitRight;
-                }
-              }
-
-              return (
-                <Box
-                  sx={{ position: "absolute", top: 0, left: 0, width: "100%" }}
-                >
-                  <FlashCardAnimationWrapper
-                    key={voca.id + (animate || "")}
-                    animate={animate}
-                    visible={idx === currentVocaIdx || idx === prevVocaIdx}
-                  >
-                    <VocaPresentationSlide voca={voca} />
-                  </FlashCardAnimationWrapper>
-                </Box>
-              );
-            })}
-          </div>
-
-          {/* Action buttons */}
-          <Stack
-            spacing={2}
+      <LessonMainContent sx={{ minHeight: "600px" }}>
+        {/* Filtering progress */}
+        <Stack
+          direction="row"
+          alignItems="center"
+          sx={{ padding: "30px 15px", marginBottom: "24px" }}
+          spacing={1}
+        >
+          <Typography fontSize={22} fontWeight={700} color="#B4B4B4">
+            {currentVocaIdx + 1}/{vocaLength}
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={((currentVocaIdx + 1) / vocaLength) * 100}
+            color="success"
             sx={{
-              marginTop: "440px",
-              textAlign: "center",
-              maxWidth: "800px",
-              mx: "auto",
+              height: "15px",
+              borderRadius: "10px",
+              backgroundColor: "#f0f0f0",
+              flexGrow: 1,
             }}
-          >
-            <Typography variant="h5">Do you know this word?</Typography>
-            <Stack direction="row" spacing={2}>
-              <BoldStrokeButton
-                variant="outlined"
-                onClick={() => handleAnswer(false)}
+          />
+        </Stack>
+
+        {/* Flashcard */}
+        <div style={{ position: "relative" }}>
+          {vocabularies.map((voca, idx) => {
+            let animate: FlashCardCompositionAnimationType = undefined;
+
+            if (direction !== "Unchanged") {
+              if (idx === currentVocaIdx) {
+                animate =
+                  direction === "Right"
+                    ? AnimationType.EnterRight
+                    : AnimationType.EnterLeft;
+              } else if (idx === prevVocaIdx) {
+                animate =
+                  direction === "Right"
+                    ? AnimationType.ExitLeft
+                    : AnimationType.ExitRight;
+              }
+            }
+
+            return (
+              <Box
+                sx={{ position: "absolute", top: 0, left: 0, width: "100%" }}
               >
-                Don't know
-              </BoldStrokeButton>
-              <BoldStrokeButton
-                variant="contained"
-                color="success"
-                onClick={() => handleAnswer(true)}
-              >
-                Already known
-              </BoldStrokeButton>
-            </Stack>
+                <FlashCardAnimationWrapper
+                  key={voca.id + (animate || "")}
+                  animate={animate}
+                  visible={idx === currentVocaIdx || idx === prevVocaIdx}
+                >
+                  <VocaPresentationSlide voca={voca} />
+                </FlashCardAnimationWrapper>
+              </Box>
+            );
+          })}
+        </div>
+
+        {/* Action buttons */}
+        <Stack
+          spacing={2}
+          sx={{
+            marginTop: "440px",
+            textAlign: "center",
+            maxWidth: "800px",
+            mx: "auto",
+          }}
+        >
+          <Typography variant="h5">Do you know this word?</Typography>
+          <Stack direction="row" spacing={2}>
+            <BoldStrokeButton
+              variant="outlined"
+              onClick={() => handleAnswer(false)}
+            >
+              Don't know
+            </BoldStrokeButton>
+            <BoldStrokeButton
+              variant="contained"
+              color="success"
+              onClick={() => handleAnswer(true)}
+            >
+              Already known
+            </BoldStrokeButton>
           </Stack>
-        </LessonMainContent>
-      )}
+        </Stack>
+      </LessonMainContent>
 
       {/* Footer button */}
       <Box
@@ -235,7 +201,7 @@ const VocaFilteringProcess: React.FC = () => {
         open={openExitDrawer}
         onClose={() => setOpenExitDrawer(false)}
         onClickStay={() => setOpenExitDrawer(false)}
-        exitLink={isLoading ? "/" : `/voca/${lesson?.collectionId}/lessons`}
+        exitLink={`/voca/${lesson?.collectionId}/lessons`}
       />
     </Stack>
   );

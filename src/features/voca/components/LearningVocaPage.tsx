@@ -27,9 +27,6 @@ const LearningVocaPage: React.FC = () => {
   const [currentVocaIdx, setCurrentVocaIdx] = useState(0);
   const [prevVocaIdx, setPrevVocaIdx] = useState(0);
 
-  console.log("currentVocaIdx", currentVocaIdx);
-  console.log("prevVocaIdx", prevVocaIdx);
-
   let direction = "Unchanged";
 
   if (currentVocaIdx > prevVocaIdx) {

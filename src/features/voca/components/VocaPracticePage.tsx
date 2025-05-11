@@ -11,7 +11,6 @@ import ClockTimer, { ClockTimerRef } from "./ClockTimer";
 import { AnimatePresence } from "framer-motion";
 import SuspendLearningDrawer from "./SuspendLearningDrawer";
 import { PostLearningResultRequest } from "../types/LearningResultRequest";
-import { createLearningResult } from "../api/voca-learning";
 import PracticeProgressBar from "./PracticeProgressBar";
 import AnswerSound from "./AnswerSound";
 import useLesson from "../../../hooks/useLesson";
@@ -125,7 +124,7 @@ const VocaPracticePage: React.FC = () => {
 
     console.log(request);
 
-    postLearningResultMutation.mutate(request);
+    // postLearningResultMutation.mutate(request);
   }, [
     exercises,
     correctVocaIds,
