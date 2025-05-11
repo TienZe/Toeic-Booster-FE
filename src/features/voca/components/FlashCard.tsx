@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { ReactNode } from "react";
 
 import TurnIcon from "../../../components/TurnIcon";
@@ -29,19 +29,21 @@ const FlashCard: React.FC<FlashCardProps> = ({
       direction="row"
     >
       <img src={vocaImage} style={{ width: "238px", height: "238px" }} />
-      <div>{children}</div>
+      <Box sx={{ flex: 1 }}>{children}</Box>
 
-      <CuteButton
-        label="flip"
-        icon={<TurnIcon color="primary" sx={{ fontSize: "27px" }} />}
-        sx={{
-          position: "absolute",
-          right: 25,
-          bottom: 30,
-          "& span": { color: "primary.main" },
-        }}
-        onClick={onClick}
-      />
+      {onClick && (
+        <CuteButton
+          label="flip"
+          icon={<TurnIcon color="primary" sx={{ fontSize: "27px" }} />}
+          sx={{
+            position: "absolute",
+            right: 25,
+            bottom: 30,
+            "& span": { color: "primary.main" },
+          }}
+          onClick={onClick}
+        />
+      )}
     </Stack>
   );
 };

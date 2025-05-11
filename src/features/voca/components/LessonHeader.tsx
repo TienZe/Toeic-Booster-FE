@@ -4,7 +4,7 @@ import WhiteLogo from "../assets/logo-white.svg";
 
 interface LessonHeader {
   lessonName?: string;
-  title: string;
+  title?: string;
   onExit?: () => void;
   containerSx?: SxProps;
 }
@@ -66,6 +66,7 @@ const LessonHeader: React.FC<LessonHeader> = ({
             display: "inline-block",
             minWidth: "110px",
             textAlign: "center",
+            visibility: title ? "visible" : "hidden",
           }}
         >
           <Typography

@@ -44,6 +44,8 @@ import ListenLessonUpdateAdmin from "./features/admin/listen/pages/ListenLessonU
 import { RoleEnum } from "./types/auth.ts";
 import AccountIndexPage from "./features/admin/accounts/components/AccountIndexPage.tsx";
 import WordIndexPage from "./features/admin/vocasets/pages/WordIndexPage.tsx";
+import VocaLearningInstructionPage from "./features/voca/components/VocaLearningInstructionPage.tsx";
+import VocaFilteringPage from "./features/voca/components/VocaFilteringPage.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -151,12 +153,20 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
+        path: "filtering",
+        element: <VocaFilteringPage />,
+      },
+      {
         path: "learn",
         element: <LearningVocaPage />,
       },
       {
         path: "practice",
         element: <VocaPracticePage />,
+      },
+      {
+        path: "learning-instruction",
+        element: <VocaLearningInstructionPage />,
       },
       {
         path: "confirm-start-testing",

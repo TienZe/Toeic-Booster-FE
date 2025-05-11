@@ -1,17 +1,32 @@
 import axiosClient from "../../../axios";
-import { PostLearningResultRequest } from "../types/LearningResultRequest";
-import { LearningResultResponse } from "../types/LearningResultResponse";
+import ApiResponse from "../../../types/ApiResponse";
+import LessonLearning from "../../../types/LessonLearning";
+// import { PostLearningResultRequest } from "../types/LearningResultRequest";
+// import { LearningResultResponse } from "../types/LearningResultResponse";
+import { SaveLessonLearningRequest } from "../types/SaveLessonLearningRequest";
 
-export async function createLearningResult(request: PostLearningResultRequest) {
-  const response = await axiosClient.post("topic-history", request);
+// export async function createLearningResult(request: PostLearningResultRequest) {
+//   const response = await axiosClient.post("topic-history", request);
 
-  return response.data;
-}
+//   return response.data;
+// }
 
-export async function getLessonLearningResult(lessonId: string) {
-  const response = await axiosClient.get<LearningResultResponse>(
-    "topic-history/statistic/topic/" + lessonId,
+// export async function getLessonLearningResult(lessonId: string) {
+//   const response = await axiosClient.get<LearningResultResponse>(
+//     "topic-history/statistic/topic/" + lessonId,
+//   );
+
+//   return response.data;
+// }
+
+export async function saveLessonLearning(request: SaveLessonLearningRequest) {
+  const { lessonId, lessonLearnings } = request;
+  const response = await axiosClient.post<ApiResponse<LessonLearning[]>>(
+    `lessons/${lessonId}/lesson-learnings`,
+    {
+      lessonLearnings,
+    },
   );
 
-  return response.data;
+  return response.data.data;
 }
