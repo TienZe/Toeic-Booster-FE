@@ -14,7 +14,7 @@ export default interface Lesson {
   learningStep?: LearningStep; // The learning step of the user posted
 }
 
-export type LearningStep = "filtered" | "tested";
+export type LearningStep = "filtered" | "examined";
 
 export interface LessonWithUserProgress extends Lesson {
   isLearned: boolean;

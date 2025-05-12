@@ -1,21 +1,16 @@
-import VocabularyModel from "../../../types/VocabularyModel";
+import { LessonVocabulary } from "../../../types/LessonVocabulary";
 
 export type LearningResult = {
-  id: string;
   numCorrect: number;
-  totalWord: number;
-  time: number;
-  topic: {
-    id: string;
-    name: string;
-    thumbnail: string;
-  };
-  correctWord: VocabularyModel[];
-  incorrectWord: VocabularyModel[];
+  totalWords: number;
+  duration: number;
+
+  correctWords: LessonVocabulary[];
+  incorrectWords: LessonVocabulary[];
 };
 
 export type LearningResultResponse = {
   current: LearningResult;
-  last: LearningResult;
-  max: LearningResult;
+  mostRecent: LearningResult;
+  best: LearningResult;
 };

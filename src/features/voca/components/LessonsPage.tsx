@@ -24,10 +24,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import LessonCourse from "./LessonCourse";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop";
-import {
-  getVocaSetRating,
-  getVocaSetWithUserProgress,
-} from "../api/voca-domain";
+import { getVocaSetRating } from "../api/voca-domain";
 import { UserProgress } from "../types/UserProgress";
 import VocaSetRatingModal from "./VocaSetRatingModal";
 import { format } from "date-fns";
@@ -119,17 +116,18 @@ const LessonsPage: React.FC = () => {
       navigate(
         `/lesson/learning-instruction?id=${lessonId}&name=${selectedLesson.name}&vocaSetId=${vocaSetId}`,
       );
-    } else if (selectedLesson.learningStep === "filtered") {
-      // Choose words to learn
+    } else if (
+      selectedLesson.learningStep === "filtered" ||
+      selectedLesson.learningStep === "examined"
+    ) {
+      // Both need to choose words to learn from the modal
       setFilteredLessonId(lessonId);
-    } else if (selectedLesson.learningStep === "tested") {
-      // TODO: Go to the testing flow
     }
   };
 
   return (
     <Content>
-      {isLoadingVocaSet ? (
+      {isLoadingVocaSet || isLoadingLessons ? (
         <CustomBackdrop open />
       ) : (
         <Box sx={{ maxWidth: "1200px", mx: "auto", px: 1, py: 3 }}>
@@ -170,7 +168,7 @@ const LessonsPage: React.FC = () => {
                         thumbnail={getLessonThumbnail(lesson)}
                         totalWords={lesson.numOfWords}
                         retainedWords={10}
-                        reviewable={lesson.learningStep === "tested"}
+                        reviewable={lesson.learningStep === "examined"}
                         vocaSetId={vocaSetId}
                         onStartLearning={() => {
                           handleStartLearningLesson(lesson.id);

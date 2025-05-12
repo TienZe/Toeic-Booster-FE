@@ -3,11 +3,15 @@ import VocabularyCard, {
   VocabularyCardState,
 } from "../../../components/VocabularyCard";
 import VocabularyModel from "../../../types/VocabularyModel";
-import { vocaWordClassFullName2Abbr } from "../../../utils/helper";
+import {
+  getWordThumbnail,
+  vocaWordClassFullName2Abbr,
+} from "../../../utils/helper";
+import { LessonVocabulary } from "../../../types/LessonVocabulary";
 
 type ListWordsProps = {
   title: string;
-  vocabularies: VocabularyModel[];
+  vocabularies: VocabularyModel[] | LessonVocabulary[];
   status: VocabularyCardState;
   sx?: SxProps;
   onCloseWordCard?: (vocabularyId: number) => void;
@@ -71,7 +75,7 @@ const ListWords: React.FC<ListWordsProps> = ({
             key={vocabulary.id}
             word={vocabulary.word}
             phonetic={vocabulary.pronunciation}
-            thumbnail={vocabulary.thumbnail}
+            thumbnail={getWordThumbnail(vocabulary)}
             type={vocaWordClassFullName2Abbr(vocabulary.partOfSpeech)}
             meaning={vocabulary.meaning}
             audio={vocabulary.pronunciationAudio || undefined}

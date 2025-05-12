@@ -6,13 +6,12 @@ import { PostLessonExamRequest } from "../types/LessonExamRequest";
 import { LessonFilteringResult } from "../types/LessonFilteringResult";
 import { SaveLessonLearningRequest } from "../types/SaveLessonLearningRequest";
 
-// deprecated
-export async function getLessonLearningResult(lessonId: string) {
-  const response = await axiosClient.get<LearningResultResponse>(
-    "topic-history/statistic/topic/" + lessonId,
+export async function getLessonPracticeStatistics(lessonId: string) {
+  const response = await axiosClient.get<ApiResponse<LearningResultResponse>>(
+    `lessons/${lessonId}/practice-statistics`,
   );
 
-  return response.data;
+  return response.data.data;
 }
 
 export async function saveLessonLearning(request: SaveLessonLearningRequest) {
@@ -38,5 +37,5 @@ export async function getLessonFilteringResult(lessonId: number) {
 export async function postLessonExam(request: PostLessonExamRequest) {
   const response = await axiosClient.post("lesson-exams", request);
 
-  return response.data;
+  return response.data.data;
 }

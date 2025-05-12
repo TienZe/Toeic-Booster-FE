@@ -9,9 +9,10 @@ import ResultHistoryBarChart from "./ResultHistoryBarChart";
 import { VocabularyCardState } from "../../../components/VocabularyCard";
 import { useQuery } from "@tanstack/react-query";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import { getLessonLearningResult } from "../api/voca-learning";
+import { getLessonPracticeStatistics } from "../api/voca-learning";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop";
 import ListWords from "./ListWords";
+import useLesson from "../../../hooks/useLesson";
 
 const PIE_COLORS = ["#32CD32", "#E5E5E5"]; // Green and Grey
 
@@ -23,14 +24,19 @@ const LessonLearningResultPage = () => {
 
   const { data: learningResult, isLoading } = useQuery({
     queryKey: ["lesson-learning-result", { lessonId: lessonId }],
-    queryFn: () => getLessonLearningResult(lessonId!),
+    queryFn: () => getLessonPracticeStatistics(lessonId!),
     enabled: !!lessonId,
   });
 
+  const { data: lesson } = useLesson(lessonId!, {
+    enabled: !!lessonId,
+  });
+
+  const lessonName = lesson?.name;
+
   const currentResult = learningResult?.current;
-  const lessonName = learningResult?.current.topic.name;
   const accuracy = currentResult
-    ? (currentResult.numCorrect / currentResult.totalWord) * 100
+    ? (currentResult.numCorrect / currentResult.totalWords) * 100
     : 0;
 
   const pieChartData = currentResult
@@ -141,7 +147,7 @@ const LessonLearningResultPage = () => {
                   />
                   <ResultItem
                     title="Time"
-                    value={`${currentResult?.time} seconds`}
+                    value={`${currentResult?.duration} seconds`}
                     icon={TimeResultSvg}
                   />
                 </Stack>
@@ -166,14 +172,14 @@ const LessonLearningResultPage = () => {
                 >
                   <ResultHistoryBarChart
                     data={{
-                      best: learningResult?.max.numCorrect || 0,
+                      best: learningResult?.best.numCorrect || 0,
                       mostRecent:
-                        learningResult?.last.numCorrect ||
+                        learningResult?.mostRecent.numCorrect ||
                         currentResult?.numCorrect ||
                         0,
                       current: currentResult?.numCorrect || 0,
                     }}
-                    totalWord={currentResult?.totalWord || 0}
+                    totalWord={currentResult?.totalWords || 0}
                   />
                 </Box>
               </Box>
@@ -186,13 +192,13 @@ const LessonLearningResultPage = () => {
           <ListWords
             status={VocabularyCardState.ERROR}
             title="Unfamiliar words"
-            vocabularies={currentResult?.incorrectWord || []}
+            vocabularies={currentResult?.incorrectWords || []}
             sx={{ marginTop: 2 }}
           />
           <ListWords
             status={VocabularyCardState.SUCCESS}
             title="Words you know well"
-            vocabularies={currentResult?.correctWord || []}
+            vocabularies={currentResult?.correctWords || []}
             sx={{ marginTop: 2 }}
           />
         </LessonMainContent>
