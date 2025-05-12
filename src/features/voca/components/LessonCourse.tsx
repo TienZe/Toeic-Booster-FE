@@ -5,13 +5,14 @@ import LessonPopup from "./LessonPopup";
 import { useRef, useState } from "react";
 
 interface LessonCourseProps {
-  id: string; // lesson id
+  id: number; // lesson id
   name: string;
   thumbnail: string;
   totalWords: number;
   retainedWords: number;
   reviewable: boolean;
   vocaSetId?: string;
+  onStartLearning?: () => void;
 }
 
 const LessonCourse: React.FC<LessonCourseProps> = ({
@@ -22,6 +23,7 @@ const LessonCourse: React.FC<LessonCourseProps> = ({
   retainedWords,
   reviewable,
   vocaSetId,
+  onStartLearning,
 }) => {
   const [openPopup, setOpenPopup] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -59,6 +61,7 @@ const LessonCourse: React.FC<LessonCourseProps> = ({
         retainedWords={retainedWords}
         totalWords={totalWords}
         vocaSetId={vocaSetId}
+        onStartLearning={onStartLearning}
       />
     </Stack>
   );

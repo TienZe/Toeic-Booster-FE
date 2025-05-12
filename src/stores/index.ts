@@ -7,10 +7,13 @@ import folderPracticeReducer from "./folderPracticeSlice";
 import seletedScript from "./selectedScript";
 import notedQuestions from "./notedQuestionSlice";
 import globalMessageReducer from "./globalMessageSlice";
-
+import lessonVocaFilteringReducer from "./lessonVocaFilteringSlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
+
+    lessonVocaFiltering: lessonVocaFilteringReducer,
+
     selectedParts: selectedPartsReducer,
     userAnswers: userAnswerReducer,
     folderPractice: folderPracticeReducer,

@@ -6,11 +6,15 @@ export default interface Lesson {
   thumbnail: string | null;
   createdAt: string;
 
-  collectionId: number|null;
+  collectionId: number | null;
 
   numOfWords: number;
   words: LessonVocabulary[];
+
+  learningStep?: LearningStep; // The learning step of the user posted
 }
+
+export type LearningStep = "filtered" | "tested";
 
 export interface LessonWithUserProgress extends Lesson {
   isLearned: boolean;

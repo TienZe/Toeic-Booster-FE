@@ -28,7 +28,10 @@ const FlashCard: React.FC<FlashCardProps> = ({
       spacing={2}
       direction="row"
     >
-      <img src={vocaImage} style={{ width: "238px", height: "238px" }} />
+      <img
+        src={vocaImage}
+        style={{ width: "238px", height: "238px", objectFit: "cover" }}
+      />
       <Box sx={{ flex: 1 }}>{children}</Box>
 
       {onClick && (

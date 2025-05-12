@@ -1,5 +1,5 @@
 import { Box, LinearProgress, Stack, Typography } from "@mui/material";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ArrowIcon from "./ArrowIcon";
 import FlashCardComposition from "./FlashCardComposition";
 import WrongAnswerAudio from "../assets/learning_wrong.mp3";
@@ -18,14 +18,23 @@ import NewWordFolderModal from "./NewFolderModal.tsx";
 import PinWordModalModal from "./PinWordModal.tsx";
 import { getWordThumbnail } from "../../../utils/helper.ts";
 import useLesson from "../../../hooks/useLesson.ts";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../stores/index.ts";
+import { lessonVocaFilteringActions } from "../../../stores/lessonVocaFilteringSlice.ts";
 
 const LearningVocaPage: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
-  const lessonId = searchParams.get("id");
+  const lessonId = Number(searchParams.get("id"));
 
   const [currentVocaIdx, setCurrentVocaIdx] = useState(0);
   const [prevVocaIdx, setPrevVocaIdx] = useState(0);
+
+  const { filteredLessonVocabularies, lessonId: filteredLessonId } =
+    useSelector((state: RootState) => state.lessonVocaFiltering);
+
+  const hasFilteringStep = filteredLessonVocabularies.length > 0;
 
   let direction = "Unchanged";
 
@@ -35,23 +44,17 @@ const LearningVocaPage: React.FC = () => {
     direction = "Left";
   }
 
-  // console.log("direction", direction);
-
   const {
     data: lesson,
     isLoading,
     isSuccess,
-  } = useLesson(
-    lessonId!,
-    {
-      enabled: !!lessonId,
-    },
-    {
-      withWords: 1,
-    },
-  );
+  } = useLesson(lessonId!, {
+    enabled: !!lessonId,
+  });
 
-  const vocabularies = lesson?.words || [];
+  // Construct the vocabularies array used for rendering flash card
+  const vocabularies = filteredLessonVocabularies || [];
+
   const vocaLength = vocabularies.length;
 
   const currentVocaId = vocabularies[currentVocaIdx]?.id;
@@ -101,9 +104,26 @@ const LearningVocaPage: React.FC = () => {
     playWrongAnswerAudio();
   };
 
+  useEffect(() => {
+    console.log("Component is mounted");
+    // Clear the filtered lesson vocabularies when the page is closed
+    return () => {
+      console.log("Component is unmounted");
+      dispatch(lessonVocaFilteringActions.clearFilteredLessonVocabularies());
+    };
+  }, [dispatch]);
+
+  console.log("filteredLessonVocabularies", filteredLessonVocabularies);
+  console.log("lessonId", lessonId);
+  console.log("hasFilteringStep", hasFilteringStep);
+  console.log("filteredLessonId", filteredLessonId);
+
   if (
     isSuccess &&
-    (!lesson?.words || lesson.words.length === 0 || !currentVocaId)
+    (!currentVocaId ||
+      !hasFilteringStep ||
+      !filteredLessonId ||
+      lessonId != filteredLessonId)
   ) {
     let redirectLink = "/";
     if (lesson.collectionId) {

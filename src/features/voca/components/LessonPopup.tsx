@@ -4,12 +4,13 @@ import LessonButton from "./LessonButton";
 import Link from "../../../components/UI/Link";
 
 interface LessonPopupProps extends PopupProps {
-  lessonId: string;
+  lessonId: number;
   lessonName: string;
   retainedWords: number;
   totalWords: number;
   reviewable?: boolean;
   vocaSetId?: string;
+  onStartLearning?: () => void;
 }
 
 const LessonPopup: React.FC<LessonPopupProps> = ({
@@ -24,7 +25,35 @@ const LessonPopup: React.FC<LessonPopupProps> = ({
   totalWords,
   reviewable = false,
   vocaSetId,
+  onStartLearning,
 }) => {
+  const getStartLearningButton = () => {
+    let text = "START LEARNING";
+    if (reviewable) {
+      text = "CONTINUE LEARNING";
+    }
+
+    if (!onStartLearning) {
+      return (
+        <Link to={`/lesson/learn?id=${lessonId}`}>
+          <LessonButton variant="outlined" sx={{ marginTop: "10px" }}>
+            {text}
+          </LessonButton>
+        </Link>
+      );
+    }
+
+    return (
+      <LessonButton
+        variant="outlined"
+        sx={{ marginTop: "10px" }}
+        onClick={onStartLearning}
+      >
+        {text}
+      </LessonButton>
+    );
+  };
+
   return (
     <Popup
       anchorEle={anchorEle}
@@ -65,11 +94,7 @@ const LessonPopup: React.FC<LessonPopupProps> = ({
               </LessonButton>
             </Link>
 
-            <Link to={`/lesson/learn?id=${lessonId}`}>
-              <LessonButton variant="outlined" sx={{ marginTop: "10px" }}>
-                CONTINUE LEARNING
-              </LessonButton>
-            </Link>
+            {getStartLearningButton()}
 
             <Link
               to={`/lesson/learning-result?id=${lessonId}${vocaSetId ? "&vocaSetId=" + vocaSetId : ""}`}
@@ -80,11 +105,7 @@ const LessonPopup: React.FC<LessonPopupProps> = ({
             </Link>
           </>
         ) : (
-          <Link to={`/lesson/learn?id=${lessonId}`}>
-            <LessonButton variant="contained" sx={{ marginTop: "10px" }}>
-              START LEARNING
-            </LessonButton>
-          </Link>
+          getStartLearningButton()
         )}
 
         <Box

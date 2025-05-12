@@ -16,7 +16,7 @@ import { NewUserFolderRequest } from "../types/UserFolderRequest";
 import { toast } from "react-toastify";
 
 interface NewWordFolderModalProps extends CustomModalProps {
-  vocaId?: string;
+  vocaId?: number;
   onCreated?: () => void; // create new folder successfully
 }
 

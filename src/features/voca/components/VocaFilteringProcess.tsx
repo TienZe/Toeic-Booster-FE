@@ -56,25 +56,24 @@ const VocaFilteringProcess: React.FC<VocaFilteringProcessProps> = ({
   });
 
   const handleAnswer = (known: boolean) => {
-    setUserKnowledge((prev) => [
-      ...prev,
+    const newUserKnowledge = [
+      ...userKnowledge,
       {
         alreadyKnown: known,
         lessonVocabularyId: currentLessonVocabularyId,
       },
-    ]);
+    ];
+
+    setUserKnowledge([...newUserKnowledge]);
 
     // handleNext is recreated every time the component re-renders
     // so the currentVocaIdx is the voca index of current render
     setPrevVocaIdx(currentVocaIdx); // needed for animation
 
     if (currentVocaIdx === vocaLength - 1 && lesson) {
-      // Finish filtering
-      console.log("userKnowledge", userKnowledge);
-
       const request: SaveLessonLearningRequest = {
         lessonId: lesson.id,
-        lessonLearnings: userKnowledge,
+        lessonLearnings: newUserKnowledge,
       };
 
       saveLessonLearningMutation.mutate(request);

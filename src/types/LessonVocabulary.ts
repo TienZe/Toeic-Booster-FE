@@ -1,3 +1,4 @@
+import LessonLearning from "./LessonLearning";
 import { VocabularyWordClass } from "./VocabularyModel";
 
 /**
@@ -20,4 +21,6 @@ export interface LessonVocabulary {
   example: string | null;
   exampleMeaning: string | null;
   exampleAudio: string | null;
+
+  userLessonLearning?: LessonLearning | null;
 }

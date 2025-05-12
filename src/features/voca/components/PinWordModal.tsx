@@ -19,7 +19,7 @@ import { toast } from "react-toastify";
 
 interface PinWordModalModalProps extends CustomModalProps {
   onClickNewFolderButton?: () => void;
-  vocaId: string;
+  vocaId: number;
 }
 
 const PinWordModalModal: React.FC<PinWordModalModalProps> = ({

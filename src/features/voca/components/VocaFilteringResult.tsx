@@ -10,6 +10,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getLessonFilteringResult } from "../api/voca-learning";
 import DotLoadingProgress from "../../../components/UI/DotLoadingProgress";
 import Link from "../../../components/UI/Link";
+import VocaChoosingModal from "./VocaChoosingModal";
+import { useState } from "react";
 
 interface VocaFilteringResultProps {
   lessonId: number;
@@ -22,6 +24,8 @@ const VocaFilteringResult: React.FC<VocaFilteringResultProps> = ({
     queryKey: ["lesson-filtering-result", { lessonId: lessonId }],
     queryFn: () => getLessonFilteringResult(lessonId),
   });
+
+  const [openVocaChoosingModal, setOpenVocaChoosingModal] = useState(false);
 
   let percentage = 0;
   if (lessonFilteringResult) {
@@ -167,18 +171,23 @@ const VocaFilteringResult: React.FC<VocaFilteringResultProps> = ({
           alignItems="center"
           sx={{ height: "100px", maxWidth: "962px", mx: "auto" }}
         >
-          <Link to={`/lesson/learn?id=${lessonId}`}>
-            <BoldStrokeButton
-              variant="contained"
-              sx={{
-                width: "254px",
-              }}
-            >
-              START LEARNING
-            </BoldStrokeButton>
-          </Link>
+          <BoldStrokeButton
+            variant="contained"
+            sx={{
+              width: "254px",
+            }}
+            onClick={() => setOpenVocaChoosingModal(true)}
+          >
+            START LEARNING
+          </BoldStrokeButton>
         </Stack>
       </Box>
+
+      <VocaChoosingModal
+        lessonId={lessonId}
+        open={openVocaChoosingModal}
+        onClose={() => setOpenVocaChoosingModal(false)}
+      />
     </Stack>
   );
 };

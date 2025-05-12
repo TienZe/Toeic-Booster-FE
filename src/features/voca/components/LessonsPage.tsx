@@ -20,7 +20,7 @@ import TwoCardIcon from "../assets/course-progress-learned-1.svg";
 import TwoRedCardIcon from "../assets/course-progress-not-learn-1.svg";
 import LessonComment from "./LessonComment";
 import CommentIcon from "../assets/comment-icon.svg";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import LessonCourse from "./LessonCourse";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop";
@@ -35,12 +35,18 @@ import DefaultAvatar from "../../../assets/avatars/default.svg";
 import Lesson, { getLessonThumbnail } from "../../../types/Lesson";
 import { getVocaSetById } from "../../admin/vocasets/api/voca-set-api";
 import useCollectionLessons from "../../../hooks/useCollectionLessons";
+import VocaChoosingModal from "./VocaChoosingModal";
 
 const LessonsPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { vocaSetId } = useParams();
   const [tabIndex, setTabIndex] = useState(0);
   const [openRatingModal, setOpenRatingModal] = useState(false);
+
+  // Lesson whose vocabularies is being filtered
+  const [filteredLessonId, setFilteredLessonId] = useState<number | null>(null);
+  const openVocaChoosingModal = Boolean(filteredLessonId);
 
   const { data: vocaSet, isLoading: isLoadingVocaSet } = useQuery({
     queryKey: ["vocaSet", { id: vocaSetId }],
@@ -52,6 +58,9 @@ const LessonsPage: React.FC = () => {
     vocaSetId!,
     {
       enabled: !!vocaSetId,
+    },
+    {
+      withUserLearningStep: 1,
     },
   );
 
@@ -100,6 +109,24 @@ const LessonsPage: React.FC = () => {
     setTabIndex(newValue);
   };
 
+  const handleStartLearningLesson = (lessonId: number) => {
+    // If the use is not do the filtering step, just go to the filtering vocabulary flow
+    const selectedLesson = lessons?.find((lesson) => lesson.id === lessonId);
+
+    if (!selectedLesson) return;
+
+    if (!selectedLesson.learningStep) {
+      navigate(
+        `/lesson/learning-instruction?id=${lessonId}&name=${selectedLesson.name}&vocaSetId=${vocaSetId}`,
+      );
+    } else if (selectedLesson.learningStep === "filtered") {
+      // Choose words to learn
+      setFilteredLessonId(lessonId);
+    } else if (selectedLesson.learningStep === "tested") {
+      // TODO: Go to the testing flow
+    }
+  };
+
   return (
     <Content>
       {isLoadingVocaSet ? (
@@ -141,10 +168,13 @@ const LessonsPage: React.FC = () => {
                         id={lesson.id}
                         name={lesson.name}
                         thumbnail={getLessonThumbnail(lesson)}
-                        totalWords={10}
+                        totalWords={lesson.numOfWords}
                         retainedWords={10}
-                        reviewable={true}
+                        reviewable={lesson.learningStep === "tested"}
                         vocaSetId={vocaSetId}
+                        onStartLearning={() => {
+                          handleStartLearningLesson(lesson.id);
+                        }}
                       />
                     ))
                   ) : (
@@ -371,6 +401,14 @@ const LessonsPage: React.FC = () => {
               })
             }
           />
+
+          {filteredLessonId && (
+            <VocaChoosingModal
+              lessonId={filteredLessonId}
+              open={openVocaChoosingModal}
+              onClose={() => setFilteredLessonId(null)}
+            />
+          )}
         </Box>
       )}
     </Content>

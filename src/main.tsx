@@ -25,24 +25,22 @@ import AuthInitializer from "./features/auth/components/AuthInitializer.tsx";
 setupAxiosInterceptors(store);
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={theme}>
-        <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            <GoogleOAuthProvider
-              clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
-            >
-              <GlobalMessageContainer>
-                <ToastContainer position="bottom-right" autoClose={4000} />
-                <AuthInitializer>
-                  <RouterProvider router={router} />
-                </AuthInitializer>
-              </GlobalMessageContainer>
-            </GoogleOAuthProvider>
-          </QueryClientProvider>
-        </Provider>
-      </ThemeProvider>
-    </StyledEngineProvider>
-  </StrictMode>,
+  // <StrictMode>
+  <StyledEngineProvider injectFirst>
+    <ThemeProvider theme={theme}>
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+            <GlobalMessageContainer>
+              <ToastContainer position="bottom-right" autoClose={4000} />
+              <AuthInitializer>
+                <RouterProvider router={router} />
+              </AuthInitializer>
+            </GlobalMessageContainer>
+          </GoogleOAuthProvider>
+        </QueryClientProvider>
+      </Provider>
+    </ThemeProvider>
+  </StyledEngineProvider>,
+  // </StrictMode>,
 );

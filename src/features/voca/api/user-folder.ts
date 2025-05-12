@@ -42,7 +42,7 @@ export async function getUserFolderById(id: string) {
   return response.data[0]; // api returns an array that contains the requested folder
 }
 
-export async function pinWordToFolder(folderId: string, vocaId: string) {
+export async function pinWordToFolder(folderId: string, vocaId: number) {
   const response = await axiosClient.post<UserFolder>(
     `user-topic/${folderId}/word/${vocaId}`,
   );
@@ -52,7 +52,7 @@ export async function pinWordToFolder(folderId: string, vocaId: string) {
 
 export async function pinWordToNewFolder(
   request: NewUserFolderRequest,
-  vocaId: string,
+  vocaId: number,
 ) {
   const folder = await createNewFolder(request);
 
