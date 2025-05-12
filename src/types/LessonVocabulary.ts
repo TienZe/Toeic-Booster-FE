@@ -13,8 +13,8 @@ export interface LessonVocabulary {
 
   partOfSpeech: VocabularyWordClass;
   meaning: string;
-  definition: string | null;
-  pronunciation: string | null;
+  definition: string;
+  pronunciation: string;
 
   pronunciationAudio: string | null;
 

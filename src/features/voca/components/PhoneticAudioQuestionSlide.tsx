@@ -33,7 +33,7 @@ const PhoneticAudioQuestionSlide: React.FC<QuestionSlideProps> = ({ voca }) => {
         >
           <AudioIconButton
             iconSize={95}
-            audioUrl={voca.audio}
+            audioUrl={voca.pronunciationAudio}
             audioRef={phoneticAudioRef}
           />
           <Stack

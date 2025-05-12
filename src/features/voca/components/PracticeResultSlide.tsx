@@ -39,7 +39,10 @@ const PracticeResultSlide: React.FC<PracticeResultSlideProps> = ({
   return (
     <PracticeSlideCard>
       <Stack spacing="35px" direction="row">
-        <Image src={thumbnail} sx={{ width: "210px" }} />
+        <Image
+          src={thumbnail}
+          sx={{ width: "210px", height: "210px", objectFit: "cover" }}
+        />
         <Box>
           <Typography
             color="#58CC02"

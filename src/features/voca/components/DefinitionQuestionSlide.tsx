@@ -27,7 +27,7 @@ const DefinitionQuestionSlide: React.FC<QuestionSlideProps> = ({ voca }) => {
               sx={{ fontSize: "24px" }}
               component="span"
             >
-              {`(${vocaWordClassFullName2Abbr(voca.wordClass)})`}
+              {`(${vocaWordClassFullName2Abbr(voca.partOfSpeech)})`}
             </Typography>{" "}
             {voca.definition}
           </Typography>

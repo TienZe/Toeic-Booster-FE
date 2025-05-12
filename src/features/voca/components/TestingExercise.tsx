@@ -14,15 +14,14 @@ import { Image } from "../../../components/UI/Image";
 import RightAnswerGif from "../assets/right-answer.gif";
 import PhoneticAudioQuestionSlide from "./PhoneticAudioQuestionSlide";
 import { motion } from "framer-motion";
-import DefaultVocaThumbnail from "../../../assets/images/voca/default-voca-image.jpg";
-import { strEqualIgnoreCase } from "../../../utils/helper";
+import { getWordThumbnail, strEqualIgnoreCase } from "../../../utils/helper";
 
 interface TestingExerciseProps {
   exercise: Exercise;
   onFulfilled?: () => void; // Trigger when the exercise has been fulfilled (after displaying the result)
   onAnswered?: () => void; // Trigger when the user has answered the question
   onCorrectAnswer?: (
-    correctVocaId: string | number,
+    correctLessonVocabularyId: number,
     type: ExerciseType,
   ) => void;
   onWrongAnswer?: () => void;
@@ -168,7 +167,7 @@ const TestingExercise: React.FC<TestingExerciseProps> = ({
                 audio={mainVoca.pronunciationAudio}
                 meaning={mainVoca.meaning}
                 phonetic={mainVoca.pronunciation}
-                thumbnail={mainVoca.thumbnail || DefaultVocaThumbnail}
+                thumbnail={getWordThumbnail(mainVoca)}
                 playAudio={hasAnswered}
                 audioDelay={500}
               />

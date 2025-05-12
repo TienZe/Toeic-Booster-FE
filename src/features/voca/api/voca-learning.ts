@@ -1,17 +1,10 @@
 import axiosClient from "../../../axios";
 import ApiResponse from "../../../types/ApiResponse";
 import LessonLearning from "../../../types/LessonLearning";
-import { PostLearningResultRequest } from "../types/LearningResultRequest";
 import { LearningResultResponse } from "../types/LearningResultResponse";
+import { PostLessonExamRequest } from "../types/LessonExamRequest";
 import { LessonFilteringResult } from "../types/LessonFilteringResult";
 import { SaveLessonLearningRequest } from "../types/SaveLessonLearningRequest";
-
-// deprecated
-export async function createLearningResult(request: PostLearningResultRequest) {
-  const response = await axiosClient.post("topic-history", request);
-
-  return response.data;
-}
 
 // deprecated
 export async function getLessonLearningResult(lessonId: string) {
@@ -40,4 +33,10 @@ export async function getLessonFilteringResult(lessonId: number) {
   );
 
   return response.data.data;
+}
+
+export async function postLessonExam(request: PostLessonExamRequest) {
+  const response = await axiosClient.post("lesson-exams", request);
+
+  return response.data;
 }

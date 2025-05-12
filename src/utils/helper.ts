@@ -143,7 +143,7 @@ export function getBingImageByKeyword(keyword: string) {
 }
 
 export function getWordThumbnail(voca: VocabularyModel | LessonVocabulary) {
-  return voca.thumbnail || getBingImageByKeyword(voca.word) || VocaDefaultThumbnail;
+  return voca.thumbnail || getBingImageByKeyword(voca.word);
 }
 
 export function strEqualIgnoreCase(str1: string, str2: string) {

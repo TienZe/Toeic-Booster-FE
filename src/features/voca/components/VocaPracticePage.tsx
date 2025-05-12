@@ -10,11 +10,12 @@ import { Exercise } from "../types/Exercise";
 import ClockTimer, { ClockTimerRef } from "./ClockTimer";
 import { AnimatePresence } from "framer-motion";
 import SuspendLearningDrawer from "./SuspendLearningDrawer";
-import { PostLearningResultRequest } from "../types/LearningResultRequest";
 import PracticeProgressBar from "./PracticeProgressBar";
 import AnswerSound from "./AnswerSound";
 import useLesson from "../../../hooks/useLesson";
 import { LessonVocabulary } from "../../../types/LessonVocabulary";
+import { postLessonExam } from "../api/voca-learning";
+import { PostLessonExamRequest } from "../types/LessonExamRequest";
 
 const MIN_NUMBER_OF_EXERCISES = 4;
 const DURATION_PER_EXERCISE = 15; // seconds
@@ -27,7 +28,9 @@ const VocaPracticePage: React.FC = () => {
   const [vocabularies, setVocabularies] = useState<LessonVocabulary[]>([]);
   // console.log("vocabularies", vocabularies);
 
-  const [correctVocaIds, setCorrectVocaIds] = useState<string[]>([]);
+  const [correctLessonVocaIds, setCorrectLessonVocaIds] = useState<number[]>(
+    [],
+  );
   const [takenTime, setTakenTime] = useState(0);
 
   const [openExitDrawer, setOpenExitDrawer] = useState(false);
@@ -65,10 +68,10 @@ const VocaPracticePage: React.FC = () => {
 
   const clockTimerRef = useRef<ClockTimerRef>(null);
 
-  const postLearningResultMutation = useMutation({
-    mutationFn: createLearningResult,
+  const postLessonExamMutation = useMutation({
+    mutationFn: postLessonExam,
     onSuccess: () => {
-      console.log("Post learning result successfully");
+      console.log("Post lesson exam successfully");
       navigate(
         `/lesson/learning-result?id=${lessonId}&vocaSetId=${lesson?.collectionId}`,
       );
@@ -87,8 +90,8 @@ const VocaPracticePage: React.FC = () => {
     });
   };
 
-  const handleCorrectAnswer = async (correctVocaId: string) => {
-    setCorrectVocaIds((prev) => [...prev, correctVocaId]);
+  const handleCorrectAnswer = async (correctLessonVocabularyId: number) => {
+    setCorrectLessonVocaIds((prev) => [...prev, correctLessonVocabularyId]);
     await playCorrectAnswerAudio();
   };
 
@@ -96,17 +99,18 @@ const VocaPracticePage: React.FC = () => {
     playWrongAnswerAudio();
   };
 
-  const postLearningResult = useCallback(() => {
-    const listCorrectWord = new Set<string>();
-    const listIncorrectWord = new Set<string>();
+  const postPracticeResult = useCallback(() => {
+    const listCorrectWord = new Set<number>();
+    const listIncorrectWord = new Set<number>();
 
     for (const {
       voca: { id },
     } of exercises) {
       // As each voca has been repeated 2 * `repeatTimes` times
-      // So, a voca is considered correct if it is answered correctly `repeatTimes` times
+      // So, a voca is considered correct if it is answered correctly 2 * repeatTimes times
       if (
-        correctVocaIds.filter((vocaId) => vocaId === id).length ==
+        correctLessonVocaIds.filter((lessonVocaId) => lessonVocaId === id)
+          .length ===
         2 * repeatTimes
       ) {
         listCorrectWord.add(id);
@@ -115,21 +119,25 @@ const VocaPracticePage: React.FC = () => {
       }
     }
 
-    const request: PostLearningResultRequest = {
-      idTopic: lessonId!,
-      listCorrectWord: [...listCorrectWord],
-      listIncorrectWord: [...listIncorrectWord],
-      time: takenTime,
+    const request: PostLessonExamRequest = {
+      lessonId: Number(lessonId),
+      duration: takenTime,
+      answers: [...listCorrectWord, ...listIncorrectWord].map(
+        (lessonVocaId) => ({
+          lessonVocabularyId: lessonVocaId,
+          isCorrect: correctLessonVocaIds.includes(lessonVocaId),
+        }),
+      ),
     };
 
     console.log(request);
 
-    // postLearningResultMutation.mutate(request);
+    postLessonExamMutation.mutate(request);
   }, [
     exercises,
-    correctVocaIds,
+    correctLessonVocaIds,
     lessonId,
-    postLearningResultMutation,
+    postLessonExamMutation,
     repeatTimes,
     takenTime,
   ]);
@@ -144,11 +152,11 @@ const VocaPracticePage: React.FC = () => {
     // The callback is re-defined in each time `exerciseIdx` changes, so the `exerciseIdx` is always the latest
     if (exercises.length > 0 && exerciseIdx + 1 >= exercises.length) {
       // Finish lesson
-      postLearningResult();
+      postPracticeResult();
     } else {
       setExerciseIdx((prev) => prev + 1);
     }
-  }, [exercises.length, exerciseIdx, postLearningResult]);
+  }, [exercises.length, exerciseIdx, postPracticeResult]);
 
   const handleAnswerExercise = useCallback(() => {
     const remainingTime = clockTimerRef.current?.stop() || 0;
@@ -167,7 +175,7 @@ const VocaPracticePage: React.FC = () => {
         <CustomBackdrop open={isLoading} />
       ) : (
         <Box sx={{ maxWidth: "962px", mx: "auto", padding: "30px 15px" }}>
-          {postLearningResultMutation.isPending && <CustomBackdrop open />}
+          {/* {postLearningResultMutation.isPending && <CustomBackdrop open />} */}
           {/* Header */}
           <Stack direction="row" spacing={0.5} alignItems="center">
             {/* Close button */}
