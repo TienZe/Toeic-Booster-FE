@@ -15,7 +15,7 @@ import { updateFolderDetails } from "../api/user-folder";
 import { toast } from "react-toastify";
 
 interface UpdateFolderModalProps extends CustomModalProps {
-  id: number;
+  folderId: number;
   initialName: string;
   initialDescription: string;
 
@@ -30,7 +30,7 @@ interface UpdateFolderFormData {
 const UpdateFolderModal: React.FC<UpdateFolderModalProps> = ({
   open,
   onClose,
-  id,
+  folderId,
   initialName,
   initialDescription,
   onUpdated,
@@ -51,7 +51,7 @@ const UpdateFolderModal: React.FC<UpdateFolderModalProps> = ({
       updateFolderDetails({
         name: request.name,
         description: request.description,
-        id,
+        folderId,
       }),
     onSuccess: () => {
       toast.success("Save successfully");

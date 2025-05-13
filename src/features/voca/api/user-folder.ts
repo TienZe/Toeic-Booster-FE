@@ -34,19 +34,21 @@ export async function getUserFolderById(folderId: number) {
 }
 
 export async function updateFolderDetails(request: UpdateFolderRequest) {
-  const { id, ...data } = request;
-  const response = await axiosClient.patch<UserFolder>(
-    "user-topic/" + id,
+  const { folderId, ...data } = request;
+  const response = await axiosClient.put<ApiResponse<UserFolder>>(
+    "word-folders/" + folderId,
     data,
   );
 
-  return response.data;
+  return response.data.data;
 }
 
-export async function deleteUserFolder(id: string) {
-  const response = await axiosClient.delete<UserFolder>("user-topic/" + id);
+export async function deleteUserFolder(folderId: number) {
+  const response = await axiosClient.delete<ApiResponse<unknown>>(
+    "word-folders/" + folderId,
+  );
 
-  return response.data;
+  return response.data.data;
 }
 
 export async function pinWordToFolder(folderId: string, vocaId: number) {

@@ -4,7 +4,7 @@ export interface NewUserFolderRequest {
 }
 
 export interface UpdateFolderRequest {
-  id: string;
+  folderId: number;
   name: string;
   description: string;
 }

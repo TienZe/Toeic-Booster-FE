@@ -76,7 +76,7 @@ const PersonalWordFolderPage = () => {
                 <Folder
                   id={folder.id}
                   name={folder.name}
-                  pinnedWords={folder?.words?.length || 0}
+                  pinnedWords={folder?.numOfWords || 0}
                   thumbnail={folder?.words?.[0]?.thumbnail}
                 />
               ))

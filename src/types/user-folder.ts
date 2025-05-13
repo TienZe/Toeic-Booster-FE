@@ -5,6 +5,7 @@ export interface UserFolder {
   name: string;
   description: string | null;
   createdAt: string;
+  numOfWords: number;
 
   words?: LessonVocabulary[];
 }

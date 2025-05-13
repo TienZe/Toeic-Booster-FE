@@ -9,13 +9,12 @@ import {
 import Content from "../../../components/layout/Content";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { pinNewWordToExistingFolder } from "../api/user-folder";
 import { Edit } from "@mui/icons-material";
 import ListWords from "./ListWords";
 import { VocabularyCardState } from "../../../components/VocabularyCard";
 import Link from "../../../components/UI/Link";
 import UpdateFolderModal from "./UpdateFolderModal";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import BoldStrokeButton from "./BoldStrokeButton";
 import VocaSearching from "./VocaSearching";
 import { toast } from "react-toastify";
@@ -48,31 +47,35 @@ const FolderDetailsPage = () => {
   );
   const [editedVocaId, setEditedVocaId] = useState<number | null>(null);
 
-  const pinNewWordMutation = useMutation({
-    mutationFn: pinNewWordToExistingFolder,
-    onSuccess: () => {
-      toast.success("Pin new word successfully!");
-      queryClient.invalidateQueries({
-        queryKey: ["userFolders", { id: folderId }],
-      });
-    },
-    onError: () => {
-      toast.error("Pin new word failed!");
-    },
-    onSettled: () => {
-      pinNewWordMutation.reset();
-    },
-  });
+  // const pinNewWordMutation = useMutation({
+  //   mutationFn: pinNewWordToExistingFolder,
+  //   onSuccess: () => {
+  //     toast.success("Pin new word successfully!");
+  //     queryClient.invalidateQueries({
+  //       queryKey: ["userFolders", { id: folderId }],
+  //     });
+  //   },
+  //   onError: () => {
+  //     toast.error("Pin new word failed!");
+  //   },
+  //   onSettled: () => {
+  //     pinNewWordMutation.reset();
+  //   },
+  // });
+
+  const invalidateFolderDetails = useCallback(() => {
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        const [key, params] = query.queryKey as [string, { id: string }];
+        return key == "lesson" && params.id == folderId;
+      },
+    });
+  }, [queryClient, folderId]);
 
   const attachSystemWordsMutation = useMutation({
     mutationFn: attachNewWordsToLesson,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          const [key, params] = query.queryKey as [string, { id: string }];
-          return key == "lesson" && params.id == folderId;
-        },
-      });
+      invalidateFolderDetails();
     },
     onSettled: () => {
       attachSystemWordsMutation.reset();
@@ -83,13 +86,7 @@ const FolderDetailsPage = () => {
     mutationFn: removeLessonVocabularyById,
     onSuccess: () => {
       toast.success("Delete word successfully!");
-
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          const [key, params] = query.queryKey as [string, { id: string }];
-          return key == "lesson" && params.id == folderId;
-        },
-      });
+      invalidateFolderDetails();
     },
     onSettled: () => {
       // reset state
@@ -245,14 +242,10 @@ const FolderDetailsPage = () => {
         <UpdateFolderModal
           open={openUpdateModal}
           onClose={() => setOpenUpdateModal(false)}
-          id={folder.id}
+          folderId={folder.id}
           initialName={folder.name}
           initialDescription={folder.description || ""}
-          onUpdated={() =>
-            queryClient.invalidateQueries({
-              queryKey: ["userFolders", { id: folderId }],
-            })
-          }
+          onUpdated={() => invalidateFolderDetails()}
         />
       )}
 

@@ -10,7 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 interface LessonPopupProps extends PopupProps {
-  folderId: string;
+  folderId: number;
   folderName: string;
   pinnedWords: number;
 }
