@@ -29,7 +29,7 @@ import { UserProgress } from "../types/UserProgress";
 import VocaSetRatingModal from "./VocaSetRatingModal";
 import { format } from "date-fns";
 import DefaultAvatar from "../../../assets/avatars/default.svg";
-import Lesson, { getLessonThumbnail } from "../../../types/Lesson";
+import { getLessonThumbnail } from "../../../types/Lesson";
 import { getVocaSetById } from "../../admin/vocasets/api/voca-set-api";
 import useCollectionLessons from "../../../hooks/useCollectionLessons";
 import VocaChoosingModal from "./VocaChoosingModal";
@@ -57,7 +57,7 @@ const LessonsPage: React.FC = () => {
       enabled: !!vocaSetId,
     },
     {
-      withUserLearningStep: 1,
+      withUserLearningProgress: 1,
     },
   );
 
@@ -68,31 +68,31 @@ const LessonsPage: React.FC = () => {
   });
 
   const userProgress: UserProgress = useMemo(() => {
-    // const lessons = vocaSet?.topics || [];
-    const lessons: Lesson[] = [];
+    if (!lessons) {
+      return {
+        learnedLessons: 0,
+        unlearnedLessons: 0,
+        retainedWords: 0,
+        newWords: 0,
+      };
+    }
 
-    // const totalWords = lessons.reduce(
-    //   (acc, lesson) => acc + lesson.listWord.length,
-    //   0,
-    // );
+    const totalWords = lessons.reduce(
+      (acc, lesson) => acc + lesson.numOfWords,
+      0,
+    );
 
-    const totalWords = 10;
+    const retainedWords = lessons.reduce(
+      (acc, lesson) => acc + (lesson.retainedWords || 0),
+      0,
+    );
 
-    // const retainedWords = lessons.reduce(
-    //   (acc, lesson) => acc + lesson.retainedWord,
-    //   0,
-    // );
-
-    const retainedWords = 10;
-
-    // const learnedLessons = lessons.reduce((acc, lesson) => {
-    //   if (lesson.isLearned) {
-    //     return acc + 1;
-    //   }
-    //   return acc;
-    // }, 0);
-
-    const learnedLessons = 10;
+    const learnedLessons = lessons.reduce((acc, lesson) => {
+      if (lesson.learningStep) {
+        return acc + 1;
+      }
+      return acc;
+    }, 0);
 
     return {
       learnedLessons,
@@ -100,7 +100,7 @@ const LessonsPage: React.FC = () => {
       retainedWords,
       newWords: totalWords - retainedWords,
     };
-  }, [vocaSet?.topics]);
+  }, [lessons]);
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);

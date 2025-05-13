@@ -125,7 +125,7 @@ const VocaPracticePage: React.FC = () => {
       answers: [...listCorrectWord, ...listIncorrectWord].map(
         (lessonVocaId) => ({
           lessonVocabularyId: lessonVocaId,
-          isCorrect: correctLessonVocaIds.includes(lessonVocaId),
+          isCorrect: listCorrectWord.has(lessonVocaId),
         }),
       ),
     };

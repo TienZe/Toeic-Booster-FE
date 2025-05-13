@@ -11,7 +11,8 @@ export default interface Lesson {
   numOfWords: number;
   words: LessonVocabulary[];
 
-  learningStep?: LearningStep; // The learning step of the user posted
+  learningStep?: LearningStep; // The learning step of the posted user
+  retainedWords?: number; // The number of retained words of the posted user in the lesson
 }
 
 export type LearningStep = "filtered" | "examined";

@@ -94,7 +94,7 @@ const VocabularyFrontSide: React.FC<VocabularyFrontSideProps> = ({
         variant="inherit"
         sx={{
           marginTop: "12px",
-          fontSize: "18px",
+          fontSize: "16px",
           lineHeight: "22px",
           fontWeight: 500,
         }}

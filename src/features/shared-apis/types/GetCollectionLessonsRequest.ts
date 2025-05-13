@@ -1,3 +1,3 @@
 export interface GetCollectionLessonsRequest {
-  withUserLearningStep?: number;
+  withUserLearningProgress?: number;
 }

@@ -1,6 +1,6 @@
 export interface NewUserFolderRequest {
   name: string;
-  description: string;
+  description: string | null;
 }
 
 export interface UpdateFolderRequest {
