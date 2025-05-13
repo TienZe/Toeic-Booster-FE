@@ -14,7 +14,11 @@ import { Image } from "../../../components/UI/Image";
 import RightAnswerGif from "../assets/right-answer.gif";
 import PhoneticAudioQuestionSlide from "./PhoneticAudioQuestionSlide";
 import { motion } from "framer-motion";
-import { getWordThumbnail, strEqualIgnoreCase } from "../../../utils/helper";
+import {
+  getWordThumbnail,
+  strEqualIgnoreCase,
+  vocaWordClassFullName2Abbr,
+} from "../../../utils/helper";
 
 interface TestingExerciseProps {
   exercise: Exercise;
@@ -170,6 +174,7 @@ const TestingExercise: React.FC<TestingExerciseProps> = ({
                 thumbnail={getWordThumbnail(mainVoca)}
                 playAudio={hasAnswered}
                 audioDelay={500}
+                partOfSpeech={vocaWordClassFullName2Abbr(mainVoca.partOfSpeech)}
               />
             }
             flip={hasAnswered}

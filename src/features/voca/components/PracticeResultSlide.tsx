@@ -12,6 +12,7 @@ interface PracticeResultSlideProps {
   thumbnail: string;
   playAudio?: boolean;
   audioDelay?: number;
+  partOfSpeech?: string;
 }
 const PracticeResultSlide: React.FC<PracticeResultSlideProps> = ({
   word,
@@ -21,6 +22,7 @@ const PracticeResultSlide: React.FC<PracticeResultSlideProps> = ({
   thumbnail,
   playAudio = false,
   audioDelay = 0,
+  partOfSpeech = "n",
 }) => {
   const phoneticAudioRef = useRef<HTMLAudioElement>(null);
 
@@ -52,7 +54,7 @@ const PracticeResultSlide: React.FC<PracticeResultSlideProps> = ({
             {word}
             <Typography component="span" color="#B4B4B4" sx={{ fontSize: 20 }}>
               {" "}
-              {`(n)`}
+              {`(${partOfSpeech})`}
             </Typography>
           </Typography>
           <Stack
