@@ -16,7 +16,7 @@ import { NewUserFolderRequest } from "../types/UserFolderRequest";
 import { toast } from "react-toastify";
 
 interface NewWordFolderModalProps extends CustomModalProps {
-  vocaId?: number;
+  lessonVocabularyId?: number;
   onCreated?: () => void; // create new folder successfully
 }
 
@@ -28,7 +28,7 @@ interface NewWordFolderFormData {
 const NewWordFolderModal: React.FC<NewWordFolderModalProps> = ({
   open,
   onClose,
-  vocaId,
+  lessonVocabularyId,
   onCreated,
 }) => {
   const {
@@ -53,7 +53,7 @@ const NewWordFolderModal: React.FC<NewWordFolderModalProps> = ({
 
   const pinWordToNewFolderMutation = useMutation({
     mutationFn: (newFolderRequest: NewUserFolderRequest) =>
-      pinWordToNewFolder(newFolderRequest, vocaId!),
+      pinWordToNewFolder(newFolderRequest, lessonVocabularyId!),
     onSuccess: () => {
       onClose();
       toast.success("Word has been pinned");
@@ -66,7 +66,7 @@ const NewWordFolderModal: React.FC<NewWordFolderModalProps> = ({
       description: data.description,
     };
 
-    if (vocaId) {
+    if (lessonVocabularyId) {
       pinWordToNewFolderMutation.mutate(request);
     } else {
       newFolderMutation.mutate(request);
@@ -77,9 +77,6 @@ const NewWordFolderModal: React.FC<NewWordFolderModalProps> = ({
       open={open}
       onClose={onClose}
       containerSx={{
-        // top: 20,
-        // left: "50%",
-        // transform: "translateX(-50%)",
         borderRadius: "8px",
       }}
     >

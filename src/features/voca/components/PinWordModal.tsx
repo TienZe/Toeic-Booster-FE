@@ -13,20 +13,21 @@ import BoldStrokeButton from "./BoldStrokeButton";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import FolderSelectItem from "./FolderSelectItem";
 import { AddCircle } from "@mui/icons-material";
-import { getUserFolders, pinWordToFolder } from "../api/user-folder";
+import { getUserFolders } from "../api/user-folder";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { attachNewWordsToLesson } from "../../shared-apis/lesson-vocabulary-api";
 
 interface PinWordModalModalProps extends CustomModalProps {
   onClickNewFolderButton?: () => void;
-  vocaId: number;
+  lessonVocabularyId: number;
 }
 
 const PinWordModalModal: React.FC<PinWordModalModalProps> = ({
   open,
   onClose,
   onClickNewFolderButton,
-  vocaId,
+  lessonVocabularyId,
 }) => {
   const { data: folders } = useQuery({
     queryKey: ["userFolders"],
@@ -35,19 +36,19 @@ const PinWordModalModal: React.FC<PinWordModalModalProps> = ({
 
   const [validateError, setValidateError] = useState<string | null>(null);
 
-  const pinWordMutation = useMutation({
-    mutationFn: (folderId: string) => pinWordToFolder(folderId, vocaId),
+  const attachSystemWordsMutation = useMutation({
+    mutationFn: attachNewWordsToLesson,
     onSuccess: () => {
       onClose();
       toast.success("Word has been pinned");
     },
     onError: (error: { message: string }) => {
       setValidateError(error.message);
-      pinWordMutation.reset();
+      attachSystemWordsMutation.reset();
     },
   });
 
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
 
   const handlePinWord = () => {
     if (!selectedFolderId) {
@@ -55,7 +56,10 @@ const PinWordModalModal: React.FC<PinWordModalModalProps> = ({
       return;
     }
 
-    pinWordMutation.mutate(selectedFolderId);
+    attachSystemWordsMutation.mutate({
+      lessonId: selectedFolderId,
+      wordIds: [lessonVocabularyId],
+    });
   };
 
   return (
@@ -63,9 +67,6 @@ const PinWordModalModal: React.FC<PinWordModalModalProps> = ({
       open={open}
       onClose={onClose}
       containerSx={{
-        // top: 20,
-        // left: "50%",
-        // transform: "translateX(-50%)",
         borderRadius: "8px",
       }}
     >
@@ -98,7 +99,7 @@ const PinWordModalModal: React.FC<PinWordModalModalProps> = ({
               <FolderSelectItem
                 key={folder.id}
                 name={folder.name}
-                totalWords={folder.words.length}
+                totalWords={folder.numOfWords}
                 onSelect={() => setSelectedFolderId(folder.id)}
                 selected={folder.id === selectedFolderId}
               />
@@ -134,10 +135,14 @@ const PinWordModalModal: React.FC<PinWordModalModalProps> = ({
               marginLeft: "auto",
               borderBottomWidth: "4px",
             }}
-            disabled={pinWordMutation.isPending}
+            disabled={attachSystemWordsMutation.isPending}
             onClick={handlePinWord}
           >
-            {pinWordMutation.isPending ? <CircularProgress size={20} /> : "Pin"}
+            {attachSystemWordsMutation.isPending ? (
+              <CircularProgress size={20} />
+            ) : (
+              "Pin"
+            )}
           </BoldStrokeButton>
         </Box>
       </Box>

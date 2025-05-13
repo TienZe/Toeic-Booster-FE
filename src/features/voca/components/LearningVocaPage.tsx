@@ -28,7 +28,7 @@ const LearningVocaPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const lessonId = Number(searchParams.get("id"));
 
-  const [currentVocaIdx, setCurrentVocaIdx] = useState(0);
+  const [currentVocaIdx, setCurrentVocaIdx] = useState(0); // current lesson vocabulary index
   const [prevVocaIdx, setPrevVocaIdx] = useState(0);
 
   const { filteredLessonVocabularies, lessonId: filteredLessonId } =
@@ -267,7 +267,7 @@ const LearningVocaPage: React.FC = () => {
         <NewWordFolderModal
           open
           onClose={() => setPinModal("")}
-          vocaId={currentVocaId}
+          lessonVocabularyId={currentVocaId}
         />
       )}
       {pinModal === "pinToFolder" && (
@@ -275,7 +275,7 @@ const LearningVocaPage: React.FC = () => {
           open
           onClose={() => setPinModal("")}
           onClickNewFolderButton={() => setPinModal("newFolder")}
-          vocaId={currentVocaId}
+          lessonVocabularyId={currentVocaId}
         />
       )}
 

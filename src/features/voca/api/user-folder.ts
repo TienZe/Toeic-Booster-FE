@@ -2,6 +2,7 @@ import axiosClient from "../../../axios";
 import ApiResponse from "../../../types/ApiResponse";
 import { UserFolder } from "../../../types/user-folder";
 import VocabularyModel from "../../../types/VocabularyModel";
+import { attachNewWordsToLesson } from "../../shared-apis/lesson-vocabulary-api";
 import PinNewWordToExistingFolderRequest from "../types/PinNewWordToExistingFolderRequest";
 import {
   NewUserFolderRequest,
@@ -51,21 +52,16 @@ export async function deleteUserFolder(folderId: number) {
   return response.data.data;
 }
 
-export async function pinWordToFolder(folderId: string, vocaId: number) {
-  const response = await axiosClient.post<UserFolder>(
-    `user-topic/${folderId}/word/${vocaId}`,
-  );
-
-  return response.data;
-}
-
 export async function pinWordToNewFolder(
   request: NewUserFolderRequest,
   vocaId: number,
 ) {
   const folder = await createNewFolder(request);
 
-  const updatedFolder = await pinWordToFolder(folder.id, vocaId);
+  const updatedFolder = await attachNewWordsToLesson({
+    lessonId: folder.id,
+    wordIds: [vocaId],
+  });
 
   return updatedFolder;
 }
