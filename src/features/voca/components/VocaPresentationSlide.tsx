@@ -26,7 +26,11 @@ const VocaPresentationSlide: React.FC<VocaPresentationSlideProps> = ({
         {voca.word}
       </Typography>
       <Stack direction="row" spacing={1} alignItems="center">
-        <AudioIconButton iconSize={60} audioUrl={voca.pronunciationAudio} />
+        <AudioIconButton
+          iconSize={60}
+          audioUrl={voca.pronunciationAudio}
+          script={voca.word}
+        />
         <Typography component="span" color="#777777" sx={{ fontSize: "24px" }}>
           {voca.pronunciation}
         </Typography>

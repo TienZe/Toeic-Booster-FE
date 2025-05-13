@@ -59,6 +59,7 @@ const Slide3: React.FC<Slide3> = ({ onClick, voca, phoneticAudioRef }) => {
           iconSize={41}
           audioUrl={voca.phoneticAudio}
           audioRef={phoneticAudioRef}
+          script={voca.word}
         />
         <Typography component="span" color="#777777" sx={{ fontSize: "20px" }}>
           {voca.phonetic}
@@ -70,7 +71,11 @@ const Slide3: React.FC<Slide3> = ({ onClick, voca, phoneticAudioRef }) => {
         alignItems="start"
         sx={{ marginTop: "20px" }}
       >
-        <AudioIconButton iconSize={41} audioUrl={voca.exampleAudio} />
+        <AudioIconButton
+          iconSize={41}
+          audioUrl={voca.exampleAudio}
+          script={voca.example}
+        />
         <div
           style={{ marginTop: "-5px", marginRight: "115px", overflowY: "auto" }}
         >

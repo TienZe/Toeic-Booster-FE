@@ -127,9 +127,17 @@ const VocaFilteringProcess: React.FC<VocaFilteringProcessProps> = ({
               }
             }
 
+            const isPresented = idx === currentVocaIdx;
+
             return (
               <Box
-                sx={{ position: "absolute", top: 0, left: 0, width: "100%" }}
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  zIndex: isPresented ? 2 : 0,
+                }}
               >
                 <FlashCardAnimationWrapper
                   key={voca.id + (animate || "")}

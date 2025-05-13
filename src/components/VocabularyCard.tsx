@@ -2,7 +2,8 @@ import VocabularyFrontSide from "./VocabularyFrontSide";
 import VocabularyCardWrapper from "./VocabularyCardWrapper";
 import VocabularyBackSide from "./VocabularyBackSide";
 import { Box } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import TtsAudio, { TtsAudioRef } from "./UI/TtsAudio";
 
 interface VocabularyCardProps {
   word: string;
@@ -35,17 +36,15 @@ const VocabularyCard: React.FC<VocabularyCardProps> = ({
 }) => {
   const [flip, setFlip] = useState(false);
 
+  const ttsAudioRef = useRef<TtsAudioRef>();
+
   useEffect(() => {
-    let audioElement: HTMLAudioElement;
     if (flip) {
-      audioElement = new Audio(audio);
-      audioElement.play();
+      ttsAudioRef.current?.play();
     }
 
     return () => {
-      if (audioElement) {
-        audioElement.pause();
-      }
+      ttsAudioRef.current?.pause();
     };
   }, [flip, audio]);
   return (
@@ -87,6 +86,8 @@ const VocabularyCard: React.FC<VocabularyCardProps> = ({
           <VocabularyBackSide type={type} meaning={meaning} />
         </VocabularyCardWrapper>
       </Box>
+
+      <TtsAudio audioUrl={audio} script={word} audioRef={ttsAudioRef} />
     </Box>
   );
 };

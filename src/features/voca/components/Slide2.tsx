@@ -22,7 +22,11 @@ const Slide2: React.FC<Slide2> = ({ onClick, voca }) => {
         {voca.meaning}
       </Typography>
       <Stack direction="row" spacing={1} alignItems="center">
-        <AudioIconButton iconSize={60} audioUrl={voca.phoneticAudio} />
+        <AudioIconButton
+          iconSize={60}
+          audioUrl={voca.phoneticAudio}
+          script={voca.word}
+        />
         <Typography component="span" color="#777777" sx={{ fontSize: "24px" }}>
           {voca.phonetic}
         </Typography>

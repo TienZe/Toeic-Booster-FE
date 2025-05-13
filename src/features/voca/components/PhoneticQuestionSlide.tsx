@@ -20,7 +20,7 @@ const PhoneticQuestionSlide: React.FC<QuestionSlideProps> = ({ voca }) => {
           <AudioIconButton
             iconSize={95}
             audioUrl={voca.pronunciationAudio}
-            // audioRef={phoneticAudioRef}
+            script={voca.word}
           />
           <Typography
             component="span"

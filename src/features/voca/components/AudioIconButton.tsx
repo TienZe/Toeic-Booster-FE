@@ -3,22 +3,24 @@ import AudioIcon from "../assets/audio-icon.svg";
 import AudioPlayGif from "../assets/audio-active.gif";
 import { useImperativeHandle, useRef, useState } from "react";
 import AudioRef from "../types/AudioRef";
+import TtsAudio, { TtsAudioRef } from "../../../components/UI/TtsAudio";
 
 interface AudioIconButtonProps extends IconButtonProps {
   iconSize: number;
-  audioUrl?: string;
+  audioUrl?: string | null;
+  script?: string | null;
   onClick?: () => void;
   audioRef?: React.RefObject<AudioRef>;
 }
 
 const AudioIconButton: React.FC<AudioIconButtonProps> = (props) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<TtsAudioRef>(null);
 
   useImperativeHandle(props.audioRef, () => ({
-    play: () => {
+    play: async () => {
       setIsPlaying(true);
-      audioRef.current?.play();
+      await audioRef.current?.play();
     },
   }));
 
@@ -48,11 +50,11 @@ const AudioIconButton: React.FC<AudioIconButtonProps> = (props) => {
         src={isPlaying ? AudioPlayGif : AudioIcon}
         style={{ width: props.iconSize, height: props.iconSize }}
       />
-      <audio
-        ref={audioRef}
-        src={props.audioUrl}
+      <TtsAudio
+        audioUrl={props.audioUrl}
+        audioRef={audioRef}
+        script={props.script}
         onEnded={handleAudioEnd}
-        style={{ display: "none" }}
       />
     </IconButton>
   );

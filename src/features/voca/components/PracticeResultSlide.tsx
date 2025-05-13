@@ -6,7 +6,7 @@ import React, { useEffect, useRef } from "react";
 
 interface PracticeResultSlideProps {
   word: string;
-  audio: string;
+  audio: string | null;
   phonetic: string;
   meaning: string;
   thumbnail: string;
@@ -66,6 +66,7 @@ const PracticeResultSlide: React.FC<PracticeResultSlideProps> = ({
             <AudioIconButton
               iconSize={41}
               audioUrl={audio}
+              script={word}
               audioRef={phoneticAudioRef}
             />
             <Typography
