@@ -8,7 +8,12 @@ import TimeResultSvg from "../assets/time-result.svg";
 import ResultHistoryBarChart from "./ResultHistoryBarChart";
 import { VocabularyCardState } from "../../../components/VocabularyCard";
 import { useQuery } from "@tanstack/react-query";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Navigate,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { getLessonPracticeStatistics } from "../api/voca-learning";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop";
 import ListWords from "./ListWords";
@@ -18,11 +23,15 @@ const PIE_COLORS = ["#32CD32", "#E5E5E5"]; // Green and Grey
 
 const LessonLearningResultPage = () => {
   const navigate = useNavigate();
+  const { folderId } = useParams();
   const [searchParams] = useSearchParams();
-  const lessonId = searchParams.get("id");
-  const vocaSetId = searchParams.get("vocaSetId");
+  const lessonId = searchParams.get("id") ?? folderId;
 
-  const { data: learningResult, isLoading } = useQuery({
+  const {
+    data: learningResult,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["lesson-learning-result", { lessonId: lessonId }],
     queryFn: () => getLessonPracticeStatistics(lessonId!),
     enabled: !!lessonId,
@@ -52,8 +61,22 @@ const LessonLearningResultPage = () => {
       ]
     : [];
 
+  const handleExitPage = () => {
+    if (lesson?.collectionId) {
+      navigate(`/voca/${lesson.collectionId}/lessons`);
+    } else if (folderId) {
+      navigate(`/personal-word-folder/${folderId}`);
+    } else {
+      navigate("/");
+    }
+  };
+
   if (!lessonId) {
     return <Navigate to="/" />;
+  }
+
+  if (isError) {
+    handleExitPage();
   }
 
   return (
@@ -64,9 +87,7 @@ const LessonLearningResultPage = () => {
           title="result"
           lessonName={lessonName}
           containerSx={{ maxWidth: "1070px" }}
-          onExit={() =>
-            navigate(vocaSetId ? `/voca/${vocaSetId}/lessons` : "/")
-          }
+          onExit={handleExitPage}
         />
         <LessonMainContent sx={{ py: "50px", maxWidth: "1070px" }}>
           <Typography variant="h4" sx={{ fontSize: "30px" }}>

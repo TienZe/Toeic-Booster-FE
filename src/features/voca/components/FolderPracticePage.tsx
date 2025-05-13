@@ -1,22 +1,20 @@
 import { Clear } from "@mui/icons-material";
 import { Box, IconButton, Stack } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { getExerciseSet } from "../utils/exercise-helper";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop";
-import VocabularyModel from "../../../types/VocabularyModel";
 import TestingExercise from "./TestingExercise";
 import { Exercise } from "../types/Exercise";
 import ClockTimer, { ClockTimerRef } from "./ClockTimer";
 import { AnimatePresence } from "framer-motion";
 import SuspendLearningDrawer from "./SuspendLearningDrawer";
-import { getUserFolderById } from "../api/user-folder";
 import PracticeProgressBar from "./PracticeProgressBar";
 import AnswerSound from "./AnswerSound";
-import { useDispatch } from "react-redux";
-import { folderPracticeActions } from "../../../stores/folderPracticeSlice";
-import { UserFolder } from "../../../types/user-folder";
+import useLesson from "../../../hooks/useLesson";
+import { PostLessonExamRequest } from "../types/LessonExamRequest";
+import { postLessonExam } from "../api/voca-learning";
 
 const MIN_NUMBER_OF_EXERCISES = 4;
 const DURATION_PER_EXERCISE = 15; // seconds
@@ -24,23 +22,25 @@ const DURATION_PER_EXERCISE = 15; // seconds
 const FolderPracticePage: React.FC = () => {
   const navigate = useNavigate();
   const { folderId } = useParams();
-  const dispatch = useDispatch();
 
-  const [vocabularies, setVocabularies] = useState<VocabularyModel[]>([]);
-  // console.log("vocabularies", vocabularies);
-
-  const [correctVocaIds, setCorrectVocaIds] = useState<string[]>([]);
+  const [correctLessonVocaIds, setCorrectLessonVocaIds] = useState<number[]>(
+    [],
+  );
   const [takenTime, setTakenTime] = useState(0);
 
   const [openExitDrawer, setOpenExitDrawer] = useState(false);
 
-  const { data: folder, isLoading } = useQuery({
-    queryKey: ["userFolders", { id: folderId }],
-    queryFn: () => getUserFolderById(folderId!),
-    enabled: !!folderId,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
+  const { data: folder, isLoading } = useLesson(
+    folderId!,
+    {
+      enabled: !!folderId,
+    },
+    {
+      withWords: 1,
+    },
+  );
+
+  const vocabularies = useMemo(() => folder?.words || [], [folder]);
 
   const [exerciseIdx, setExerciseIdx] = useState(0);
 
@@ -64,6 +64,14 @@ const FolderPracticePage: React.FC = () => {
 
   const clockTimerRef = useRef<ClockTimerRef>(null);
 
+  const postLessonExamMutation = useMutation({
+    mutationFn: postLessonExam,
+    onSuccess: () => {
+      console.log("Post lesson exam successfully");
+      navigate(`/personal-word-folder/${folderId}/practice-result`);
+    },
+  });
+
   const playWrongAnswerAudio = () => {
     wrongAnswerAudioRef.current?.play();
   };
@@ -76,8 +84,8 @@ const FolderPracticePage: React.FC = () => {
     });
   };
 
-  const handleCorrectAnswer = async (correctVocaId: string) => {
-    setCorrectVocaIds((prev) => [...prev, correctVocaId]);
+  const handleCorrectAnswer = async (correctLessonVocabularyId: number) => {
+    setCorrectLessonVocaIds((prev) => [...prev, correctLessonVocabularyId]);
     await playCorrectAnswerAudio();
   };
 
@@ -85,44 +93,58 @@ const FolderPracticePage: React.FC = () => {
     playWrongAnswerAudio();
   };
 
-  useEffect(() => {
-    if (folder) {
-      setVocabularies(folder.words || []);
+  const postPracticeResult = useCallback(() => {
+    const listCorrectWord = new Set<number>();
+    const listIncorrectWord = new Set<number>();
+
+    for (const {
+      voca: { id },
+    } of exercises) {
+      // As each voca has been repeated 2 * `repeatTimes` times
+      // So, a voca is considered correct if it is answered correctly 2 * repeatTimes times
+      if (
+        correctLessonVocaIds.filter((lessonVocaId) => lessonVocaId === id)
+          .length ===
+        2 * repeatTimes
+      ) {
+        listCorrectWord.add(id);
+      } else {
+        listIncorrectWord.add(id);
+      }
     }
-  }, [folder]);
+
+    const request: PostLessonExamRequest = {
+      lessonId: Number(folderId),
+      duration: takenTime,
+      answers: [...listCorrectWord, ...listIncorrectWord].map(
+        (lessonVocaId) => ({
+          lessonVocabularyId: lessonVocaId,
+          isCorrect: listCorrectWord.has(lessonVocaId),
+        }),
+      ),
+    };
+
+    console.log(request);
+
+    postLessonExamMutation.mutate(request);
+  }, [
+    exercises,
+    correctLessonVocaIds,
+    folderId,
+    postLessonExamMutation,
+    repeatTimes,
+    takenTime,
+  ]);
 
   const handleFulFillExercise = useCallback(() => {
     // The callback is re-defined in each time `exerciseIdx` changes, so the `exerciseIdx` is always the latest
     if (exercises.length > 0 && exerciseIdx + 1 >= exercises.length) {
       // Finish lesson
-      const actualCorrectVocaIds = correctVocaIds.filter(
-        (vocaId) =>
-          correctVocaIds.filter((id) => id === vocaId).length ===
-          2 * repeatTimes,
-      );
-      console.log("actualCorrectVocaIds", actualCorrectVocaIds);
-      dispatch(
-        folderPracticeActions.savePracticeResult({
-          folder: folder as UserFolder,
-          correctVocaIds: [...new Set(actualCorrectVocaIds)],
-          takenTime: takenTime,
-        }),
-      );
-      navigate(`/personal-word-folder/${folderId}/practice-result`);
+      postPracticeResult();
     } else {
       setExerciseIdx((prev) => prev + 1);
     }
-  }, [
-    exercises.length,
-    exerciseIdx,
-    correctVocaIds,
-    dispatch,
-    folder,
-    takenTime,
-    navigate,
-    folderId,
-    repeatTimes,
-  ]);
+  }, [exercises.length, exerciseIdx, postPracticeResult]);
 
   const handleAnswerExercise = useCallback(() => {
     const remainingTime = clockTimerRef.current?.stop() || 0;

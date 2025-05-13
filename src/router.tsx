@@ -200,7 +200,7 @@ export const router = createBrowserRouter([
       },
       {
         path: ":folderId/practice-result",
-        element: <FolderPracticeResultPage />,
+        element: <LessonLearningResultPage />,
       },
     ],
   },

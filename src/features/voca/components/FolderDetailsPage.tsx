@@ -9,7 +9,7 @@ import {
 import Content from "../../../components/layout/Content";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { Edit } from "@mui/icons-material";
+import { ArrowBackIos, Edit } from "@mui/icons-material";
 import ListWords from "./ListWords";
 import { VocabularyCardState } from "../../../components/VocabularyCard";
 import Link from "../../../components/UI/Link";
@@ -188,6 +188,20 @@ const FolderDetailsPage = () => {
 
         {/*  folder details */}
         <Box sx={{ marginTop: 1.5 }}>
+          <Link
+            to="/personal-word-folder"
+            sx={{
+              color: "primary.main",
+              lineHeight: 1.5,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              mb: 1.5,
+            }}
+          >
+            <ArrowBackIos sx={{ fontSize: "14px" }} />
+            All folders
+          </Link>
           <Stack direction="row" spacing={0.5}>
             <Typography variant="h5" sx={{ textTransform: "uppercase" }}>
               {folder?.name}
@@ -200,16 +214,22 @@ const FolderDetailsPage = () => {
               <Edit />
             </IconButton>
 
-            <Link
-              to="/personal-word-folder"
+            <Button
               sx={{
-                color: "primary.main",
-                lineHeight: 1.5,
                 marginLeft: "auto !important",
+                backgroundColor: "primary.extraLight",
               }}
             >
-              All folders
-            </Link>
+              <Link
+                to={`/personal-word-folder/${folderId}/practice-result`}
+                sx={{
+                  color: "primary.main",
+                  lineHeight: 1.5,
+                }}
+              >
+                Practice Result
+              </Link>
+            </Button>
           </Stack>
           <Typography>{folder?.description}</Typography>
         </Box>

@@ -38,6 +38,7 @@ const PersonalWordFolderPage = () => {
             A tool to help you create, pin and learn English vocabulary.
           </Typography>
         </Box>
+
         <Stack
           direction="row"
           justifyContent="space-between"
