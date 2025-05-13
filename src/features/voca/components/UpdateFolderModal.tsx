@@ -15,7 +15,7 @@ import { updateFolderDetails } from "../api/user-folder";
 import { toast } from "react-toastify";
 
 interface UpdateFolderModalProps extends CustomModalProps {
-  id: string;
+  id: number;
   initialName: string;
   initialDescription: string;
 

@@ -1,4 +1,5 @@
 import axiosClient from "../../../axios";
+import ApiResponse from "../../../types/ApiResponse";
 import { UserFolder } from "../../../types/user-folder";
 import VocabularyModel from "../../../types/VocabularyModel";
 import PinNewWordToExistingFolderRequest from "../types/PinNewWordToExistingFolderRequest";
@@ -9,9 +10,27 @@ import {
 } from "../types/UserFolderRequest";
 
 export async function createNewFolder(request: NewUserFolderRequest) {
-  const response = await axiosClient.post<UserFolder>("user-topic", request);
+  const response = await axiosClient.post<ApiResponse<UserFolder>>(
+    "word-folders",
+    request,
+  );
 
-  return response.data;
+  return response.data.data;
+}
+
+export async function getUserFolders() {
+  const response =
+    await axiosClient.get<ApiResponse<UserFolder[]>>("word-folders");
+
+  return response.data.data;
+}
+
+export async function getUserFolderById(folderId: number) {
+  const response = await axiosClient.get<ApiResponse<UserFolder[]>>(
+    "word-folders/" + folderId,
+  );
+
+  return response.data.data;
 }
 
 export async function updateFolderDetails(request: UpdateFolderRequest) {
@@ -28,18 +47,6 @@ export async function deleteUserFolder(id: string) {
   const response = await axiosClient.delete<UserFolder>("user-topic/" + id);
 
   return response.data;
-}
-
-export async function getUserFolders() {
-  const response = await axiosClient.get<UserFolder[]>("user-topic");
-
-  return response.data;
-}
-
-export async function getUserFolderById(id: string) {
-  const response = await axiosClient.get<UserFolder[]>("user-topic/" + id);
-
-  return response.data[0]; // api returns an array that contains the requested folder
 }
 
 export async function pinWordToFolder(folderId: string, vocaId: number) {
@@ -68,14 +75,6 @@ export async function pinNewWordToExistingFolder(
   const response = await axiosClient.post<UserFolder>(
     `word/user-topic/${folderId}`,
     body,
-  );
-
-  return response.data;
-}
-
-export async function unpinWordFromFolder(folderId: string, vocaId: string) {
-  const response = await axiosClient.delete(
-    `user-topic/${folderId}/word/${vocaId}`,
   );
 
   return response.data;

@@ -45,10 +45,12 @@ import { Image } from "../../../../components/UI/Image";
 import DefaultLessonThumbnail from "../../../../assets/images/voca/default-lesson-image.svg";
 import useLesson from "../../../../hooks/useLesson";
 import AttachingLessonVocabularyDrawer from "../components/AttachingLessonVocabularyDrawer";
-import { attachNewWordsToLesson } from "../api/lesson-vocabulary-api";
 import { useLessonVocabularies } from "../../../../hooks/useLessonVocabularies";
 import { LessonVocabulary } from "../../../../types/LessonVocabulary";
-import { deleteLessonVocabulary } from "../../../shared-apis/lesson-vocabulary-api";
+import {
+  attachNewWordsToLesson,
+  deleteLessonVocabulary,
+} from "../../../shared-apis/lesson-vocabulary-api";
 
 interface LessonFormData {
   name: string;

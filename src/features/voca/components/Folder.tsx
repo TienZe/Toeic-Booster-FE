@@ -5,7 +5,7 @@ import React, { useRef, useState } from "react";
 import FolderPopup from "./FolderPopup";
 
 interface FolderProps {
-  id: string; // folderId
+  id: number; // folderId
   name: string;
   pinnedWords: number;
   thumbnail?: string | null;

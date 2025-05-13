@@ -28,3 +28,25 @@ export async function deleteLessonVocabulary(request: {
 
   return response.data.data;
 }
+
+export async function removeLessonVocabularyById(lessonVocabularyId: number) {
+  const response = await axiosClient.delete<ApiResponse<unknown>>(
+    "/lesson-vocabularies/" + lessonVocabularyId,
+  );
+
+  return response.data.data;
+}
+
+export async function attachNewWordsToLesson(request: {
+  lessonId: number | string;
+  wordIds: number[] | string[];
+}) {
+  const { lessonId, wordIds } = request;
+
+  const wordObjects = wordIds.map((wordId) => ({ vocabularyId: wordId }));
+  const response = await axiosClient.post(`/lessons/${lessonId}/words`, {
+    words: wordObjects,
+  });
+
+  return response.data;
+}

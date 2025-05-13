@@ -3,6 +3,7 @@ import { LessonVocabulary } from "./LessonVocabulary";
 export default interface Lesson {
   id: number;
   name: string;
+  description: string | null;
   thumbnail: string | null;
   createdAt: string;
 

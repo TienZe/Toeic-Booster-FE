@@ -7,13 +7,9 @@ import {
   Typography,
 } from "@mui/material";
 import Content from "../../../components/layout/Content";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import {
-  getUserFolderById,
-  pinNewWordToExistingFolder,
-  unpinWordFromFolder,
-} from "../api/user-folder";
+import { pinNewWordToExistingFolder } from "../api/user-folder";
 import { Edit } from "@mui/icons-material";
 import ListWords from "./ListWords";
 import { VocabularyCardState } from "../../../components/VocabularyCard";
@@ -29,21 +25,28 @@ import { vocaWordClassAbrr2FullName } from "../../../utils/helper";
 import CustomModal from "../../../components/UI/CustomModal";
 import EditFlashCardModal from "./EditFlashCardModal";
 import VocabularyModel from "../../../types/VocabularyModel";
+import useLesson from "../../../hooks/useLesson";
+import {
+  attachNewWordsToLesson,
+  removeLessonVocabularyById,
+} from "../../shared-apis/lesson-vocabulary-api";
 
 const FolderDetailsPage = () => {
   const navigate = useNavigate();
   const { folderId } = useParams();
   const queryClient = useQueryClient();
 
-  const { data: folder } = useQuery({
-    queryKey: ["userFolders", { id: folderId }],
-    queryFn: () => getUserFolderById(folderId!),
-    enabled: !!folderId,
-  });
+  const { data: folder } = useLesson(
+    folderId!,
+    { enabled: !!folderId },
+    { withWords: 1 },
+  );
 
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
-  const [deletedVocaId, setDeletedVocaId] = useState<string | null>(null);
-  const [editedVocaId, setEditedVocaId] = useState<string | null>(null);
+  const [deletedFolderWordId, setDeletedFolderWordId] = useState<number | null>(
+    null,
+  );
+  const [editedVocaId, setEditedVocaId] = useState<number | null>(null);
 
   const pinNewWordMutation = useMutation({
     mutationFn: pinNewWordToExistingFolder,
@@ -61,48 +64,77 @@ const FolderDetailsPage = () => {
     },
   });
 
-  const unpinWordMutation = useMutation({
-    mutationFn: (request: { folderId: string; vocaId: string }) =>
-      unpinWordFromFolder(request.folderId, request.vocaId),
+  const attachSystemWordsMutation = useMutation({
+    mutationFn: attachNewWordsToLesson,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["userFolders", { id: folderId }],
+        predicate: (query) => {
+          const [key, params] = query.queryKey as [string, { id: string }];
+          return key == "lesson" && params.id == folderId;
+        },
       });
     },
-    onError: () => {
-      toast.error("Unpin word failed!");
-    },
     onSettled: () => {
-      unpinWordMutation.reset();
-      setDeletedVocaId(null);
+      attachSystemWordsMutation.reset();
     },
   });
 
-  const handleClickOnWordItem = (wordItem: WordItem) => {
+  const detachSystemWordMutation = useMutation({
+    mutationFn: removeLessonVocabularyById,
+    onSuccess: () => {
+      toast.success("Delete word successfully!");
+
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const [key, params] = query.queryKey as [string, { id: string }];
+          return key == "lesson" && params.id == folderId;
+        },
+      });
+    },
+    onSettled: () => {
+      // reset state
+      setDeletedFolderWordId(null);
+      detachSystemWordMutation.reset();
+    },
+  });
+
+  const handleClickOnWordItem = (wordItem: WordItem | VocabularyModel) => {
     if (!folderId) {
       return;
     }
 
-    const request: PinNewWordToExistingFolderRequest = {
-      folderId,
-      word: wordItem.word,
-      pronunciation: wordItem.phonetic || "",
-      audioUrl: wordItem.phoneticAudio,
-      translate: wordItem.meaning || "",
-      wordClass: vocaWordClassAbrr2FullName(wordItem.partOfSpeech),
-      example: wordItem.example,
-      definition: wordItem.definition,
-    };
+    if ("id" in wordItem) {
+      // This word is system word, already exists, so just attach it to the lesson
+      wordItem = wordItem as VocabularyModel;
+      attachSystemWordsMutation.mutate({
+        lessonId: folderId,
+        wordIds: [wordItem.id],
+      });
+    } else {
+      // Handle pin new word to existing folder
+      const request: PinNewWordToExistingFolderRequest = {
+        folderId,
+        word: wordItem.word,
+        pronunciation: wordItem.pronunciation || "",
+        pronunciationAudio: wordItem.pronunciationAudio,
+        meaning: wordItem.meaning || "",
+        partOfSpeech: vocaWordClassAbrr2FullName(wordItem.partOfSpeech),
+        example: wordItem.example,
+        definition: wordItem.definition,
+      };
 
-    pinNewWordMutation.mutate(request);
+      console.log("request", request);
+
+      // pinNewWordMutation.mutate(request);
+    }
   };
 
   const handleUnpinWord = () => {
-    if (!folderId || !deletedVocaId) {
+    if (!folderId || !deletedFolderWordId) {
       return;
     }
 
-    unpinWordMutation.mutate({ folderId, vocaId: deletedVocaId });
+    detachSystemWordMutation.mutate(deletedFolderWordId);
   };
 
   const handleUpdatedFlashCard = () => {
@@ -146,7 +178,7 @@ const FolderDetailsPage = () => {
             </Typography>
           </div>
 
-          {folder && folder?.words.length >= 4 && (
+          {folder && folder?.words?.length && folder.words.length >= 4 && (
             <BoldStrokeButton
               variant="contained"
               sx={{ maxWidth: "200px", borderBottomWidth: "2px" }}
@@ -188,6 +220,7 @@ const FolderDetailsPage = () => {
         <VocaSearching
           containerSx={{ marginTop: 1.5 }}
           onClickWord={handleClickOnWordItem}
+          searchMode="system"
         />
       </Box>
 
@@ -198,11 +231,11 @@ const FolderDetailsPage = () => {
             title="Pinned words"
             vocabularies={folder?.words || []}
             status={VocabularyCardState.DEFAULT}
-            onCloseWordCard={(vocaId: string) => setDeletedVocaId(vocaId)}
-            onEditWordCard={(vocaId: string) => setEditedVocaId(vocaId)}
+            onCloseWordCard={(vocaId: number) => setDeletedFolderWordId(vocaId)}
+            onEditWordCard={(vocaId: number) => setEditedVocaId(vocaId)}
           />
 
-          {folder?.words.length == 0 && (
+          {folder?.words?.length == 0 && (
             <Typography>You haven't pinned any word yet</Typography>
           )}
         </Box>
@@ -214,7 +247,7 @@ const FolderDetailsPage = () => {
           onClose={() => setOpenUpdateModal(false)}
           id={folder.id}
           initialName={folder.name}
-          initialDescription={folder.description}
+          initialDescription={folder.description || ""}
           onUpdated={() =>
             queryClient.invalidateQueries({
               queryKey: ["userFolders", { id: folderId }],
@@ -225,8 +258,8 @@ const FolderDetailsPage = () => {
 
       {/* Confirm deleting word modal */}
       <CustomModal
-        open={deletedVocaId !== null}
-        onClose={() => setDeletedVocaId(null)}
+        open={deletedFolderWordId !== null}
+        onClose={() => setDeletedFolderWordId(null)}
       >
         <Box sx={{ py: 1.5, maxWidth: "400px", textAlign: "center" }}>
           <Typography variant="h6" sx={{ mx: 2, fontWeight: "bold" }}>
@@ -248,12 +281,12 @@ const FolderDetailsPage = () => {
               onClick={handleUnpinWord}
               sx={{ boxShadow: "none", minWidth: "85px" }}
             >
-              {unpinWordMutation.isPending ? "Deleting..." : "OK"}
+              {detachSystemWordMutation.isPending ? "Deleting..." : "OK"}
             </Button>
             <Button
               color="error"
               variant="outlined"
-              onClick={() => setDeletedVocaId(null)}
+              onClick={() => setDeletedFolderWordId(null)}
             >
               Cancel
             </Button>
@@ -268,7 +301,7 @@ const FolderDetailsPage = () => {
           onClose={() => setEditedVocaId(null)}
           onFlashCardUpdated={handleUpdatedFlashCard}
           voca={
-            folder.words.find((v) => v.id === editedVocaId) as VocabularyModel
+            folder?.words?.find((v) => v.id === editedVocaId) as VocabularyModel
           }
         />
       )}

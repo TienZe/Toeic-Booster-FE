@@ -3,28 +3,17 @@ import Content from "../../../components/layout/Content";
 import Folder from "./Folder";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUserFolders } from "../api/user-folder";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { CreateNewFolder } from "@mui/icons-material";
 import NewWordFolderModal from "./NewFolderModal";
 
 const PersonalWordFolderPage = () => {
   const queryClient = useQueryClient();
 
-  const { data } = useQuery({
+  const { data: folders } = useQuery({
     queryKey: ["userFolders"],
     queryFn: getUserFolders,
   });
-
-  const folders = useMemo(
-    () =>
-      data
-        ?.slice()
-        ?.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-        ) || [],
-    [data],
-  );
 
   const [openNewModal, setOpenNewModal] = useState(false);
   return (
@@ -69,7 +58,7 @@ const PersonalWordFolderPage = () => {
                 backgroundColor: "#BFF199",
               }}
             >
-              {folders.length}
+              {folders?.length || 0}
             </Typography>
           </Typography>
 
@@ -82,13 +71,13 @@ const PersonalWordFolderPage = () => {
         </Stack>
 
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-          {folders.length > 0
+          {folders
             ? folders.map((folder) => (
                 <Folder
                   id={folder.id}
                   name={folder.name}
-                  pinnedWords={folder.words.length}
-                  thumbnail={folder.words[0]?.thumbnail}
+                  pinnedWords={folder?.words?.length || 0}
+                  thumbnail={folder?.words?.[0]?.thumbnail}
                 />
               ))
             : "You haven't created a vocabulary yet, create a word folder to save the vocabulary you want to learn."}

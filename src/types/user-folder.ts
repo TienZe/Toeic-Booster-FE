@@ -1,10 +1,10 @@
-import VocabularyModel from "./VocabularyModel";
+import { LessonVocabulary } from "./LessonVocabulary";
 
 export interface UserFolder {
-  id: string;
+  id: number;
   name: string;
-  description: string;
+  description: string | null;
   createdAt: string;
 
-  words: VocabularyModel[];
+  words?: LessonVocabulary[];
 }

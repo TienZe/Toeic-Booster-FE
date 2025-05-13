@@ -1,10 +1,10 @@
 export default interface PinNewWordToExistingFolderRequest {
   folderId: string;
-  audioUrl: string;
-  translate: string;
+  pronunciationAudio: string | null; // temporary just post url string (no upload operation)
+  meaning: string;
   definition: string;
   pronunciation: string;
-  wordClass: string;
+  partOfSpeech: string;
   word: string;
-  example?: string;
+  example?: string | null;
 }
