@@ -167,7 +167,7 @@ const LessonsPage: React.FC = () => {
                         name={lesson.name}
                         thumbnail={getLessonThumbnail(lesson)}
                         totalWords={lesson.numOfWords}
-                        retainedWords={10}
+                        retainedWords={lesson.retainedWords || 0}
                         reviewable={lesson.learningStep === "examined"}
                         vocaSetId={vocaSetId}
                         onStartLearning={() => {
