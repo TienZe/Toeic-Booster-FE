@@ -20,6 +20,7 @@ import CollectionCard from "../../../components/CollectionCard";
 import usePaginatedVocaSets from "../../../hooks/usePaginatedVocaSets";
 import DotLoadingProgress from "../../../components/UI/DotLoadingProgress";
 import Link from "../../../components/UI/Link";
+import useCollectionTags from "../../../hooks/useCollectionTags";
 
 const ratingOptions = [
   { value: 4.5, label: "4.5 & up", count: 10000 },
@@ -28,18 +29,10 @@ const ratingOptions = [
   { value: 3.0, label: "3.0 & up", count: 10000 },
 ];
 
-const languageOptions = [
-  { label: "English", value: "en", count: 9402 },
-  { label: "Español", value: "es", count: 516 },
-  { label: "Türkçe", value: "tr", count: 164 },
-  { label: "Português", value: "pt", count: 736 },
-  { label: "العربية", value: "ar", count: 202 },
-];
-
 const VocaLibraryPage: React.FC = () => {
   const [page, setPage] = useState(0);
 
-  const [selectedLanguages] = useState<string[]>(["en", "tr"]);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
 
   const [selectedRating, setSelectedRating] = useState<number | null>(4.5);
 
@@ -49,6 +42,8 @@ const VocaLibraryPage: React.FC = () => {
       limit: 10,
     },
   );
+
+  const { data: collectionTags } = useCollectionTags();
 
   return (
     <Content>
@@ -101,10 +96,13 @@ const VocaLibraryPage: React.FC = () => {
 
           <Stack direction="row" gap={1} mt={1}>
             <MultipleSelectCheckmarks
-              label="Language"
-              itemLabels={languageOptions.map((option) => option.label)}
-              itemValues={languageOptions.map((option) => option.value)}
-              value={selectedLanguages}
+              label="Categories"
+              itemLabels={collectionTags?.map((tag) => tag.tagName) || []}
+              itemValues={collectionTags?.map((tag) => tag.id) || []}
+              value={selectedCategories}
+              onChange={(newSelectedCategories) =>
+                setSelectedCategories(newSelectedCategories as number[])
+              }
               menuProps={{
                 anchorOrigin: {
                   vertical: "bottom",

@@ -99,6 +99,7 @@ const MultipleSelectCheckmarks: React.FC<MultipleSelectCheckmarksProps> = ({
           <OutlinedInput label={labelType === "mui" ? label : undefined} />
         }
         renderValue={(selected) => {
+          console.log("selected", selected);
           if (labelType === "inside") {
             if (selected.length === 0) {
               return label;
