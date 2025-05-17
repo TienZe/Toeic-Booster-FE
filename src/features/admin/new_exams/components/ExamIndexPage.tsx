@@ -44,10 +44,13 @@ const ExamSet = () => {
     filterStatus: "all",
   };
 
-  const { isPending, data: examSetData } = useQuery({
-    queryKey: ["fetchExam", page, limit, search],
-    queryFn: () => fetchAllExam(undefined, page, limit, search),
-  });
+  // const { isPending, data: examSetData } = useQuery({
+  //   queryKey: ["fetchExam", page, limit, search],
+  //   queryFn: () => fetchAllExam(undefined, page, limit, search),
+  // });
+
+  const isPending = false;
+  const examSetData = null;
 
   console.log("examsetdata", examSetData);
 
@@ -146,27 +149,11 @@ const ExamSet = () => {
                 )}
               />
             </Grid2>
-            {/* <Grid2 size={3}>
-              <Controller
-                name="filterStatus"
-                control={control}
-                render={({ field }) => (
-                  <BootstrapSelect
-                    {...field}
-                    label="Status"
-                    defaultValue="all"
-                    itemLabels={["All", "Active", "Inactive"]}
-                    itemValues={["all", "active", "inactive"]}
-                  />
-                )}
-              />
-            </Grid2> */}
             <Grid2 size={2} display="flex" alignItems="end">
               <Button
                 type="submit"
                 variant="contained"
                 startIcon={<FilterAlt />}
-                sx={{ py: "12px", px: 3, marginBottom: "3px" }}
               >
                 Search
               </Button>
@@ -177,7 +164,6 @@ const ExamSet = () => {
                 type="reset"
                 variant="outlined"
                 startIcon={<FilterAltOff />}
-                sx={{ py: "12px", px: 3, marginBottom: "3px" }}
               >
                 Clear
               </Button>
@@ -201,13 +187,14 @@ const ExamSet = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {examSetData?.data?.map((examSet: IExamModel) => (
-                  <ExamSetRow
-                    key={examSet.id}
-                    examSet={examSet}
-                    onDelete={() => setDeletedExam(examSet.id)}
-                  />
-                ))}
+                {examSetData?.data &&
+                  examSetData?.data?.map((examSet: IExamModel) => (
+                    <ExamSetRow
+                      key={examSet.id}
+                      examSet={examSet}
+                      onDelete={() => setDeletedExam(examSet.id)}
+                    />
+                  ))}
                 {/* {emptyRows > 0 && (
                   <TableRow
                     style={{

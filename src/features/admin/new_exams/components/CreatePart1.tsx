@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Button,
   Chip,
@@ -16,12 +15,14 @@ import {
   validateState,
 } from "../types/examType";
 import Grid from "@mui/material/Grid2";
-import { Editor } from "@tinymce/tinymce-react";
-import { uploadFile } from "../api/examApi";
 import _ from "lodash";
 import { convertExamData } from "../utils/helper";
 import { UpdateExamReq } from "../types/UpdateExamReq";
-
+import Editor from "../../../../components/UI/Editor";
+import { useForm } from "react-hook-form";
+import { answerIndexToLabel, QuestionGroup } from "../../../../types/ToeicExam";
+import { file2Base64 } from "../../../../utils/helper";
+import { Image } from "../../../../components/UI/Image";
 interface CrPartProps1 {
   updateExamData?: (data: groupQuestionData[], part: string) => void;
   isUpdate: boolean;
@@ -29,18 +30,81 @@ interface CrPartProps1 {
   onUpdate: (v: UpdateExamReq | null) => void;
 }
 
+interface QuestionGroupsForm {
+  questionGroups: QuestionGroup[];
+}
+
+const part1Group = Array.from({
+  length: TOEIC_PARTS.Part1.groupQuestion,
+});
+
+const getChipStyle = (state: validateState = validateState.blank) => {
+  switch (state) {
+    case validateState.blank:
+      return {};
+    case validateState.pending:
+      return { backgroundColor: "orange", color: "white" };
+    case validateState.fulfilled:
+      return {
+        backgroundColor: "green",
+        color: "white",
+        "&:hover": { backgroundColor: "green", color: "white" },
+      };
+    default:
+      return {};
+  }
+};
+
+const DEFAULT_QUESTION_GROUPS: QuestionGroup[] = Array.from(
+  { length: TOEIC_PARTS.Part1.groupQuestion },
+  (_, groupIndex) => ({
+    id: "",
+    part: "part1",
+    transcript: "",
+
+    questions: Array.from(
+      { length: TOEIC_PARTS.Part1.questionPerGroup },
+      (_, questionIndex) => ({
+        id: 0,
+        question: "",
+        explanation: "",
+        questionNumber:
+          groupIndex * TOEIC_PARTS.Part1.questionPerGroup + questionIndex + 1,
+        A: "",
+        B: "",
+        C: "",
+        D: "",
+        correctAnswer: "",
+      }),
+    ),
+
+    medias: [],
+  }),
+);
+
 const CreatePart1: React.FC<CrPartProps1> = ({
   updateExamData,
   isUpdate,
   examData,
   onUpdate,
 }) => {
+  const {
+    // formState: { errors: validationErrors },
+    setValue,
+    watch,
+  } = useForm<QuestionGroupsForm>({
+    defaultValues: {
+      questionGroups: DEFAULT_QUESTION_GROUPS,
+    },
+  });
+
+  const questionGroupsFormData = watch("questionGroups");
+  console.log("questionGroupsFormData", questionGroupsFormData);
+
   console.log("isUpdate", isUpdate, examData);
   const [group, setGroup] = useState<number>(0);
   const [show, setShow] = useState<boolean>(false);
-  const part1Group = Array.from({
-    length: TOEIC_PARTS.Part1.groupQuestion,
-  });
+
   const [part1Data, setPart1Data] = useState<groupQuestionData[]>(
     Array.from(
       { length: TOEIC_PARTS.Part1.groupQuestion },
@@ -81,28 +145,11 @@ const CreatePart1: React.FC<CrPartProps1> = ({
     }
   }, [examData]);
 
-  const getChipStyle = (state: validateState = validateState.blank) => {
-    switch (state) {
-      case validateState.blank:
-        return {};
-      case validateState.pending:
-        return { backgroundColor: "orange", color: "white" };
-      case validateState.fulfilled:
-        return {
-          backgroundColor: "green",
-          color: "white",
-          "&:hover": { backgroundColor: "green", color: "white" },
-        };
-      default:
-        return {};
-    }
-  };
-
   const handleGroupQuestion = (groupQuestion: number) => {
-    if (!show) {
-      setGroup(groupQuestion);
-      setShow(true);
-    }
+    // if (!show) {
+    setGroup(groupQuestion);
+    setShow(true);
+    // }
   };
 
   const handleCloseButton = (groupPara: number) => {
@@ -146,7 +193,6 @@ const CreatePart1: React.FC<CrPartProps1> = ({
 
     //validate answer
     let isValidAnswer = true;
-    //let isFullBlank = true;
     let indexA = -1;
     for (let i = 0; i < part1Data[groupPara].questionData.length; i++) {
       for (
@@ -169,35 +215,16 @@ const CreatePart1: React.FC<CrPartProps1> = ({
       }
     }
 
-    // if (!isValidAnswer) {
-    //   toast.error(
-    //     `Answer ${indexA + 1} Question ${indexQ + 1} group ${groupPara + 1}  cannot blank `,
-    //   );
-    // }
-
-    // if (!isValidQuestion) {
-    //   toast.error(
-    //     `Question ${indexQ + 1} group ${groupPara + 1}  cannot blank `,
-    //   );
-    //   let updateData = [...part1Data];
-    //   updateData[groupPara].validate = validateState.pending;
-    //   setPart1Data(updateData);
-    // } else {
-    //   let updateData = [...part1Data];
-    //   updateData[groupPara].validate = validateState.blank;
-    //   setPart1Data(updateData);
-    // }
-
     if (isValidAnswer && isValidQuestion) {
-      let updateData = [...part1Data];
+      const updateData = [...part1Data];
       updateData[groupPara].validate = validateState.fulfilled;
       setPart1Data(updateData);
     } else if (indexQ < 0 && indexA < 0) {
-      let updateData = [...part1Data];
+      const updateData = [...part1Data];
       updateData[groupPara].validate = validateState.blank;
       setPart1Data(updateData);
     } else if (indexQ >= 0 && indexA >= 0) {
-      let updateData = [...part1Data];
+      const updateData = [...part1Data];
       updateData[groupPara].validate = validateState.pending;
       setPart1Data(updateData);
     }
@@ -216,95 +243,36 @@ const CreatePart1: React.FC<CrPartProps1> = ({
     }
   };
 
-  const handleQuestionChange = (
-    groupIndex: number,
-    questionDataIndex: number,
-    value: string,
-  ) => {
-    let updatedData = [...part1Data];
-    updatedData[groupIndex].questionData[questionDataIndex].question = value;
-    // updatedData[groupIndex].questionData[questionDataIndex].questionNumber =
-    //   group * TOEIC_PARTS.Part1.questionPerGroup + (questionDataIndex + 1);
-    setPart1Data(updatedData);
-  };
-
-  const handleAnswerChange = (
-    groupIndex: number,
-    questionDataIndex: number,
-    answerIndex: number,
-    value: string,
-  ) => {
-    let updateData = [...part1Data];
-    updateData[groupIndex].questionData[questionDataIndex].answer[answerIndex] =
-      value;
-    setPart1Data(updateData);
-  };
-
-  const handleChangeCorrectAnswer = (
-    groupIndex: number,
-    questionDataIndex: number,
-    answerIndex: number,
-  ) => {
-    let updateData = [...part1Data];
-    updateData[groupIndex].questionData[questionDataIndex].correctAnswer =
-      `${updateData[groupIndex].questionData[questionDataIndex].answer[answerIndex]}`;
-    setPart1Data(updateData);
-  };
-
-  const handleEditorChange = (
-    groupIndex: number,
-    questionDataIndex: number,
-    newContent: string,
-  ) => {
-    let updateData = [...part1Data];
-    console.log(groupIndex, questionDataIndex, newContent);
-    updateData[groupIndex].questionData[questionDataIndex].explain = newContent;
-    setPart1Data(updateData);
-  };
-
-  const handleEditorChangeScript = (groupIndex: number, newContent: string) => {
-    let updateData = [...part1Data];
-    updateData[groupIndex].transcript = newContent;
-    setPart1Data(updateData);
-  };
-
-  // const handleAudioChange = (
-  //   groupIndex: number,
-  //   event: React.ChangeEvent<HTMLInputElement>,
-  // ) => {
-  //   if (event.target.files && event.target.files.length > 0) {
-  //     let updateData = [...part1Data];
-  //     const file = event.target.files[0];
-  //     console.log(file);
-  //     updateData[groupIndex].audio = file;
-  //     const previewUrl = URL.createObjectURL(file);
-  //     updateData[groupIndex].audioPreview = previewUrl;
-  //     setPart1Data(updateData);
-  //   }
-  // };
-
   const handleAudioChange = async (
     groupIndex: number,
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     if (event.target.files && event.target.files.length > 0) {
-      let dataUpdate = [...part1Data];
-      const file = event.target.files[0];
+      const audioFile = event.target.files[0];
 
-      let data = await uploadFile(file);
+      const audioBase64Url = await file2Base64(audioFile);
 
-      const audioUrl = data.secure_url;
-      dataUpdate[groupIndex].audioUrl = audioUrl;
-      dataUpdate[groupIndex].audioPreview = audioUrl;
-      setPart1Data(dataUpdate);
+      const groupMedias = questionGroupsFormData[groupIndex].medias.filter(
+        (media) => media.fileType !== "audio",
+      );
+
+      setValue(`questionGroups.${groupIndex}.medias`, [
+        ...groupMedias,
+        {
+          id: 0,
+          fileUrl: audioBase64Url,
+          fileType: "audio",
+        },
+      ]);
     }
   };
 
   const handleClearImage = (groupIndex: number) => {
-    let dataUpdate = [...part1Data];
-    dataUpdate[groupIndex].image = [];
-    dataUpdate[groupIndex].imagePreview = [];
-    setPart1Data(dataUpdate);
+    const groupMedias = questionGroupsFormData[groupIndex].medias.filter(
+      (media) => media.fileType !== "image",
+    );
+
+    setValue(`questionGroups.${groupIndex}.medias`, groupMedias);
   };
 
   const handleImageChange = async (
@@ -312,61 +280,49 @@ const CreatePart1: React.FC<CrPartProps1> = ({
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     if (event.target.files && event.target.files.length > 0) {
-      let dataUpdate = [...part1Data];
       const filesArray = Array.from(event.target.files);
+      for (const file of filesArray) {
+        const imageBase64Url = await file2Base64(file);
 
-      // Upload từng file lên Cloudinary
-      for (let file of filesArray) {
-        let data = await uploadFile(file);
-        const imageUrl = data.secure_url;
+        const groupMedias = questionGroupsFormData[groupIndex].medias.filter(
+          (media) => media.fileType !== "image",
+        );
 
-        dataUpdate[groupIndex].image = [
-          ...(dataUpdate[groupIndex].image || []),
+        setValue(`questionGroups.${groupIndex}.medias`, [
+          ...groupMedias,
           {
-            fileUrl: imageUrl,
-            index: dataUpdate[groupIndex].image
-              ? dataUpdate[groupIndex].image.length
-              : 0,
+            id: 0,
+            fileUrl: imageBase64Url,
+            fileType: "image",
+            order: 0,
           },
-        ];
+        ]);
 
-        dataUpdate[groupIndex].imagePreview = [
-          ...(dataUpdate[groupIndex].imagePreview || []),
-          imageUrl,
-        ];
+        // const currentImageOrder = Math.max(
+        //   ...groupMedias
+        //     .filter((media) => media.fileType == "image")
+        //     .map((media) => media.order || -1),
+        //   0,
+        // );
+
+        // setValue(
+        //   `questionGroups.${groupIndex}.medias`,
+        //   [
+        //     ...groupMedias,
+        //     {
+        //       id: 0,
+        //       fileUrl: imageBase64Url,
+        //       fileType: "image",
+        //       order: currentImageOrder + 1,
+        //     },
+        //   ],
+        //   {
+        //     shouldDirty: true,
+        //   },
+        // );
       }
-      setPart1Data(dataUpdate);
     }
   };
-
-  // const handleImageChange = (
-  //   groupIndex: number,
-  //   event: React.ChangeEvent<HTMLInputElement>,
-  // ) => {
-  //   if (event.target.files && event.target.files.length > 0) {
-  //     console.log(event.target.files);
-  //     let dataUpdate = [...part1Data];
-  //     const filesArray = Array.from(event.target.files);
-  //     //setSelectedImages((prevImages) => [...prevImages, ...filesArray]);
-  //     dataUpdate[groupIndex].image = [
-  //       ...(dataUpdate[groupIndex].image || []),
-  //       ...filesArray,
-  //     ];
-
-  //     const previewUrls = filesArray.map((file) => URL.createObjectURL(file));
-  //     //setImagePreviews((prevPreviews) => [...prevPreviews, ...previewUrls]);
-  //     dataUpdate[groupIndex].imagePreview = [
-  //       ...(dataUpdate[groupIndex].imagePreview || []),
-  //       ...previewUrls,
-  //     ];
-
-  //     // const file = event.target.files[0];
-  //     // setSelectedImage(file);
-  //     // const previewUrl = URL.createObjectURL(file);
-  //     // setImagePreview(previewUrl);
-  //     setPart1Data(dataUpdate);
-  //   }
-  // };
 
   return (
     <>
@@ -404,7 +360,17 @@ const CreatePart1: React.FC<CrPartProps1> = ({
           <Grid container spacing={3}>
             <Grid size={3}>
               <Stack>
-                <Box display="flex" flexDirection="column" alignItems="center">
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  sx={{
+                    "& .MuiButton-root": {
+                      boxShadow: "none",
+                    },
+                  }}
+                >
+                  {/* Input upload audio */}
                   <input
                     accept="audio/*"
                     type="file"
@@ -417,20 +383,19 @@ const CreatePart1: React.FC<CrPartProps1> = ({
                       Upload Audio
                     </Button>
                   </label>
-                  {part1Data[group].audioUrl && (
-                    <audio
-                      controls
-                      style={{ marginTop: "15px", width: "250px" }}
-                    >
-                      <source
-                        src={part1Data[group].audioUrl}
-                        type="audio/mpeg"
-                      />
-                    </audio>
-                  )}
-                  {/* <Typography variant="body1" my={0.5}>
-                    {part1Data[group].audioUrl && part1Data[group].audioUrl}
-                  </Typography> */}
+
+                  {questionGroupsFormData[group].medias
+                    ?.filter((media) => media.fileType == "audio")
+                    .map((audio) => (
+                      <Box
+                        key={audio.id}
+                        sx={{ marginTop: "15px", width: "250px" }}
+                      >
+                        <audio controls src={audio.fileUrl} />
+                      </Box>
+                    ))}
+
+                  {/* Input upload image */}
                   <input
                     accept="image/*"
                     type="file"
@@ -444,67 +409,57 @@ const CreatePart1: React.FC<CrPartProps1> = ({
                       Upload Image
                     </Button>
                   </label>
-                  {part1Data[group].imagePreview &&
-                    part1Data[group].imagePreview.map((previewUrl, index) => (
-                      <Box key={index} mt={2} textAlign="center">
-                        <Avatar
-                          src={previewUrl}
-                          alt={`Image Preview ${index}`}
+
+                  {_.sortBy(questionGroupsFormData[group].medias, "order")
+                    ?.filter((media) => media.fileType == "image")
+                    .map((image) => (
+                      <Box
+                        key={`${group}-${image.id}-${image.order}`}
+                        mt={2}
+                        textAlign="center"
+                      >
+                        <Image
+                          src={image.fileUrl}
                           sx={{ width: 150, height: "auto", borderRadius: 1 }}
                         />
-                        {/* <Typography variant="body1" mt={1}>
-                          {part1Data[group].image &&
-                            part1Data[group].image[index].imageUrl}
-                        </Typography> */}
                       </Box>
                     ))}
-                  {part1Data[group].image &&
-                    part1Data[group].image?.length > 0 && (
-                      <Button
-                        variant="contained"
-                        component="span"
-                        sx={{ mt: 1 }}
-                        onClick={() => handleClearImage(group)}
-                      >
-                        Clear Image
-                      </Button>
-                    )}
+
+                  {questionGroupsFormData[group].medias.filter(
+                    (media) => media.fileType == "image",
+                  ).length > 0 && (
+                    <Button
+                      variant="contained"
+                      component="span"
+                      sx={{ mt: 1 }}
+                      onClick={() => handleClearImage(group)}
+                    >
+                      Clear Image
+                    </Button>
+                  )}
                 </Box>
               </Stack>
             </Grid>
+
             <Grid size={9}>
               <Typography my={0.75}>Transcript</Typography>
               <Stack flexDirection="column" flexGrow={1}>
                 <Editor
-                  apiKey={import.meta.env.VITE_TINY_KEY}
-                  value={part1Data[group].transcript}
-                  init={{
-                    height: 200,
-                    width: "100%",
-                    menubar: false,
-                    plugins: [
-                      "advlist autolink lists link image charmap print preview anchor",
-                      "searchreplace visualblocks code fullscreen",
-                      "insertdatetime media table paste code help wordcount",
-                    ],
-                    toolbar:
-                      "undo redo | formatselect | bold italic backcolor | \
-               alignleft aligncenter alignright alignjustify | \
-               bullist numlist outdent indent | removeformat | help",
-                  }}
+                  value={questionGroupsFormData[group].transcript}
                   onEditorChange={(newContent) =>
-                    handleEditorChangeScript(group, newContent)
+                    setValue(`questionGroups.${group}.transcript`, newContent)
                   }
                 />
               </Stack>
-              {part1Data[group].questionData.map(
-                (questionData, questionDataIndex) => {
+              {questionGroupsFormData[group].questions.map(
+                (question, questionIndex) => {
                   return (
-                    <Box key={questionDataIndex} mb={1}>
+                    <Box key={questionIndex} mb={1}>
                       <Stack direction="row" spacing={0.5} sx={{ my: 1 }}>
+                        {/* Question number */}
                         <Box
                           sx={{
-                            background: "var(--color-primary-main)",
+                            backgroundColor: "primary.main",
                             color: "white",
                             fontWeight: "400",
                             borderRadius: "50%",
@@ -517,15 +472,14 @@ const CreatePart1: React.FC<CrPartProps1> = ({
                           }}
                         >
                           {group * TOEIC_PARTS.Part1.questionPerGroup +
-                            (questionDataIndex + 1)}
+                            (questionIndex + 1)}
                         </Box>
                         <TextField
                           label="Question"
-                          value={questionData.question}
+                          value={question.question}
                           onChange={(e) =>
-                            handleQuestionChange(
-                              group,
-                              questionDataIndex,
+                            setValue(
+                              `questionGroups.${group}.questions.${questionIndex}.question`,
                               e.target.value,
                             )
                           }
@@ -535,21 +489,24 @@ const CreatePart1: React.FC<CrPartProps1> = ({
                       </Stack>
 
                       <Typography>Answers</Typography>
-                      {questionData.answer.map((answer, answerIndex) => (
+                      {Array.from({
+                        length: TOEIC_PARTS.Part1.answerCount,
+                      }).map((_, answerIndex) => (
                         <Stack direction="row" key={answerIndex}>
                           <FormControlLabel
                             value="female"
                             control={
                               <Radio
                                 checked={
-                                  answer != "" &&
-                                  questionData.correctAnswer === answer
+                                  question.correctAnswer ===
+                                  answerIndexToLabel(answerIndex)
                                 }
-                                onChange={() =>
-                                  handleChangeCorrectAnswer(
-                                    group,
-                                    questionDataIndex,
-                                    answerIndex,
+                                onChange={(_, checked) =>
+                                  setValue(
+                                    `questionGroups.${group}.questions.${questionIndex}.correctAnswer`,
+                                    checked
+                                      ? answerIndexToLabel(answerIndex)
+                                      : null,
                                   )
                                 }
                               />
@@ -561,46 +518,39 @@ const CreatePart1: React.FC<CrPartProps1> = ({
                             }}
                           />
                           <TextField
-                            label={`Answer ${String.fromCharCode(65 + answerIndex)}`}
-                            value={answer || ""}
-                            onChange={(e) =>
-                              handleAnswerChange(
-                                group,
-                                questionDataIndex,
-                                answerIndex,
-                                e.target.value,
-                              )
-                            }
+                            label={`Answer ${answerIndexToLabel(answerIndex)}`}
+                            // value={
+                            //   question[`${answerIndexToLabel(answerIndex)}`] ||
+                            //   ""
+                            // }
+                            // onChange={(e) => {
+                            //   setValue(
+                            //     `questionGroups.${group}.questions.${questionIndex}.${answerIndexToLabel(answerIndex)}`,
+                            //     e.target.value,
+                            //   );
+                            // }}
                             size="small"
                             fullWidth
                             margin="dense"
                             disabled
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                "& fieldset": {
+                                  border: "none",
+                                },
+                              },
+                            }}
                           />
                         </Stack>
                       ))}
-                      <Typography my={0.75}>Explain</Typography>
+
+                      <Typography my={0.75}>Explanation</Typography>
                       <Stack flexDirection="column" flexGrow={1}>
                         <Editor
-                          apiKey={import.meta.env.VITE_TINY_KEY}
-                          value={questionData.explain}
-                          init={{
-                            height: 200,
-                            width: "100%",
-                            menubar: false,
-                            plugins: [
-                              "advlist autolink lists link image charmap print preview anchor",
-                              "searchreplace visualblocks code fullscreen",
-                              "insertdatetime media table paste code help wordcount",
-                            ],
-                            toolbar:
-                              "undo redo | formatselect | bold italic backcolor | \
-               alignleft aligncenter alignright alignjustify | \
-               bullist numlist outdent indent | removeformat | help",
-                          }}
+                          value={question.explanation}
                           onEditorChange={(newContent) =>
-                            handleEditorChange(
-                              group,
-                              questionDataIndex,
+                            setValue(
+                              `questionGroups.${group}.questions.${questionIndex}.explanation`,
                               newContent,
                             )
                           }

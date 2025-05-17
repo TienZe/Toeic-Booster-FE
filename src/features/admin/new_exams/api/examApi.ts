@@ -32,7 +32,7 @@ const fetchAllExam = async (
   limit: number = 12,
   search?: string,
 ) => {
-  const url = `test?${tagId ? `tag_id=${tagId}` : ""}${page ? `&page=${page}` : ""}${limit ? `&limit=${limit}` : ""}${search ? `&search=${search}` : ""}`;
+  const url = `tests?${tagId ? `tag_id=${tagId}` : ""}${page ? `&page=${page}` : ""}${limit ? `&limit=${limit}` : ""}${search ? `&search=${search}` : ""}`;
   const response = await axiosClient.get<IExamSetResponse>(url);
   return response.data;
 };

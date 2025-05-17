@@ -1,7 +1,7 @@
-import { partData } from "./examType";
+import { QuestionGroup } from "../../../../types/ToeicExam";
 
 export default interface NewExamRequest {
   name: string;
-  tags: { id: string; name: string }[];
-  partData: partData[];
+  // tags: { id: string; name: string }[];
+  questionGroups: QuestionGroup[];
 }

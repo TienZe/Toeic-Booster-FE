@@ -21,6 +21,7 @@ import usePaginatedVocaSets from "../../../hooks/usePaginatedVocaSets";
 import DotLoadingProgress from "../../../components/UI/DotLoadingProgress";
 import Link from "../../../components/UI/Link";
 import useCollectionTags from "../../../hooks/useCollectionTags";
+import DefaultVocaSetImg from "../../../assets/images/voca/default.png";
 
 const ratingOptions = [
   { value: 4.5, label: "4.5 & up", count: 10000 },
@@ -132,10 +133,10 @@ const VocaLibraryPage: React.FC = () => {
             <Grid2 key={vocaSet.id} size={6}>
               <Link to={`${vocaSet.id}/lessons`} style={{ display: "flex" }}>
                 <CollectionCard
-                  image={vocaSet.thumbnail}
+                  image={vocaSet.thumbnail || DefaultVocaSetImg}
                   title={vocaSet.name}
                   author={"TienZe"}
-                  description={vocaSet.description}
+                  description={vocaSet.description || ""}
                 />
               </Link>
             </Grid2>

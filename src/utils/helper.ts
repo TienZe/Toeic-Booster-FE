@@ -2,7 +2,6 @@ import VocabularyModel, {
   VocabularyWordClass,
   VocabularyWordClassAbbr,
 } from "../types/VocabularyModel";
-import VocaDefaultThumbnail from "../assets/images/voca/default-voca-image.jpg";
 import { LessonVocabulary } from "../types/LessonVocabulary";
 
 export function getPlaceholderImage(width: number, height: number) {

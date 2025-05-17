@@ -34,42 +34,15 @@ import queryClient from "../../../../queryClient";
 import { UpdateExamReq } from "../types/UpdateExamReq";
 import CustomModal from "../../../../components/UI/CustomModal";
 
+const initExamData: NewExamRequest = {
+  name: "",
+  // tags: [],
+  questionGroups: [],
+};
+
 export default function CreateExam() {
   const navigate = useNavigate();
-  const initExamData: NewExamRequest = {
-    name: "",
-    tags: [],
-    partData: [
-      {
-        part: "part1",
-        groupQuestionData: [],
-      },
-      {
-        part: "part2",
-        groupQuestionData: [],
-      },
-      {
-        part: "part3",
-        groupQuestionData: [],
-      },
-      {
-        part: "part4",
-        groupQuestionData: [],
-      },
-      {
-        part: "part5",
-        groupQuestionData: [],
-      },
-      {
-        part: "part6",
-        groupQuestionData: [],
-      },
-      {
-        part: "part7",
-        groupQuestionData: [],
-      },
-    ],
-  };
+
   const [examData, setExamData] = useState<NewExamRequest>(initExamData);
   const [isUpdate, setIsUpdate] = useState<boolean>(false);
   const [listPart, setListPart] = useState<part[]>([]);
@@ -308,6 +281,7 @@ export default function CreateExam() {
             <Typography color="primary.main" variant="caption">
               Import Data
             </Typography>
+
             <Accordion>
               <AccordionSummary
                 expandIcon={<ArrowDropDownIcon />}
@@ -320,7 +294,9 @@ export default function CreateExam() {
                 <CreatePart1
                   updateExamData={updateExamData}
                   isUpdate={isUpdate}
-                  examData={examData.partData[0].groupQuestionData}
+                  examData={examData.questionGroups.filter(
+                    (questionGroup) => questionGroup.part === "part1",
+                  )}
                   onUpdate={setGroupUpdate}
                 />
               </AccordionDetails>
@@ -338,7 +314,8 @@ export default function CreateExam() {
                 <CreatePart2
                   updateExamData={updateExamData}
                   isUpdate={isUpdate}
-                  examData={examData.partData[1].groupQuestionData}
+                  // examData={examData.partData[1].groupQuestionData}
+                  examData={[]}
                   onUpdate={setGroupUpdate}
                 />
               </AccordionDetails>
@@ -355,7 +332,8 @@ export default function CreateExam() {
                 <CreatePart3
                   updateExamData={updateExamData}
                   isUpdate={isUpdate}
-                  examData={examData.partData[2].groupQuestionData}
+                  // examData={examData.partData[2].groupQuestionData}
+                  examData={[]}
                   onUpdate={setGroupUpdate}
                 />
               </AccordionDetails>
@@ -372,7 +350,8 @@ export default function CreateExam() {
                 <CreatePart4
                   updateExamData={updateExamData}
                   isUpdate={isUpdate}
-                  examData={examData.partData[3].groupQuestionData}
+                  // examData={examData.partData[3].groupQuestionData}
+                  examData={[]}
                   onUpdate={setGroupUpdate}
                 />
               </AccordionDetails>
@@ -389,7 +368,8 @@ export default function CreateExam() {
                 <CreatePart5
                   updateExamData={updateExamData}
                   isUpdate={isUpdate}
-                  examData={examData.partData[4].groupQuestionData}
+                  // examData={examData.partData[4].groupQuestionData}
+                  examData={[]}
                   onUpdate={setGroupUpdate}
                 />
               </AccordionDetails>
@@ -406,7 +386,8 @@ export default function CreateExam() {
                 <CreatePart6
                   updateExamData={updateExamData}
                   isUpdate={isUpdate}
-                  examData={examData.partData[5].groupQuestionData}
+                  // examData={examData.partData[5].groupQuestionData}
+                  examData={[]}
                   onUpdate={setGroupUpdate}
                 />
               </AccordionDetails>
@@ -423,7 +404,8 @@ export default function CreateExam() {
                 <CreatePart7
                   updateExamData={updateExamData}
                   isUpdate={isUpdate}
-                  examData={examData.partData[6].groupQuestionData}
+                  // examData={examData.partData[6].groupQuestionData}
+                  examData={[]}
                   onUpdate={setGroupUpdate}
                 />
               </AccordionDetails>
