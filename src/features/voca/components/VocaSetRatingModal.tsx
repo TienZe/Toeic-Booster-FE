@@ -101,9 +101,9 @@ const VocaSetRatingModal: React.FC<VocaSetRatingModalProps> = ({
     }
 
     const request: PostVocaSetRatingRequest = {
-      vocaSetId,
-      rating: rate,
-      ratingContent: review,
+      collectionId: vocaSetId,
+      rate,
+      personalMessage: review,
     };
 
     postReviewMutation.mutate(request);

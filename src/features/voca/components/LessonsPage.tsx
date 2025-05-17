@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Content from "../../../components/layout/Content";
 import {
   alpha,
@@ -33,6 +33,10 @@ import { getLessonThumbnail } from "../../../types/Lesson";
 import { getVocaSetById } from "../../admin/vocasets/api/voca-set-api";
 import useCollectionLessons from "../../../hooks/useCollectionLessons";
 import VocaChoosingModal from "./VocaChoosingModal";
+import { RootState } from "../../../stores";
+import { useSelector } from "react-redux";
+import Link from "../../../components/UI/Link";
+import { ArrowBackIos } from "@mui/icons-material";
 
 const LessonsPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -40,6 +44,9 @@ const LessonsPage: React.FC = () => {
   const { vocaSetId } = useParams();
   const [tabIndex, setTabIndex] = useState(0);
   const [openRatingModal, setOpenRatingModal] = useState(false);
+  const [alreadyRated, setAlreadyRated] = useState(false);
+
+  const loggedInUser = useSelector((state: RootState) => state.auth.user);
 
   // Lesson whose vocabularies is being filtered
   const [filteredLessonId, setFilteredLessonId] = useState<number | null>(null);
@@ -66,6 +73,14 @@ const LessonsPage: React.FC = () => {
     queryFn: () => getVocaSetRating(vocaSetId!),
     enabled: !!vocaSetId,
   });
+
+  useEffect(() => {
+    if (ratings?.length && loggedInUser) {
+      setAlreadyRated(
+        ratings.some((rating) => rating.user.id === loggedInUser.id),
+      );
+    }
+  }, [ratings, loggedInUser]);
 
   const userProgress: UserProgress = useMemo(() => {
     if (!lessons) {
@@ -134,6 +149,20 @@ const LessonsPage: React.FC = () => {
           <Stack direction="row" justifyContent="space-between">
             {/* List of lessons */}
             <Box>
+              <Link
+                to="/voca"
+                sx={{
+                  color: "primary.main",
+                  lineHeight: 1.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 2,
+                }}
+              >
+                <ArrowBackIos sx={{ fontSize: "14px" }} />
+                All collections
+              </Link>
               <Typography variant="h5">
                 Lesson{" "}
                 <Typography
@@ -348,8 +377,8 @@ const LessonsPage: React.FC = () => {
                       key={rating.id}
                       reviewer={rating.user.name}
                       reviewerAvatar={rating.user.avatar || DefaultAvatar}
-                      rating={rating.rating}
-                      ratingContent={rating.ratingContent}
+                      rating={rating.rate}
+                      ratingContent={rating.personalMessage}
                       rateDate={format(
                         new Date(rating.createdAt),
                         "dd/MM/yyyy",
@@ -379,10 +408,13 @@ const LessonsPage: React.FC = () => {
                         cursor: "pointer !important",
                       },
                       "& input:hover": {
-                        textDecoration: "underline",
+                        textDecoration: alreadyRated ? "none" : "underline",
                       },
                     }}
-                    onClick={() => setOpenRatingModal(true)}
+                    onClick={() => {
+                      if (alreadyRated) return;
+                      setOpenRatingModal(true);
+                    }}
                   />
                 </Stack>
               </Paper>
