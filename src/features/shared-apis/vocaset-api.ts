@@ -33,12 +33,11 @@ export async function getVocaSetLessons(
 export async function getRecommendedVocaSets(
   request: GetRecommendedCollectionRequest,
 ) {
-  const response = await axiosClient.get<ApiResponse<VocaSetModel[]>>(
-    "/collections/recommend",
-    {
-      params: request,
-    },
-  );
+  const response = await axiosClient.get<
+    ApiResponse<PaginatedData<VocaSetModel>>
+  >("/collections/recommend", {
+    params: request,
+  });
 
   return response.data.data;
 }

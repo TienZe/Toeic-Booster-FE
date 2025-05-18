@@ -54,12 +54,14 @@ const VocaLibraryPage: React.FC = () => {
     },
   });
 
-  const { data: vocaSets, isLoading: isLoadingVocaSets } =
+  const { data: paginatedVocaSets, isLoading: isLoadingVocaSets } =
     useRecommendedVocaSets(
       {},
       {
         filterTitle: actualFilterInput.filterTitle,
         filterCategories: actualFilterInput.filterCategories,
+        page,
+        limit: 10,
       },
     );
 
@@ -67,6 +69,7 @@ const VocaLibraryPage: React.FC = () => {
 
   const handleSubmitFitler = (data: FilterCollectionFormData) => {
     setActualFilterInput({ ...data });
+    setPage(0);
   };
 
   return (
@@ -160,7 +163,7 @@ const VocaLibraryPage: React.FC = () => {
         </Box>
 
         <Grid2 container rowGap={1.5} sx={{ marginTop: 3 }}>
-          {vocaSets?.map((vocaSet) => (
+          {paginatedVocaSets?.items.map((vocaSet) => (
             <Grid2 key={vocaSet.id} size={6}>
               <Link to={`${vocaSet.id}/lessons`} style={{ display: "flex" }}>
                 <CollectionCard
@@ -188,9 +191,9 @@ const VocaLibraryPage: React.FC = () => {
           }}
         >
           <Pagination
-            count={0}
-            page={page}
-            onChange={(_, value) => setPage(value)}
+            count={paginatedVocaSets?.totalPages || 0}
+            page={page + 1}
+            onChange={(_, value) => setPage(value - 1)}
             color="primary"
           />
         </Box>
