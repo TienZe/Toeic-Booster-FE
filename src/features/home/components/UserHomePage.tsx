@@ -21,7 +21,6 @@ import "swiper/css/autoplay";
 import "swiper/css/pagination";
 
 import { Autoplay, Pagination } from "swiper/modules";
-import VocaSet from "../../../components/VocaSet";
 import ExamCard from "./ExamCard";
 import ViewMoreButton from "./ViewMoreButton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -43,9 +42,9 @@ import { toast } from "react-toastify";
 import { differenceInDays, format } from "date-fns";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop";
 import { fetchLast4PracticeDetailUser } from "../api/lastPractice.api";
-import { getTop8Vocab } from "../api/TopVocab.api";
-import { getTopTestTaken } from "../api/TopTest.api";
 import Link from "../../../components/UI/Link";
+import { getVocaSetsUserMightAlsoLike } from "../../shared-apis/vocaset-api";
+import PortraitCollectionCard from "../../../components/PortraitCollectionCard";
 
 type UserTargetFormData = {
   testDate: string;
@@ -69,18 +68,16 @@ const UserHomePage = () => {
   });
 
   const { data: top8Vocab } = useQuery({
-    queryKey: ["top8Vocab"],
-    queryFn: () => getTop8Vocab(),
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
+    queryKey: ["vocaSetsUserMightAlsoLike"],
+    queryFn: () => getVocaSetsUserMightAlsoLike(),
   });
 
-  const { data: topTest } = useQuery({
-    queryKey: ["top8Test"],
-    queryFn: () => getTopTestTaken(),
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
+  // const { data: topTest } = useQuery({
+  //   queryKey: ["top8Test"],
+  //   queryFn: () => getTopTestTaken(),
+  // });
+
+  const topTest = [];
 
   const [openChangeTargetModal, setOpenChangeTargetModal] = useState(false);
 
@@ -253,7 +250,7 @@ const UserHomePage = () => {
           {/* popular voca sets section */}
           <Box sx={{ py: 7 }}>
             <Typography variant="h4" color="primary.main" textAlign={"center"}>
-              Top Vocabulary Sets - Most Studied by Learners
+              Vocabulary Sets You Might Also Like
             </Typography>
 
             <Box
@@ -279,31 +276,25 @@ const UserHomePage = () => {
                     slidesPerView: 2,
                   },
                   900: {
-                    slidesPerView: 3,
+                    slidesPerView: 4,
                     spaceBetween: 20,
                   },
                   1200: {
-                    slidesPerView: 4,
+                    slidesPerView: 5,
                   },
                 }}
                 style={{ paddingBottom: "40px" }}
               >
-                {top8Vocab?.map((vocab) => {
+                {top8Vocab?.map((vocaSet) => {
                   return (
                     <SwiperSlide
                       onClick={() => {
-                        window.location.href = `/voca/${vocab.groupTopic_id}/lessons`;
+                        window.location.href = `/voca/${vocaSet.id}/lessons`;
                       }}
-                      key={vocab.groupTopic_id}
+                      key={vocaSet.id}
                       style={{ alignSelf: "stretch", height: "auto" }}
                     >
-                      <VocaSet
-                        id={vocab.groupTopic_id}
-                        title={vocab.groupTopic_name}
-                        qualification={vocab.groupTopic_level}
-                        takenNumber={vocab.userCount}
-                        image={vocab.groupTopic_thumbnail}
-                      />
+                      <PortraitCollectionCard vocaSet={vocaSet} />
                     </SwiperSlide>
                   );
                 })}
@@ -390,9 +381,13 @@ const UserHomePage = () => {
                     value={new Date(userTargetState.testDate)}
                     onChange={(date) => {
                       if (date) {
-                        userTargetForm.setValue("testDate", date.toISOString().split("T")[0], {
-                          shouldValidate: true,
-                        });
+                        userTargetForm.setValue(
+                          "testDate",
+                          date.toISOString().split("T")[0],
+                          {
+                            shouldValidate: true,
+                          },
+                        );
                       }
                     }}
                     slotProps={{

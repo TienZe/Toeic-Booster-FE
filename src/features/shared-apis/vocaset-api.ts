@@ -44,3 +44,11 @@ export async function getSimilarVocaSets(vocaSetId: number | string) {
 
   return response.data.data;
 }
+
+export async function getVocaSetsUserMightAlsoLike() {
+  const response = await axiosClient.get<ApiResponse<VocaSetModel[]>>(
+    "/collections/user-might-also-like",
+  );
+
+  return response.data.data;
+}

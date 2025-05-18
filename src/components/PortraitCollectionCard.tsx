@@ -54,7 +54,7 @@ const PortraitCollectionCard: React.FC<{
             color="text.secondary"
             fontSize={"0.875rem"}
           >
-            {briefString(vocaSet.description || "", 50)}
+            {briefString(vocaSet.description || "", 70)}
           </Typography>
         </CardContent>
       </Box>
