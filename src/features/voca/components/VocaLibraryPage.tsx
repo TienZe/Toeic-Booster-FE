@@ -22,6 +22,7 @@ import Link from "../../../components/UI/Link";
 import useCollectionTags from "../../../hooks/useCollectionTags";
 import DefaultVocaSetImg from "../../../assets/images/voca/default.png";
 import useRecommendedVocaSets from "../../../hooks/useRecommendedVocaSets";
+import { Controller, useForm } from "react-hook-form";
 
 const ratingOptions = [
   { value: 4.5, label: "4.5 & up", count: 10000 },
@@ -30,17 +31,43 @@ const ratingOptions = [
   { value: 3.0, label: "3.0 & up", count: 10000 },
 ];
 
+interface FilterCollectionFormData {
+  filterTitle?: string;
+  filterCategories?: string[];
+}
+
 const VocaLibraryPage: React.FC = () => {
   const [page, setPage] = useState(0);
 
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-
   const [selectedRating, setSelectedRating] = useState<number | null>(4.5);
 
+  const [actualFilterInput, setActualFilterInput] =
+    useState<FilterCollectionFormData>({
+      filterTitle: "",
+      filterCategories: [],
+    }); // use for triggering re-fetching the voca sets
+
+  const filterCollectionForm = useForm<FilterCollectionFormData>({
+    defaultValues: {
+      filterTitle: "",
+      filterCategories: [],
+    },
+  });
+
   const { data: vocaSets, isLoading: isLoadingVocaSets } =
-    useRecommendedVocaSets();
+    useRecommendedVocaSets(
+      {},
+      {
+        filterTitle: actualFilterInput.filterTitle,
+        filterCategories: actualFilterInput.filterCategories,
+      },
+    );
 
   const { data: collectionTags } = useCollectionTags();
+
+  const handleSubmitFitler = (data: FilterCollectionFormData) => {
+    setActualFilterInput({ ...data });
+  };
 
   return (
     <Content>
@@ -64,10 +91,12 @@ const VocaLibraryPage: React.FC = () => {
               backgroundColor: "#f6f8fa",
             }}
             elevation={0}
+            onSubmit={filterCollectionForm.handleSubmit(handleSubmitFitler)}
           >
             <InputBase
               sx={{ ml: 1, flex: 1 }}
               placeholder="Search vocabulary lists"
+              {...filterCollectionForm.register("filterTitle")}
             />
             <IconButton type="submit" sx={{ p: "10px", color: "primary.main" }}>
               <SearchIcon />
@@ -88,31 +117,37 @@ const VocaLibraryPage: React.FC = () => {
               Collection Finder
             </Box>
           </Paper>
-
           {/* Filter */}
 
           <Stack direction="row" gap={1} mt={1}>
-            <MultipleSelectCheckmarks
-              label="Categories"
-              itemLabels={collectionTags?.map((tag) => tag.tagName) || []}
-              itemValues={collectionTags?.map((tag) => tag.id) || []}
-              value={selectedCategories}
-              onChange={(newSelectedCategories) =>
-                setSelectedCategories(newSelectedCategories as number[])
-              }
-              menuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-              }}
-              menuWidth="240px"
-              sx={{ borderRadius: "20px" }}
-              labelType="inside"
+            <Controller
+              name="filterCategories"
+              control={filterCollectionForm.control}
+              render={({ field }) => (
+                <MultipleSelectCheckmarks
+                  label="Categories"
+                  itemLabels={collectionTags?.map((tag) => tag.tagName) || []}
+                  itemValues={collectionTags?.map((tag) => tag.tagName) || []}
+                  menuProps={{
+                    anchorOrigin: {
+                      vertical: "bottom",
+                      horizontal: "left",
+                    },
+                    transformOrigin: {
+                      vertical: "top",
+                      horizontal: "left",
+                    },
+                  }}
+                  menuWidth="240px"
+                  sx={{
+                    borderRadius: "20px",
+                    "& .MuiSelect-select": { lineHeight: "24px" },
+                  }}
+                  labelType="inside"
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
 
             <RatingFilterDropdown

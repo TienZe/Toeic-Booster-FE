@@ -5,6 +5,7 @@ import VocaSetModel from "../../types/VocaSetModel";
 import { GetVocaSetsRequest } from "./types/GetVocaSetsRequest";
 import ApiResponse from "../../types/ApiResponse";
 import { GetCollectionLessonsRequest } from "./types/GetCollectionLessonsRequest";
+import { GetRecommendedCollectionRequest } from "./types/GetRecommendedCollectionRequest";
 export async function getAllVocaSets(request: GetVocaSetsRequest) {
   const response = await axiosClient.get<
     ApiResponse<PaginatedData<VocaSetModel>>
@@ -29,9 +30,14 @@ export async function getVocaSetLessons(
   return response.data.data;
 }
 
-export async function getRecommendedVocaSets() {
+export async function getRecommendedVocaSets(
+  request: GetRecommendedCollectionRequest,
+) {
   const response = await axiosClient.get<ApiResponse<VocaSetModel[]>>(
     "/collections/recommend",
+    {
+      params: request,
+    },
   );
 
   return response.data.data;

@@ -95,6 +95,7 @@ const MultipleSelectCheckmarks: React.FC<MultipleSelectCheckmarksProps> = ({
         value={value}
         onChange={handleChange}
         onBlur={onBlur}
+        displayEmpty
         input={
           <OutlinedInput label={labelType === "mui" ? label : undefined} />
         }
