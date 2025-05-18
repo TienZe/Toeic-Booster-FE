@@ -3,6 +3,7 @@ import Content from "../../../components/layout/Content";
 import {
   alpha,
   Box,
+  Grid2,
   OutlinedInput,
   Paper,
   Stack,
@@ -37,6 +38,8 @@ import { RootState } from "../../../stores";
 import { useSelector } from "react-redux";
 import Link from "../../../components/UI/Link";
 import { ArrowBackIos } from "@mui/icons-material";
+import PortraitCollectionCard from "../../../components/PortraitCollectionCard";
+import useSimilarVocaSets from "../../../hooks/useSimilarVocaSets";
 
 const LessonsPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -67,6 +70,10 @@ const LessonsPage: React.FC = () => {
       withUserLearningProgress: 1,
     },
   );
+
+  const { data: similarVocaSets } = useSimilarVocaSets(vocaSetId!, {
+    enabled: !!vocaSetId,
+  });
 
   const { data: ratings } = useQuery({
     queryKey: ["vocaSetRating", { vocaSetId: vocaSetId }],
@@ -148,70 +155,72 @@ const LessonsPage: React.FC = () => {
         <Box sx={{ maxWidth: "1200px", mx: "auto", px: 1, py: 3 }}>
           <Stack direction="row" justifyContent="space-between">
             {/* List of lessons */}
-            <Box>
-              <Link
-                to="/voca"
-                sx={{
-                  color: "primary.main",
-                  lineHeight: 1.5,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                  mb: 2,
-                }}
-              >
-                <ArrowBackIos sx={{ fontSize: "14px" }} />
-                All collections
-              </Link>
-              <Typography variant="h5">
-                Lesson{" "}
-                <Typography
-                  component="span"
-                  color="primary"
+            <Stack justifyContent="space-between">
+              <Box>
+                <Link
+                  to="/voca"
                   sx={{
-                    marginTop: "-4px",
-                    fontWeight: "medium",
-                    lineHeight: 2,
-                    display: "inline-block",
-                    textAlign: "center",
-                    fontSize: "15px",
-                    marginLeft: "15px",
-                    borderRadius: "50%",
-                    width: 30,
-                    height: 30,
-                    backgroundColor: (theme) =>
-                      alpha(theme.palette.primary.main, 0.1),
+                    color: "primary.main",
+                    lineHeight: 1.5,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    mb: 2,
                   }}
                 >
-                  {lessons?.length || 0}
+                  <ArrowBackIos sx={{ fontSize: "14px" }} />
+                  All collections
+                </Link>
+                <Typography variant="h5">
+                  Lesson{" "}
+                  <Typography
+                    component="span"
+                    color="primary"
+                    sx={{
+                      marginTop: "-4px",
+                      fontWeight: "medium",
+                      lineHeight: 2,
+                      display: "inline-block",
+                      textAlign: "center",
+                      fontSize: "15px",
+                      marginLeft: "15px",
+                      borderRadius: "50%",
+                      width: 30,
+                      height: 30,
+                      backgroundColor: (theme) =>
+                        alpha(theme.palette.primary.main, 0.1),
+                    }}
+                  >
+                    {lessons?.length || 0}
+                  </Typography>
                 </Typography>
-              </Typography>
-              <Box sx={{ marginTop: "40px", maxWidth: "800px" }}>
-                <Box display="flex" flexWrap="wrap" sx={{ gap: 3 }}>
-                  {lessons?.length && lessons.length > 0 ? (
-                    lessons.map((lesson) => (
-                      <LessonCourse
-                        key={lesson.id}
-                        id={lesson.id}
-                        name={lesson.name}
-                        thumbnail={getLessonThumbnail(lesson)}
-                        totalWords={lesson.numOfWords}
-                        retainedWords={lesson.retainedWords || 0}
-                        reviewable={lesson.learningStep === "examined"}
-                        vocaSetId={vocaSetId}
-                        onStartLearning={() => {
-                          handleStartLearningLesson(lesson.id);
-                        }}
-                      />
-                    ))
-                  ) : (
-                    <Typography>
-                      Opps, this voca set doesn't have any lessons...
-                    </Typography>
-                  )}
+                <Box sx={{ marginTop: "40px", maxWidth: "800px" }}>
+                  <Box display="flex" flexWrap="wrap" sx={{ gap: 3 }}>
+                    {lessons?.length && lessons.length > 0 ? (
+                      lessons.map((lesson) => (
+                        <LessonCourse
+                          key={lesson.id}
+                          id={lesson.id}
+                          name={lesson.name}
+                          thumbnail={getLessonThumbnail(lesson)}
+                          totalWords={lesson.numOfWords}
+                          retainedWords={lesson.retainedWords || 0}
+                          reviewable={lesson.learningStep === "examined"}
+                          vocaSetId={vocaSetId}
+                          onStartLearning={() => {
+                            handleStartLearningLesson(lesson.id);
+                          }}
+                        />
+                      ))
+                    ) : (
+                      <Typography>
+                        Opps, this voca set doesn't have any lessons...
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
               </Box>
-            </Box>
+            </Stack>
 
             {/* Collection bar */}
             <Stack
@@ -419,6 +428,19 @@ const LessonsPage: React.FC = () => {
                 </Stack>
               </Paper>
             </Stack>
+          </Stack>
+
+          <Stack sx={{ marginTop: 3 }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>
+              Students Also Studied
+            </Typography>
+            <Grid2 container spacing={1}>
+              {similarVocaSets?.map((vocaSet) => (
+                <Grid2 sx={{ display: "flex" }}>
+                  <PortraitCollectionCard vocaSet={vocaSet} />
+                </Grid2>
+              ))}
+            </Grid2>
           </Stack>
 
           <VocaSetRatingModal

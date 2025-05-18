@@ -17,11 +17,11 @@ import Content from "../../../components/layout/Content";
 import MultipleSelectCheckmarks from "../../../components/UI/MultipleSelectCheckmarks";
 import RatingFilterDropdown from "../../../components/UI/RatingFilterDropdown";
 import CollectionCard from "../../../components/CollectionCard";
-import usePaginatedVocaSets from "../../../hooks/usePaginatedVocaSets";
 import DotLoadingProgress from "../../../components/UI/DotLoadingProgress";
 import Link from "../../../components/UI/Link";
 import useCollectionTags from "../../../hooks/useCollectionTags";
 import DefaultVocaSetImg from "../../../assets/images/voca/default.png";
+import useRecommendedVocaSets from "../../../hooks/useRecommendedVocaSets";
 
 const ratingOptions = [
   { value: 4.5, label: "4.5 & up", count: 10000 },
@@ -37,12 +37,8 @@ const VocaLibraryPage: React.FC = () => {
 
   const [selectedRating, setSelectedRating] = useState<number | null>(4.5);
 
-  const { data: vocaSets, isLoading: isLoadingVocaSets } = usePaginatedVocaSets(
-    {
-      page: 0,
-      limit: 10,
-    },
-  );
+  const { data: vocaSets, isLoading: isLoadingVocaSets } =
+    useRecommendedVocaSets();
 
   const { data: collectionTags } = useCollectionTags();
 
@@ -129,7 +125,7 @@ const VocaLibraryPage: React.FC = () => {
         </Box>
 
         <Grid2 container rowGap={1.5} sx={{ marginTop: 3 }}>
-          {vocaSets?.items?.map((vocaSet) => (
+          {vocaSets?.map((vocaSet) => (
             <Grid2 key={vocaSet.id} size={6}>
               <Link to={`${vocaSet.id}/lessons`} style={{ display: "flex" }}>
                 <CollectionCard

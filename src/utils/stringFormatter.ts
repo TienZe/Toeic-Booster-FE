@@ -2,10 +2,19 @@ export function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export function briefString(str: string, maxWords: number = 25) {
-  const words = str.split(" ");
-  if (words.length <= maxWords) {
+export function briefString(str: string, maxCharacters: number = 50) {
+  if (str.length <= maxCharacters) {
     return str;
   }
-  return words.slice(0, maxWords).join(" ") + "...";
+
+  const strSlice = str.slice(0, maxCharacters);
+
+  if (strSlice[maxCharacters] === " ") {
+    return strSlice + " ...";
+  }
+
+  // Remove the last word
+  const words = strSlice.split(" ");
+  words.pop();
+  return words.join(" ") + " ...";
 }

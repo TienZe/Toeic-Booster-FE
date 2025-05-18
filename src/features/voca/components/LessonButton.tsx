@@ -3,7 +3,7 @@ import { Button, styled } from "@mui/material";
 const LessonButton = styled(Button)(({ theme, variant }) => ({
   boxShadow: "none",
   width: "100%",
-  fontSize: "15px",
+  fontSize: "14px",
   borderRadius: "10px",
   minHeight: "53px",
   "&:hover": {

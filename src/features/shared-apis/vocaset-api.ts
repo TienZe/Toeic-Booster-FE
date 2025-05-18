@@ -28,3 +28,19 @@ export async function getVocaSetLessons(
 
   return response.data.data;
 }
+
+export async function getRecommendedVocaSets() {
+  const response = await axiosClient.get<ApiResponse<VocaSetModel[]>>(
+    "/collections/recommend",
+  );
+
+  return response.data.data;
+}
+
+export async function getSimilarVocaSets(vocaSetId: number | string) {
+  const response = await axiosClient.get<ApiResponse<VocaSetModel[]>>(
+    `/collections/${vocaSetId}/similar`,
+  );
+
+  return response.data.data;
+}

@@ -93,7 +93,7 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
             mt: 0.5,
           }}
         >
-          {briefString(description)}
+          {briefString(description, 160)}
         </Typography>
       </CardContent>
     </Card>

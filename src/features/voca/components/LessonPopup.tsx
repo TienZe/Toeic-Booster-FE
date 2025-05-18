@@ -73,7 +73,7 @@ const LessonPopup: React.FC<LessonPopupProps> = ({
       >
         <Typography
           sx={{
-            fontSize: "20px",
+            fontSize: "16px",
             textTransform: "uppercase",
             fontWeight: "medium",
           }}
