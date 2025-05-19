@@ -1,9 +1,12 @@
 import axiosClient from "../../../../axios";
+import ApiResponse from "../../../../types/ApiResponse";
+import { ToeicExam } from "../../../../types/ToeicExam";
 import { Tag } from "../../../toeic-exam/types/Tags";
-import { IExamSetResponse } from "../types/Exam";
 import { ExamResponse } from "../types/ExamResponse";
 import NewExamRequest from "../types/NewExamRequest";
+import { SaveToeicTestRequest } from "../types/SaveToeicTestRequest";
 
+// deprecated
 const uploadFile = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
@@ -26,29 +29,17 @@ const uploadFile = async (file: File) => {
   }
 };
 
-const fetchAllExam = async (
-  tagId?: string,
-  page: number = 1,
-  limit: number = 12,
-  search?: string,
-) => {
-  const url = `tests?${tagId ? `tag_id=${tagId}` : ""}${page ? `&page=${page}` : ""}${limit ? `&limit=${limit}` : ""}${search ? `&search=${search}` : ""}`;
-  const response = await axiosClient.get<IExamSetResponse>(url);
-  return response.data;
-};
-
 const fetchExamById = async (examId: string) => {
   const response = await axiosClient.get<ExamResponse>(`test/${examId}`);
   return response.data;
 };
 
 const createExam = async (data: NewExamRequest) => {
-  const response = await axiosClient.post(`test`, data);
-  return response.data;
-};
-
-const getListPart = async () => {
-  return await axiosClient.get(`part`);
+  const response = await axiosClient.post<ApiResponse<ToeicExam>>(
+    `toeic-tests`,
+    data,
+  );
+  return response.data.data;
 };
 
 const fetchListTags = async () => {
@@ -61,6 +52,7 @@ const updateGroupQuestion = async (id: string, data: any) => {
   return response.data;
 };
 
+// deprecated
 const updateNameExam = async (id: string, data: any) => {
   const response = await axiosClient.patch(`test/${id}`, { ...data });
   return response.data;
@@ -71,11 +63,18 @@ const deleteEntireExam = async (id: string) => {
   return response.data;
 };
 
+export async function saveExam(request: SaveToeicTestRequest) {
+  const response = await axiosClient.post<ApiResponse<ToeicExam>>(
+    `toeic-tests`,
+    request,
+  );
+
+  return response.data.data;
+}
+
 export {
   uploadFile,
   createExam,
-  getListPart,
-  fetchAllExam,
   fetchExamById,
   fetchListTags,
   updateGroupQuestion,

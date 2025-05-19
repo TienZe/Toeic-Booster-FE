@@ -1,7 +1,9 @@
 export interface QuestionGroup {
   id: string;
   part: string;
-  transcript: string;
+  transcript: string | null;
+
+  groupIndex: number;
 
   questions: Question[];
   medias: QuestionMedia[];
@@ -24,6 +26,16 @@ export interface QuestionMedia {
   fileUrl: string;
   order?: number;
   fileType: string;
+}
+
+export interface ToeicExam {
+  id: number;
+  name: string;
+
+  tag?: number;
+  questionGroups?: QuestionGroup[];
+
+  createdAt: string;
 }
 
 export function answerIndexToLabel(index: number) {

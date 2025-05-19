@@ -12,7 +12,7 @@ import InforUserBox from "../InforUserBox";
 import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  fetchAllExam,
+  // fetchAllExam,
   fetchListTags,
 } from "../../../admin/new_exams/api/examApi";
 import DotLoadingProgress from "../../../../components/UI/DotLoadingProgress";

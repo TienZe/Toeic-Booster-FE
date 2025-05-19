@@ -19,7 +19,6 @@ import LessonDetailsPage from "./features/admin/vocasets/pages/LessonDetailsPage
 import VocabularyDetailsPage from "./features/admin/vocasets/pages/VocabularyDetailsPage.tsx";
 import LessonsPage from "./features/voca/components/LessonsPage.tsx";
 import CreateExam from "./features/admin/new_exams/components/createExam.tsx";
-import ExamSet from "./features/admin/new_exams/components/ExamIndexPage.tsx";
 import ExamsListPage from "./features/toeic-exam/components/Exams/ExamsLibraryPage.tsx";
 import PartIndex from "./features/toeic-exam/components/PartIndex.tsx";
 import ResultPage from "./features/toeic-exam/components/ResultPage.tsx";
@@ -32,7 +31,6 @@ import UserHistoryPage from "./features/practice-history/components/UserHistoryP
 import PersonalWordFolderPage from "./features/voca/components/PersonalWordFolderPage.tsx";
 import FolderDetailsPage from "./features/voca/components/FolderDetailsPage.tsx";
 import FolderPracticePage from "./features/voca/components/FolderPracticePage.tsx";
-import FolderPracticeResultPage from "./features/voca/components/FolderPracticeResultPage.tsx";
 import ListListenGroup from "./features/listen/pages/ListListenGroup.tsx";
 import ListenPractice from "./features/listen/pages/ListenPractice.tsx";
 
@@ -46,6 +44,7 @@ import AccountIndexPage from "./features/admin/accounts/components/AccountIndexP
 import WordIndexPage from "./features/admin/vocasets/pages/WordIndexPage.tsx";
 import VocaLearningInstructionPage from "./features/voca/components/VocaLearningInstructionPage.tsx";
 import VocaFilteringPage from "./features/voca/components/VocaFilteringPage.tsx";
+import ExamIndexPage from "./features/admin/new_exams/components/ExamIndexPage.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -216,13 +215,13 @@ export const router = createBrowserRouter([
         index: true,
         element: <Dashboard />,
       },
-      {
-        path: "createExam",
-        element: <CreateExam />,
-      },
+      // {
+      //   path: "createExam",
+      //   element: <CreateExam />,
+      // },
       {
         path: "exam-set",
-        element: <ExamSet />,
+        element: <ExamIndexPage />,
       },
       {
         path: "exam-set/:examId",

@@ -3,227 +3,113 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { useEffect, useState } from "react";
-import _ from "lodash";
-import { Box, Button, CircularProgress, Stack, TextField } from "@mui/material";
-import { groupQuestionData, part } from "../types/examType";
+import { useCallback, useEffect, useState } from "react";
+import { Box, Button, CircularProgress, Stack } from "@mui/material";
 import CreatePart1 from "./CreatePart1";
 import CreatePart3 from "./CreatePart3";
 import CreatePart2 from "./CreatePart2";
 import CreatePart4 from "./CreatePart4";
 import CreatePart5 from "./CreatePart5";
 import CreatePart6 from "./CreatePart6";
-import {
-  createExam,
-  fetchExamById,
-  fetchListTags,
-  getListPart,
-  updateGroupQuestion,
-  updateNameExam,
-} from "../api/examApi";
+import { saveExam, updateGroupQuestion } from "../api/examApi";
 import { GoBackButton } from "../../../../components/UI/GoBackButton";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import NewExamRequest from "../types/NewExamRequest";
+import { useMutation } from "@tanstack/react-query";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
-import { convertExamResponse } from "../utils/helper";
-import TagSelect from "./TagSelect";
 import CreatePart7 from "./CreatePart7";
 import queryClient from "../../../../queryClient";
 import { UpdateExamReq } from "../types/UpdateExamReq";
 import CustomModal from "../../../../components/UI/CustomModal";
+import RoundedInput from "../../../../components/UI/RoundedInput";
+import BootstrapSelect from "../../../../components/UI/BootstrapSelect";
+import { SaveToeicTestRequest } from "../types/SaveToeicTestRequest";
+import useToeicExam from "../../../../hooks/useToeicExam";
+import { FormProvider, useForm } from "react-hook-form";
+import { QuestionGroup } from "../../../../types/ToeicExam";
+import { TOEIC_PARTS } from "../types/examType";
+import { DEFAULT_QUESTION_GROUP } from "../../../../utils/defaultToeicTestQuestionGroups";
 
-const initExamData: NewExamRequest = {
+const DEFAULT_FORM_VALUE: SaveToeicTestRequest = {
   name: "",
-  // tags: [],
-  questionGroups: [],
+  tag: undefined,
+  questionGroups: DEFAULT_QUESTION_GROUP,
 };
 
 export default function CreateExam() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+  console.log("PARENT RENDER");
+  const { examId } = useParams();
 
-  const [examData, setExamData] = useState<NewExamRequest>(initExamData);
-  const [isUpdate, setIsUpdate] = useState<boolean>(false);
-  const [listPart, setListPart] = useState<part[]>([]);
-  const [groupUpdate, setGroupUpdate] = useState<UpdateExamReq | null>(null);
-  const [modalUpdate, setModalUpdate] = useState<boolean>(false);
-  const routeParams = useParams<{ examId: string }>();
-  const examId = routeParams.examId;
-
-  const { isPending, data: ExamSetData } = useQuery({
-    queryKey: ["FetchExamSet", examId],
-    queryFn: () => fetchExamById(examId!),
+  const {
+    isLoading: isLoadingToeicTest,
+    data: toeicTest,
+    isFetching: isFetchingToeicTest,
+  } = useToeicExam(examId!, {
     enabled: !!examId,
   });
 
-  const { data: tags } = useQuery({
-    queryKey: ["FetchListTags"],
-    queryFn: () => fetchListTags(),
+  const form = useForm<SaveToeicTestRequest>({
+    defaultValues: DEFAULT_FORM_VALUE,
   });
 
-  useEffect(() => {
-    if (examId && ExamSetData) {
-      setIsUpdate(true);
-      console.log("exam ", ExamSetData);
-      console.log("converve data", convertExamResponse(ExamSetData));
-      const convertedData = convertExamResponse(ExamSetData);
-      setExamData(convertedData);
-    }
-  }, [ExamSetData]);
-
-  console.log("examData", examData, ExamSetData);
-
-  useEffect(() => {
-    fetchListPart();
-    console.log(listPart);
-  }, []);
-
-  const fetchListPart = async () => {
-    const res = await getListPart();
-    if (res.status === 200) {
-      console.log("part", res.data);
-      setListPart(res.data);
-    }
-  };
-
-  const updateExamData = (data: groupQuestionData[], part: string) => {
-    let updateExamData = { ...examData };
-    let { partData: partDataClone } = updateExamData;
-    const partExamData = partDataClone.find(
-      (partExamDataObj) => partExamDataObj.part === part,
-    );
-    if (
-      partExamData?.groupQuestionData &&
-      partExamData.groupQuestionData.length >= 0
-    ) {
-      partExamData.groupQuestionData = data;
-    }
-    setExamData(updateExamData);
-  };
-
-  const handleChangeName = (value: string) => {
-    const updatedExamData = { ...examData, name: value };
-    setExamData(updatedExamData);
-  };
-
-  const handleChangeTag = (value: string) => {
-    const selectedTag = tags?.find((tag) => tag?.id === value);
-    console.log(selectedTag);
-    if (!selectedTag) {
-      console.log("cannot find tag");
-      return;
-    }
-    const selectedTagModel = {
-      id: selectedTag.id,
-      name: selectedTag.name,
-    };
-    const updatedExamData = {
-      ...examData,
-      tags: [selectedTagModel],
-    };
-    setExamData(updatedExamData);
-  };
-
-  const createExamMuatation = useMutation({
-    mutationFn: async (newExam: NewExamRequest) => {
-      return await createExam(newExam);
-    },
-    onSuccess() {
-      setExamData(initExamData);
-      navigate("/admin/exam-set");
-      toast.success("Exam created successfully");
-    },
-    onError(error) {
-      console.log("error", error);
-      toast.error("Create Exam Error");
-    },
-  });
-
-  const handleCreateTest = () => {
-    const examDataClone = { ...examData };
-    if (examDataClone.name === "") {
-      toast.error("Name is required");
-      return;
-    }
-    const {
-      name: nameClone,
-      tags: tagClone,
-      partData: partDataClone,
-    } = examDataClone;
-    const transferPart = partDataClone.map((item) => {
-      const matchedPart = listPart.find((part) => part.key === item.part);
-      return {
-        ...item,
-        part: matchedPart?.id ?? "",
-      };
-    });
-    const validExamData = transferPart.filter(
-      (item) => item.groupQuestionData.length > 0,
-    );
-    console.log(validExamData);
-    const newExam = {
-      name: nameClone,
-      tags: tagClone,
-      partData: validExamData,
-    };
-    console.log(newExam);
-    createExamMuatation.mutate(newExam);
-  };
-
-  const updateGroupMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: UpdateExamReq }) => {
-      const response = await updateGroupQuestion(id, data);
-      return response;
-    },
+  const {
+    mutate: updateExam,
+    isPending: isUpdatingExam,
+    reset: resetUpdateExam,
+  } = useMutation({
+    mutationFn: saveExam,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["FetchExamSet", examId] });
-      toast.success("Update group successfully!");
-    },
-    onSettled: () => {
-      setGroupUpdate(null);
-      updateGroupMutation.reset();
-    },
-  });
-
-  const updateExamMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await updateNameExam(examId!!, data);
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["FetchExamSet", examId] });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "toeicExam",
+          {
+            examId: examId,
+          },
+        ],
+      });
       toast.success("Update exam successfully!");
-      navigate("/admin/exam-set");
     },
     onSettled: () => {
-      setModalUpdate(false);
-      updateGroupMutation.reset();
+      resetUpdateExam();
     },
   });
 
-  const handleUpdateGroup = () => {
-    if (groupUpdate) {
-      const { id, ...data } = groupUpdate;
-      if (id) {
-        updateGroupMutation.mutate({ id, data: data });
-      }
-    }
-  };
+  const handleUpdateExam = useCallback(
+    (groupIndex: number) => {
+      const data = form.getValues(`questionGroups.${groupIndex}`);
 
-  const handleUpdateExam = () => {
-    if (!examId) {
-      return;
+      const request: SaveToeicTestRequest = {
+        id: toeicTest?.id,
+        questionGroups: [data],
+      };
+
+      console.log("FORM DATA", request);
+      updateExam(request);
+    },
+    [updateExam, form, toeicTest],
+  );
+
+  useEffect(() => {
+    if (toeicTest && !isUpdatingExam && !isFetchingToeicTest) {
+      form.reset(toeicTest);
     }
-    const data = {
-      name: examData.name,
-      tag: examData.tags[0].id,
-    };
-    updateExamMutation.mutate(data);
-  };
+  }, [toeicTest, form, updateExam, isUpdatingExam, isFetchingToeicTest]);
+
+  useEffect(() => {
+    console.log("FORM CHANGED", form.getValues());
+  }, [form]);
+
+  useEffect(() => {
+    console.log("updateExam CHANGED");
+  }, [updateExam]);
+
+  useEffect(() => {
+    console.log("TOEIC TEST CHANGED", toeicTest);
+  }, [toeicTest]);
 
   return (
-    <>
+    <FormProvider {...form}>
       <Box
         sx={{
           padding: 3,
@@ -234,206 +120,163 @@ export default function CreateExam() {
           justifyContent="space-between"
           alignItems="start"
         >
-          <Typography color="primary.main" variant="h5">
-            {!isUpdate ? "Create Exam" : "Update Exam"}
+          <Typography variant="h4" sx={{ marginBottom: 1 }}>
+            Exam Set
           </Typography>
           <GoBackButton />
         </Stack>
 
-        <Stack spacing={0.25} sx={{ my: 1 }}>
-          <Typography color="primary.main" variant="caption">
-            Name
-          </Typography>
-          <TextField
-            value={examData.name}
-            size="small"
-            sx={{ width: "50%" }}
-            onChange={(event) => handleChangeName(event.target.value)}
-            placeholder="Name"
+        <Stack spacing={1} sx={{ maxWidth: "500px" }}>
+          <RoundedInput label="Name" {...form.register("name")} />
+          <BootstrapSelect
+            label="Tag"
+            itemLabels={["2021", "2022"]}
+            itemValues={[1, 2]}
           />
         </Stack>
 
-        <Stack spacing={0.25} sx={{ my: 1 }}>
-          <Typography color="primary.main" variant="caption">
-            Tag
-          </Typography>
-          {/* <TextField
-          variant="outlined"
-          size="small"
-          sx={{ width: "50%" }}
-          placeholder="Tag"
-        /> */}
-          <TagSelect
-            labels={tags?.map((tag) => tag.name) || []}
-            values={tags?.map((tag) => tag?.id) || []}
-            selectedValue={examData?.tags?.[0]?.id ?? ""}
-            onChange={handleChangeTag}
-            sx={{
-              width: "50%",
-            }}
-          />
-        </Stack>
-
-        {isPending && isUpdate ? (
+        {isLoadingToeicTest ? (
           <CustomBackdrop open />
         ) : (
-          <Stack spacing={0.25} sx={{ my: 1 }}>
-            <Typography color="primary.main" variant="caption">
-              Import Data
-            </Typography>
+          <Box sx={{ mt: 2 }}>
+            <Typography sx={{ mb: 1 }}>Import Data</Typography>
+            <Stack spacing={0.25} sx={{ my: 1 }}>
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ArrowDropDownIcon />}
+                  aria-controls="panel2-content"
+                  id="panel2-header"
+                >
+                  <Typography>Part 1</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <CreatePart1 onUpdate={handleUpdateExam} />
+                </AccordionDetails>
+              </Accordion>
 
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ArrowDropDownIcon />}
-                aria-controls="panel2-content"
-                id="panel2-header"
-              >
-                <Typography>Part 1</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <CreatePart1
-                  updateExamData={updateExamData}
-                  isUpdate={isUpdate}
-                  examData={examData.questionGroups.filter(
-                    (questionGroup) => questionGroup.part === "part1",
-                  )}
-                  onUpdate={setGroupUpdate}
-                />
-              </AccordionDetails>
-            </Accordion>
-
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ArrowDropDownIcon />}
-                aria-controls="panel2-content"
-                id="panel2-header"
-              >
-                <Typography>Part 2</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <CreatePart2
-                  updateExamData={updateExamData}
-                  isUpdate={isUpdate}
-                  // examData={examData.partData[1].groupQuestionData}
-                  examData={[]}
-                  onUpdate={setGroupUpdate}
-                />
-              </AccordionDetails>
-            </Accordion>
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ArrowDropDownIcon />}
-                aria-controls="panel2-content"
-                id="panel2-header"
-              >
-                <Typography>Part 3</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <CreatePart3
-                  updateExamData={updateExamData}
-                  isUpdate={isUpdate}
-                  // examData={examData.partData[2].groupQuestionData}
-                  examData={[]}
-                  onUpdate={setGroupUpdate}
-                />
-              </AccordionDetails>
-            </Accordion>
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ArrowDropDownIcon />}
-                aria-controls="panel2-content"
-                id="panel2-header"
-              >
-                <Typography>Part 4</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <CreatePart4
-                  updateExamData={updateExamData}
-                  isUpdate={isUpdate}
-                  // examData={examData.partData[3].groupQuestionData}
-                  examData={[]}
-                  onUpdate={setGroupUpdate}
-                />
-              </AccordionDetails>
-            </Accordion>
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ArrowDropDownIcon />}
-                aria-controls="panel2-content"
-                id="panel2-header"
-              >
-                <Typography>Part 5</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <CreatePart5
-                  updateExamData={updateExamData}
-                  isUpdate={isUpdate}
-                  // examData={examData.partData[4].groupQuestionData}
-                  examData={[]}
-                  onUpdate={setGroupUpdate}
-                />
-              </AccordionDetails>
-            </Accordion>
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ArrowDropDownIcon />}
-                aria-controls="panel2-content"
-                id="panel2-header"
-              >
-                <Typography>Part 6</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <CreatePart6
-                  updateExamData={updateExamData}
-                  isUpdate={isUpdate}
-                  // examData={examData.partData[5].groupQuestionData}
-                  examData={[]}
-                  onUpdate={setGroupUpdate}
-                />
-              </AccordionDetails>
-            </Accordion>
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ArrowDropDownIcon />}
-                aria-controls="panel2-content"
-                id="panel2-header"
-              >
-                <Typography>Part 7</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <CreatePart7
-                  updateExamData={updateExamData}
-                  isUpdate={isUpdate}
-                  // examData={examData.partData[6].groupQuestionData}
-                  examData={[]}
-                  onUpdate={setGroupUpdate}
-                />
-              </AccordionDetails>
-            </Accordion>
-          </Stack>
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ArrowDropDownIcon />}
+                  aria-controls="panel2-content"
+                  id="panel2-header"
+                >
+                  <Typography>Part 2</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <CreatePart2
+                    updateExamData={() => {}}
+                    isUpdate={false}
+                    // examData={examData.partData[1].groupQuestionData}
+                    examData={[]}
+                    onUpdate={() => {}}
+                  />
+                </AccordionDetails>
+              </Accordion>
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ArrowDropDownIcon />}
+                  aria-controls="panel2-content"
+                  id="panel2-header"
+                >
+                  <Typography>Part 3</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <CreatePart3
+                    updateExamData={() => {}}
+                    isUpdate={false}
+                    // examData={examData.partData[2].groupQuestionData}
+                    examData={[]}
+                    onUpdate={() => {}}
+                  />
+                </AccordionDetails>
+              </Accordion>
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ArrowDropDownIcon />}
+                  aria-controls="panel2-content"
+                  id="panel2-header"
+                >
+                  <Typography>Part 4</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <CreatePart4
+                    updateExamData={() => {}}
+                    isUpdate={false}
+                    // examData={examData.partData[3].groupQuestionData}
+                    examData={[]}
+                    onUpdate={() => {}}
+                  />
+                </AccordionDetails>
+              </Accordion>
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ArrowDropDownIcon />}
+                  aria-controls="panel2-content"
+                  id="panel2-header"
+                >
+                  <Typography>Part 5</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <CreatePart5
+                    updateExamData={() => {}}
+                    isUpdate={false}
+                    // examData={examData.partData[4].groupQuestionData}
+                    examData={[]}
+                    onUpdate={() => {}}
+                  />
+                </AccordionDetails>
+              </Accordion>
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ArrowDropDownIcon />}
+                  aria-controls="panel2-content"
+                  id="panel2-header"
+                >
+                  <Typography>Part 6</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <CreatePart6
+                    updateExamData={() => {}}
+                    isUpdate={false}
+                    // examData={examData.partData[5].groupQuestionData}
+                    examData={[]}
+                    onUpdate={() => {}}
+                  />
+                </AccordionDetails>
+              </Accordion>
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ArrowDropDownIcon />}
+                  aria-controls="panel2-content"
+                  id="panel2-header"
+                >
+                  <Typography>Part 7</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <CreatePart7
+                    updateExamData={() => {}}
+                    isUpdate={false}
+                    // examData={examData.partData[6].groupQuestionData}
+                    examData={[]}
+                    onUpdate={() => {}}
+                  />
+                </AccordionDetails>
+              </Accordion>
+            </Stack>
+          </Box>
         )}
 
-        <Stack>
-          {!examId ? (
-            <Button
-              variant="contained"
-              sx={{ width: "fit-content" }}
-              onClick={() => handleCreateTest()}
-            >
-              Create
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              sx={{ width: "fit-content" }}
-              onClick={() => setModalUpdate(true)}
-            >
-              Update
-            </Button>
-          )}
-        </Stack>
+        {/* <Stack>
+          <Button
+            variant="contained"
+            sx={{ width: "fit-content" }}
+            onClick={() => setModalUpdate(true)}
+          >
+            Update
+          </Button>
+        </Stack> */}
       </Box>
-      <CustomModal open={!!groupUpdate} onClose={() => setGroupUpdate(null)}>
+      {/* <CustomModal open={!!groupUpdate} onClose={() => setGroupUpdate(null)}>
         <Box sx={{ padding: 3 }}>
           <Typography variant="h6" sx={{ marginBottom: 1 }}>
             Do you want to update this group?
@@ -457,8 +300,8 @@ export default function CreateExam() {
             </Button>
           </Stack>
         </Box>
-      </CustomModal>
-      <CustomModal open={modalUpdate} onClose={() => setModalUpdate(false)}>
+      </CustomModal> */}
+      {/* <CustomModal open={modalUpdate} onClose={() => setModalUpdate(false)}>
         <Box sx={{ padding: 3 }}>
           <Typography variant="h6" sx={{ marginBottom: 1 }}>
             Do you want to update this test?
@@ -482,7 +325,7 @@ export default function CreateExam() {
             </Button>
           </Stack>
         </Box>
-      </CustomModal>
-    </>
+      </CustomModal> */}
+    </FormProvider>
   );
 }

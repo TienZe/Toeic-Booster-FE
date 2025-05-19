@@ -1,6 +1,9 @@
 import { QuestionGroup } from "../../../../types/ToeicExam";
 
-export default interface NewExamRequest {
-  name: string;
+export interface SaveToeicTestRequest {
+  id?: number;
+  name?: string;
+  tag?: number;
+
   questionGroups: QuestionGroup[];
 }

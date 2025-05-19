@@ -50,6 +50,7 @@ export const TOEIC_PARTS = {
     questionPerGroup: 1,
     answerCount: 4,
     groupQuestion: 6,
+    startGroupQuestionIndex: 0,
     start: 1,
   },
   Part2: {
@@ -57,6 +58,7 @@ export const TOEIC_PARTS = {
     questionPerGroup: 1,
     answerCount: 3,
     groupQuestion: 25,
+    startGroupQuestionIndex: 6,
     start: 7,
   },
   Part3: {
@@ -64,6 +66,7 @@ export const TOEIC_PARTS = {
     questionPerGroup: 3,
     answerCount: 4,
     groupQuestion: 13,
+    startGroupQuestionIndex: 31,
     start: 32,
   },
   Part4: {
@@ -71,6 +74,7 @@ export const TOEIC_PARTS = {
     questionPerGroup: 3,
     answerCount: 4,
     groupQuestion: 10,
+    startGroupQuestionIndex: 44,
     start: 71,
   },
   Part5: {
@@ -78,6 +82,7 @@ export const TOEIC_PARTS = {
     questionPerGroup: 1,
     answerCount: 4,
     groupQuestion: 30,
+    startGroupQuestionIndex: 54,
     start: 101,
   },
   Part6: {
@@ -85,12 +90,14 @@ export const TOEIC_PARTS = {
     questionPerGroup: 4,
     answerCount: 4,
     groupQuestion: 4,
+    startGroupQuestionIndex: 84,
     start: 131,
   },
   Part7: {
     questionCount: 54,
     answerCount: 4,
     groupQuestion: 15,
+    startGroupQuestionIndex: 88,
     start: 147,
   },
 };

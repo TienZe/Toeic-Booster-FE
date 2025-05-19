@@ -10,15 +10,15 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TextField,
   Typography,
 } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import RoundedInput from "../../../../components/UI/RoundedInput";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { deleteEntireExam, fetchAllExam } from "../api/examApi";
+import { useMutation } from "@tanstack/react-query";
+import { createExam, deleteEntireExam } from "../api/examApi";
 import { useNavigate } from "react-router-dom";
-import { IExamModel } from "../types/Exam";
 import { useState } from "react";
 import AdminTableContainer from "../../vocasets/components/AdminTableContainer";
 import ExamSetRow from "./ExamSetRow";
@@ -26,37 +26,60 @@ import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
 import CustomModal from "../../../../components/UI/CustomModal";
 import queryClient from "../../../../queryClient";
 import { toast } from "react-toastify";
+import usePaginatedToeicExams from "../../../../hooks/usePaginatedToeicExams";
+import { ToeicExam } from "../../../../types/ToeicExam";
+import { DEFAULT_QUESTION_GROUP } from "../../../../utils/defaultToeicTestQuestionGroups";
 
-const ExamSet = () => {
+interface IFilterExamForm {
+  filterName: string;
+  filterStatus: string;
+}
+
+interface NewExamForm {
+  name: string;
+  tag: number;
+}
+
+const DEFAULT_EXAM_FILTER_FORM: IFilterExamForm = {
+  filterName: "",
+  filterStatus: "all",
+};
+
+const EXAM_PAGE_SIZE = 5;
+
+const ExamIndexPage = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
-  const [search, setSearch] = useState("");
-  const [deletedExam, setDeletedExam] = useState<string | null>(null);
+  const [deletedExam, setDeletedExam] = useState<number | null>(null);
+  const [openNewModal, setOpenNewModal] = useState(false);
 
-  interface IFilterExamForm {
-    filterName: string;
-    filterStatus: string;
-  }
+  const { data: paginatedExams, isLoading: isLoadingExams } =
+    usePaginatedToeicExams(
+      {},
+      {
+        page: 0,
+        limit: EXAM_PAGE_SIZE,
+      },
+    );
 
-  const DEFAULT_EXAM_FILTER_FORM: IFilterExamForm = {
-    filterName: "",
-    filterStatus: "all",
-  };
+  const newExamForm = useForm<NewExamForm>({
+    defaultValues: {
+      name: "",
+      tag: 0,
+    },
+  });
 
-  // const { isPending, data: examSetData } = useQuery({
-  //   queryKey: ["fetchExam", page, limit, search],
-  //   queryFn: () => fetchAllExam(undefined, page, limit, search),
-  // });
-
-  const isPending = false;
-  const examSetData = null;
-
-  console.log("examsetdata", examSetData);
-
-  // useEffect(() => {
-  //   setExamSets(examSetData?.data);
-  // }, [examSetData]);
+  const newExamMutation = useMutation({
+    mutationFn: createExam,
+    onSuccess: (responseData) => {
+      toast.success("Create exam successfully!");
+      navigate(`/admin/exam-set/${responseData.id}`);
+    },
+    onError: () => {
+      toast.error("Create exam failed!");
+      newExamMutation.reset();
+    },
+  });
 
   const deleteExamMutation = useMutation({
     mutationFn: deleteEntireExam,
@@ -93,18 +116,22 @@ const ExamSet = () => {
     //       examSet.name.toLowerCase().includes(filterName as string)) &&
     //     (filterStatus === "all" || filterStatus === "inactive"),
     // );
-    setSearch(filterName);
-    setPage(1);
+    // setSearch(filterName);
+    setPage(0);
   };
 
   const handleResetFilter = () => {
     resetFilterForm(DEFAULT_EXAM_FILTER_FORM);
-    setSearch("");
-    setPage(1);
+    // setSearch("");
+    setPage(0);
   };
 
-  // const { page, setPage, emptyRows, pageData, handleChangePage } =
-  //   useAdminTablePagination<IExamModel>(examSets || [], EXAMSET_PAGE_SIZE);
+  const handleCreateExam: SubmitHandler<NewExamForm> = (data) => {
+    newExamMutation.mutate({
+      ...data,
+      questionGroups: DEFAULT_QUESTION_GROUP,
+    });
+  };
 
   return (
     <>
@@ -120,7 +147,7 @@ const ExamSet = () => {
           <Button
             variant="outlined"
             startIcon={<Add />}
-            onClick={() => navigate("/admin/createExam")}
+            onClick={() => setOpenNewModal(true)}
           >
             New
           </Button>
@@ -149,7 +176,12 @@ const ExamSet = () => {
                 )}
               />
             </Grid2>
-            <Grid2 size={2} display="flex" alignItems="end">
+            <Grid2
+              size={4}
+              display="flex"
+              alignItems="end"
+              sx={{ columnGap: 1 }}
+            >
               <Button
                 type="submit"
                 variant="contained"
@@ -157,8 +189,6 @@ const ExamSet = () => {
               >
                 Search
               </Button>
-            </Grid2>
-            <Grid2 size={2} display="flex" alignItems="end">
               <Button
                 onClick={handleResetFilter}
                 type="reset"
@@ -171,7 +201,7 @@ const ExamSet = () => {
           </Grid2>
         </form>
 
-        {isPending ? (
+        {isLoadingExams ? (
           <CustomBackdrop open />
         ) : (
           <AdminTableContainer>
@@ -180,45 +210,28 @@ const ExamSet = () => {
                 <TableRow>
                   <TableCell width="30%">ID</TableCell>
                   <TableCell width="25%">Name</TableCell>
-                  <TableCell width="10%">Time</TableCell>
-                  {/* <TableCell width="10%">Taken</TableCell> */}
                   <TableCell width="10%">Tag</TableCell>
                   <TableCell>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {examSetData?.data &&
-                  examSetData?.data?.map((examSet: IExamModel) => (
-                    <ExamSetRow
-                      key={examSet.id}
-                      examSet={examSet}
-                      onDelete={() => setDeletedExam(examSet.id)}
-                    />
-                  ))}
-                {/* {emptyRows > 0 && (
-                  <TableRow
-                    style={{
-                      height: 53 * emptyRows,
-                      backgroundColor: "white",
-                    }}
-                  >
-                    <TableCell colSpan={7} />
-                  </TableRow>
-                )} */}
+                {paginatedExams?.items.map((exam: ToeicExam) => (
+                  <ExamSetRow
+                    key={exam.id}
+                    examSet={exam}
+                    onDelete={() => setDeletedExam(exam.id)}
+                  />
+                ))}
               </TableBody>
               <TableFooter>
                 <TableRow>
                   <TablePagination
-                    rowsPerPageOptions={[5, 10, 15]}
-                    count={examSetData?.total || 0}
-                    rowsPerPage={limit}
+                    count={paginatedExams?.total || 0}
+                    rowsPerPage={EXAM_PAGE_SIZE}
+                    rowsPerPageOptions={[EXAM_PAGE_SIZE]}
                     page={page - 1}
                     onPageChange={(_e, newPage) => {
                       setPage(newPage + 1);
-                    }}
-                    onRowsPerPageChange={(e) => {
-                      setLimit(+e.target.value);
-                      setPage(1);
                     }}
                   />
                 </TableRow>
@@ -227,6 +240,68 @@ const ExamSet = () => {
           </AdminTableContainer>
         )}
       </Box>
+
+      {/*  New exam modal */}
+      <CustomModal
+        open={openNewModal}
+        onClose={() => setOpenNewModal(false)}
+        sx={{ width: "500px", padding: 4 }}
+      >
+        <Box sx={{}}>
+          <Typography
+            variant="h5"
+            sx={{ marginBottom: 2.5, textAlign: "center" }}
+          >
+            New Exam
+          </Typography>
+
+          <form
+            id="new-exam-form"
+            onSubmit={newExamForm.handleSubmit(handleCreateExam)}
+          >
+            <Stack spacing={1}>
+              <TextField
+                label="Name"
+                helperText={newExamForm.formState.errors.name?.message}
+                error={!!newExamForm.formState.errors.name}
+                {...newExamForm.register("name")}
+                sx={{ width: "100%" }}
+              />
+
+              <TextField
+                label="Tag"
+                select
+                helperText={newExamForm.formState.errors.tag?.message}
+                error={!!newExamForm.formState.errors.tag}
+                {...newExamForm.register("tag")}
+                sx={{ width: "100%" }}
+              />
+
+              <Stack direction="row" spacing={0.5} justifyContent="end">
+                <Button
+                  variant="outlined"
+                  onClick={() => setOpenNewModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="contained"
+                  type="submit"
+                  sx={{ minWidth: "110px", boxShadow: "none" }}
+                  disabled={newExamMutation.isPending}
+                >
+                  {newExamMutation.isPending ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    "Create"
+                  )}
+                </Button>
+              </Stack>
+            </Stack>
+          </form>
+        </Box>
+      </CustomModal>
+
       {/* Delete modal */}
       <CustomModal open={!!deletedExam} onClose={() => setDeletedExam(null)}>
         <Box sx={{ padding: 3 }}>
@@ -257,4 +332,4 @@ const ExamSet = () => {
   );
 };
 
-export default ExamSet;
+export default ExamIndexPage;
