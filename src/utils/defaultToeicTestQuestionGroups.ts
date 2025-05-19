@@ -7,6 +7,7 @@ const DEFAULT_QUESTION_GROUP_PART1: QuestionGroup[] = Array.from(
     id: "",
     part: "part1",
     transcript: "",
+    passage: null,
     groupIndex: groupIndex,
     questions: Array.from(
       { length: TOEIC_PARTS.Part1.questionPerGroup },
@@ -36,6 +37,7 @@ const DEFAULT_QUESTION_GROUP_PART2: QuestionGroup[] = Array.from(
     id: "",
     part: "part2",
     transcript: "",
+    passage: null,
     groupIndex: groupIndex + TOEIC_PARTS.Part2.startGroupQuestionIndex,
     questions: Array.from(
       { length: TOEIC_PARTS.Part2.questionPerGroup },
@@ -64,6 +66,7 @@ const DEFAULT_QUESTION_GROUP_PART3: QuestionGroup[] = Array.from(
     id: "",
     part: "part3",
     transcript: "",
+    passage: null,
     groupIndex: groupIndex + TOEIC_PARTS.Part3.startGroupQuestionIndex,
     questions: Array.from(
       { length: TOEIC_PARTS.Part3.questionPerGroup },
@@ -92,6 +95,7 @@ const DEFAULT_QUESTION_GROUP_PART4: QuestionGroup[] = Array.from(
     id: "",
     part: "part4",
     transcript: "",
+    passage: null,
     groupIndex: groupIndex + TOEIC_PARTS.Part4.startGroupQuestionIndex,
     questions: Array.from(
       { length: TOEIC_PARTS.Part4.questionPerGroup },
@@ -120,6 +124,7 @@ const DEFAULT_QUESTION_GROUP_PART5: QuestionGroup[] = Array.from(
     id: "",
     part: "part5",
     transcript: null,
+    passage: null,
     groupIndex: groupIndex + TOEIC_PARTS.Part5.startGroupQuestionIndex,
     questions: Array.from(
       { length: TOEIC_PARTS.Part5.questionPerGroup },
@@ -148,6 +153,7 @@ const DEFAULT_QUESTION_GROUP_PART6: QuestionGroup[] = Array.from(
     id: "",
     part: "part6",
     transcript: null,
+    passage: null,
     groupIndex: groupIndex + TOEIC_PARTS.Part6.startGroupQuestionIndex,
     questions: Array.from(
       { length: TOEIC_PARTS.Part6.questionPerGroup },
@@ -188,6 +194,7 @@ function getDefaultPart7QuestionGroup() {
         id: "",
         part: "part7",
         transcript: null,
+        passage: null,
         groupIndex: groupIndex,
         questions: Array.from(
           { length: questionPerGroup },

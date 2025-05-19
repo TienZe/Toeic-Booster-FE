@@ -2,6 +2,7 @@ export interface QuestionGroup {
   id: string;
   part: string;
   transcript: string | null;
+  passage: string | null;
 
   groupIndex: number;
 

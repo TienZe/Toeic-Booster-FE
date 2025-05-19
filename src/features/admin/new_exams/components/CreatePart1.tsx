@@ -18,36 +18,17 @@ import { file2Base64 } from "../../../../utils/helper";
 import { Image } from "../../../../components/UI/Image";
 import { SaveToeicTestRequest } from "../types/SaveToeicTestRequest";
 import { useFormContext, useWatch } from "react-hook-form";
-interface CrPartProps1 {
-  onUpdate: (groupIndex: number) => void;
-}
+import { CrPartProps } from "../types/CrPartProps";
 
 const part1Group = Array.from({
   length: TOEIC_PARTS.Part1.groupQuestion,
 });
 
-const getChipStyle = (state: validateState = validateState.blank) => {
-  switch (state) {
-    case validateState.blank:
-      return {};
-    case validateState.pending:
-      return { backgroundColor: "orange", color: "white" };
-    case validateState.fulfilled:
-      return {
-        backgroundColor: "green",
-        color: "white",
-        "&:hover": { backgroundColor: "green", color: "white" },
-      };
-    default:
-      return {};
-  }
-};
-
-const CreatePart1: React.FC<CrPartProps1> = ({ onUpdate }) => {
+const CreatePart1: React.FC<CrPartProps> = ({ onUpdate }) => {
   const [group, setGroup] = useState<number>(
     TOEIC_PARTS.Part1.startGroupQuestionIndex,
   );
-  const [show, setShow] = useState<boolean>(false);
+  const [show, setShow] = useState<boolean>(true);
 
   const handleSwitchGroupQuestion = (selectedGroupIndex: number) => {
     // Update the current group question before switching
@@ -82,7 +63,9 @@ const CreatePart1: React.FC<CrPartProps1> = ({ onUpdate }) => {
                 mb: 0.5,
                 width: 85,
                 backgroundColor:
-                  group === groupIndex ? "primary.extraLight" : "transparent",
+                  group === groupIndex
+                    ? "primary.extraLight"
+                    : "rgba(0, 0, 0, 0.05)",
                 color: group === groupIndex ? "primary.main" : "inherit",
                 // ...getChipStyle(part1Data[groupIndex]?.validate),
               }}

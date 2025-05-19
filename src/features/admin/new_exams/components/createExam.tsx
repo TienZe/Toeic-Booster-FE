@@ -3,31 +3,27 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { useCallback, useEffect, useState } from "react";
-import { Box, Button, CircularProgress, Stack } from "@mui/material";
+import { useCallback, useEffect } from "react";
+import { Box, Stack } from "@mui/material";
 import CreatePart1 from "./CreatePart1";
 import CreatePart3 from "./CreatePart3";
 import CreatePart2 from "./CreatePart2";
 import CreatePart4 from "./CreatePart4";
 import CreatePart5 from "./CreatePart5";
 import CreatePart6 from "./CreatePart6";
-import { saveExam, updateGroupQuestion } from "../api/examApi";
+import { saveExam } from "../api/examApi";
 import { GoBackButton } from "../../../../components/UI/GoBackButton";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
 import CreatePart7 from "./CreatePart7";
 import queryClient from "../../../../queryClient";
-import { UpdateExamReq } from "../types/UpdateExamReq";
-import CustomModal from "../../../../components/UI/CustomModal";
 import RoundedInput from "../../../../components/UI/RoundedInput";
 import BootstrapSelect from "../../../../components/UI/BootstrapSelect";
 import { SaveToeicTestRequest } from "../types/SaveToeicTestRequest";
 import useToeicExam from "../../../../hooks/useToeicExam";
 import { FormProvider, useForm } from "react-hook-form";
-import { QuestionGroup } from "../../../../types/ToeicExam";
-import { TOEIC_PARTS } from "../types/examType";
 import { DEFAULT_QUESTION_GROUP } from "../../../../utils/defaultToeicTestQuestionGroups";
 
 const DEFAULT_FORM_VALUE: SaveToeicTestRequest = {
@@ -163,13 +159,7 @@ export default function CreateExam() {
                   <Typography>Part 2</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <CreatePart2
-                    updateExamData={() => {}}
-                    isUpdate={false}
-                    // examData={examData.partData[1].groupQuestionData}
-                    examData={[]}
-                    onUpdate={() => {}}
-                  />
+                  <CreatePart2 onUpdate={handleUpdateExam} />
                 </AccordionDetails>
               </Accordion>
               <Accordion>
@@ -181,13 +171,7 @@ export default function CreateExam() {
                   <Typography>Part 3</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <CreatePart3
-                    updateExamData={() => {}}
-                    isUpdate={false}
-                    // examData={examData.partData[2].groupQuestionData}
-                    examData={[]}
-                    onUpdate={() => {}}
-                  />
+                  <CreatePart3 onUpdate={handleUpdateExam} />
                 </AccordionDetails>
               </Accordion>
               <Accordion>
@@ -199,15 +183,10 @@ export default function CreateExam() {
                   <Typography>Part 4</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <CreatePart4
-                    updateExamData={() => {}}
-                    isUpdate={false}
-                    // examData={examData.partData[3].groupQuestionData}
-                    examData={[]}
-                    onUpdate={() => {}}
-                  />
+                  <CreatePart4 onUpdate={handleUpdateExam} />
                 </AccordionDetails>
               </Accordion>
+
               <Accordion>
                 <AccordionSummary
                   expandIcon={<ArrowDropDownIcon />}
@@ -217,15 +196,10 @@ export default function CreateExam() {
                   <Typography>Part 5</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <CreatePart5
-                    updateExamData={() => {}}
-                    isUpdate={false}
-                    // examData={examData.partData[4].groupQuestionData}
-                    examData={[]}
-                    onUpdate={() => {}}
-                  />
+                  <CreatePart5 onUpdate={handleUpdateExam} />
                 </AccordionDetails>
               </Accordion>
+
               <Accordion>
                 <AccordionSummary
                   expandIcon={<ArrowDropDownIcon />}
@@ -235,15 +209,10 @@ export default function CreateExam() {
                   <Typography>Part 6</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <CreatePart6
-                    updateExamData={() => {}}
-                    isUpdate={false}
-                    // examData={examData.partData[5].groupQuestionData}
-                    examData={[]}
-                    onUpdate={() => {}}
-                  />
+                  <CreatePart6 onUpdate={handleUpdateExam} />
                 </AccordionDetails>
               </Accordion>
+
               <Accordion>
                 <AccordionSummary
                   expandIcon={<ArrowDropDownIcon />}
@@ -253,13 +222,7 @@ export default function CreateExam() {
                   <Typography>Part 7</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <CreatePart7
-                    updateExamData={() => {}}
-                    isUpdate={false}
-                    // examData={examData.partData[6].groupQuestionData}
-                    examData={[]}
-                    onUpdate={() => {}}
-                  />
+                  <CreatePart7 onUpdate={handleUpdateExam} />
                 </AccordionDetails>
               </Accordion>
             </Stack>
