@@ -94,7 +94,7 @@ const theme = createTheme({
         },
         inherit: {
           fontSize: "inherit",
-        }
+        },
       },
     },
     MuiChip: {
@@ -163,7 +163,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontSize: "0.875rem",
-          lineHeight: "1.25rem"
+          lineHeight: "1.25rem",
         },
       },
     },
@@ -176,13 +176,13 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontSize: "inherit",
-        }
-      }
+        },
+      },
     },
     MuiFormControl: {
       defaultProps: {
         size: "small",
-      }
+      },
     },
     MuiTextField: {
       defaultProps: {
@@ -195,28 +195,28 @@ const theme = createTheme({
               props: { size: "small" },
               style: {
                 "& .MuiInputLabel-shrink": {
-                  transform: "translate(12px, -9px) scale(0.85)"
-                }
+                  transform: "translate(12px, -9px) scale(0.85)",
+                },
               },
-            }
-          ]
-        }
-      }
+            },
+          ],
+        },
+      },
     },
     MuiFormLabel: {
       styleOverrides: {
         root: {
           fontSize: "0.875rem",
-        }
-      }
-    }
+        },
+      },
+    },
   },
   palette: {
     primary: {
       light: "#4A82C3",
       main: "#203A90",
       dark: "#11297a",
-      extraLight: "#F0F5FF"
+      extraLight: "#F0F5FF",
     },
     secondary: {
       light: "rgba(84, 86, 90, 0.6)",
@@ -233,8 +233,15 @@ const theme = createTheme({
       contrastText: "#fff",
     },
     gradient: {
-      main: "linear-gradient(90deg, rgba(59, 130, 246, 1), rgba(30, 58, 138, 1))"
-    }
+      main: "linear-gradient(90deg, rgba(59, 130, 246, 1), rgba(30, 58, 138, 1))",
+    },
+    warning: {
+      light: "#ff9800",
+      main: "#ed6c02",
+      dark: "#e65100",
+      contrastText: "#fff",
+      extraLight: "hsl(27 98% 95% / 1)",
+    },
   },
   typography: {
     fontFamily: "'Inter', sans-serif",

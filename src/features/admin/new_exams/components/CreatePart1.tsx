@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import _ from "lodash";
 import { useState } from "react";
-import { TOEIC_PARTS, validateState } from "../types/examType";
+import { TOEIC_PARTS } from "../types/examType";
 import Grid from "@mui/material/Grid2";
 import Editor from "../../../../components/UI/Editor";
 import { answerIndexToLabel, QuestionGroup } from "../../../../types/ToeicExam";
@@ -19,6 +19,7 @@ import { Image } from "../../../../components/UI/Image";
 import { SaveToeicTestRequest } from "../types/SaveToeicTestRequest";
 import { useFormContext, useWatch } from "react-hook-form";
 import { CrPartProps } from "../types/CrPartProps";
+import { getQuestionGroupChipStyle } from "../utils/helper";
 
 const part1Group = Array.from({
   length: TOEIC_PARTS.Part1.groupQuestion,
@@ -28,6 +29,11 @@ const CreatePart1: React.FC<CrPartProps> = ({ onUpdate }) => {
   const [group, setGroup] = useState<number>(
     TOEIC_PARTS.Part1.startGroupQuestionIndex,
   );
+
+  const form = useFormContext<SaveToeicTestRequest>();
+
+  const questionGroups = form.getValues(`questionGroups`);
+
   const [show, setShow] = useState<boolean>(true);
 
   const handleSwitchGroupQuestion = (selectedGroupIndex: number) => {
@@ -62,12 +68,7 @@ const CreatePart1: React.FC<CrPartProps> = ({ onUpdate }) => {
                 py: 1,
                 mb: 0.5,
                 width: 85,
-                backgroundColor:
-                  group === groupIndex
-                    ? "primary.extraLight"
-                    : "rgba(0, 0, 0, 0.05)",
-                color: group === groupIndex ? "primary.main" : "inherit",
-                // ...getChipStyle(part1Data[groupIndex]?.validate),
+                ...getQuestionGroupChipStyle(questionGroups[groupIndex], group),
               }}
               label={`Question ${TOEIC_PARTS.Part1.start + groupIndex}`}
               onClick={() => handleSwitchGroupQuestion(groupIndex)}

@@ -17,6 +17,7 @@ import { file2Base64 } from "../../../../utils/helper";
 import { SaveToeicTestRequest } from "../types/SaveToeicTestRequest";
 import { useFormContext, useWatch } from "react-hook-form";
 import { CrPartProps } from "../types/CrPartProps";
+import { getQuestionGroupChipStyle } from "../utils/helper";
 
 const part2Group = Array.from({
   length: TOEIC_PARTS.Part2.groupQuestion,
@@ -27,6 +28,10 @@ const CreatePart2: React.FC<CrPartProps> = ({ onUpdate }) => {
     TOEIC_PARTS.Part2.startGroupQuestionIndex,
   ); // current actual group index
   const [show, setShow] = useState<boolean>(true);
+
+  const form = useFormContext<SaveToeicTestRequest>();
+
+  const questionGroups = form.getValues(`questionGroups`);
 
   const handleSwitchGroupQuestion = (selectedGroupIndex: number) => {
     // Update the current group question before switching
@@ -62,11 +67,10 @@ const CreatePart2: React.FC<CrPartProps> = ({ onUpdate }) => {
                 py: 1,
                 mb: 0.5,
                 width: 85,
-                backgroundColor:
-                  group === actualGroupIndex
-                    ? "primary.extraLight"
-                    : "rgba(0, 0, 0, 0.05)",
-                color: group === actualGroupIndex ? "primary.main" : "inherit",
+                ...getQuestionGroupChipStyle(
+                  questionGroups[actualGroupIndex],
+                  group,
+                ),
               }}
               label={`Question ${TOEIC_PARTS.Part2.start + internalGroupIndex}`}
               onClick={() => handleSwitchGroupQuestion(actualGroupIndex)}

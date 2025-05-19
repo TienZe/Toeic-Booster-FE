@@ -19,6 +19,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { CrPartProps } from "../types/CrPartProps";
 import _ from "lodash";
 import { Image } from "../../../../components/UI/Image";
+import { getQuestionGroupChipStyle } from "../utils/helper";
 
 const part7Group = Array.from({
   length: TOEIC_PARTS.Part7.groupQuestion,
@@ -30,6 +31,7 @@ const CreatePart7: React.FC<CrPartProps> = ({ onUpdate }) => {
   const [group, setGroup] = useState<number>(
     TOEIC_PARTS.Part7.startGroupQuestionIndex,
   ); // current actual group index
+
   const [show, setShow] = useState<boolean>(true);
 
   const handleSwitchGroupQuestion = (selectedGroupIndex: number) => {
@@ -76,11 +78,10 @@ const CreatePart7: React.FC<CrPartProps> = ({ onUpdate }) => {
                 py: 1,
                 mb: 0.5,
                 width: 125,
-                backgroundColor:
-                  group === actualGroupIndex
-                    ? "primary.extraLight"
-                    : "rgba(0, 0, 0, 0.05)",
-                color: group === actualGroupIndex ? "primary.main" : "inherit",
+                ...getQuestionGroupChipStyle(
+                  questionGroups[actualGroupIndex],
+                  group,
+                ),
               }}
               label={`Question ${startQuestionNumber} to ${endQuestionNumber}`}
               onClick={() => handleSwitchGroupQuestion(actualGroupIndex)}
