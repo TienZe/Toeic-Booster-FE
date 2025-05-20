@@ -13,6 +13,7 @@ export async function getToeicExams(request: GetToeicExamsRequest) {
   return response.data.data;
 }
 
+// Get toeic exam with its question groups
 export async function getToeicExamById(examId: number | string) {
   const response = await axiosClient.get<ApiResponse<ToeicExam>>(
     `toeic-tests/${examId}`,

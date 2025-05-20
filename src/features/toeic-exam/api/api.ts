@@ -1,4 +1,6 @@
 import axiosClient from "../../../axios";
+import ApiResponse from "../../../types/ApiResponse";
+import { ToeicExam } from "../../../types/ToeicExam";
 import { PracticeDetailResponse } from "../types/PracticeDetailResponse";
 import { PracticeRequest } from "../types/PracticeRequest";
 import { TestDetailWithPractice } from "../types/TestDetailWithPractice";
@@ -21,5 +23,13 @@ const fetchTestDetailWithPractice = async (testId: string) => {
   );
   return response.data;
 };
+
+export async function getToeicExamInfo(id: number) {
+  const response = await axiosClient.get<ApiResponse<ToeicExam>>(
+    `toeic-tests/${id}/info`,
+  );
+
+  return response.data.data;
+}
 
 export { postPractice, fetchPracticeDetailUser, fetchTestDetailWithPractice };

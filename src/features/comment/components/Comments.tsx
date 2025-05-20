@@ -8,7 +8,7 @@ import CommentForm from "./CommentForm";
 import { useState } from "react";
 
 interface CommentsProps {
-  examId?: string;
+  examId?: number;
 }
 
 export interface IActiveComment {

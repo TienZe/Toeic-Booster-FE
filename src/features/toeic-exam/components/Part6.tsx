@@ -1,6 +1,5 @@
 import { Box, Divider, Paper, Stack, styled, Typography } from "@mui/material";
 
-import { partData } from "../../admin/new_exams/types/examType";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setAnswer,
@@ -15,9 +14,11 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import InfoIcon from "@mui/icons-material/Info";
 import useScrollToTop from "../hooks/useScrollToTop";
 import { useQuestionContext } from "./QuestionProvider";
+import { QuestionGroup } from "../../../types/ToeicExam";
+import { ABCD, answerIndexToLabel } from "../../../utils/toeicExamHelper";
 
 interface Part6Props {
-  partData?: partData;
+  questionGroups: QuestionGroup[];
   mode?: string;
   handleNotedQuestion?: (
     part: number,
@@ -89,12 +90,11 @@ const Item = styled(Paper)(
   }),
 );
 const Part6: React.FC<Part6Props> = ({
-  partData,
+  questionGroups,
   mode,
   handleNotedQuestion = () => {},
   isNotedQuestion = () => false,
 }) => {
-  console.log(partData);
   const { questionRefs } = useQuestionContext();
   const PART = 6;
   useScrollToTop();
@@ -113,7 +113,7 @@ const Part6: React.FC<Part6Props> = ({
     groupIndex: number,
     questionIndex: number,
     answerIndex: number,
-    questionId: string,
+    questionId: number,
     answer: string,
   ) => {
     dispatch(
@@ -186,10 +186,10 @@ const Part6: React.FC<Part6Props> = ({
       </Typography>
 
       {/* Group Questions */}
-      {partData?.groupQuestionData.map((group, groupIndex) => {
-        let isDisabled = mode === "review";
-        let isExplain = mode === "review";
-        let isScriptExpanded = checkScriptExpanded(PART, groupIndex);
+      {questionGroups.map((group, groupIndexInPart) => {
+        const isDisabled = mode === "review";
+        const isExplain = mode === "review";
+        const isScriptExpanded = checkScriptExpanded(PART, groupIndexInPart);
         return (
           <Box sx={{ display: "flex", gap: "30px" }} mb={2}>
             <Box
@@ -207,23 +207,20 @@ const Part6: React.FC<Part6Props> = ({
                 style={{ flexGrow: 1, maxHeight: "100%", overflow: "auto" }}
               >
                 <Typography mb={1}>
-                  {/* Add your passage text here */}
-
-                  {group.detail ? parse(group.detail) : ""}
+                  {group.passage ? parse(group.passage) : ""}
                 </Typography>
                 <Box>
-                  {group.image && group.image.length > 0
-                    ? group.image.map((img) => (
-                        <img src={img.fileUrl} alt="" key={img.index} />
-                      ))
-                    : ""}
+                  {/* Part 6 only contains image medias */}
+                  {group.medias.map((media) => (
+                    <img src={media.fileUrl} alt="" key={media.id} />
+                  ))}
                 </Box>
                 {isExplain && (
                   <>
                     <Stack
                       direction="row"
                       gap={0.25}
-                      onClick={() => handleExpandScript(PART, groupIndex)}
+                      onClick={() => handleExpandScript(PART, groupIndexInPart)}
                       style={{ cursor: "pointer" }}
                     >
                       <Typography color="primary.main">Translate</Typography>
@@ -255,39 +252,36 @@ const Part6: React.FC<Part6Props> = ({
               }}
             >
               <PerfectScrollbar style={{ flexGrow: 1 }}>
-                {group.questionData.map((question, questionIndex) => {
-                  let isCorrectQuestion = question.userAnswer?.isCorrect;
-                  let isExpanded = isItemExpanded(
+                {group.questions.map((question, questionIndex) => {
+                  const isCorrectQuestion = question.userAnswer?.isCorrect;
+                  const isExpanded = isItemExpanded(
                     PART,
-                    groupIndex,
+                    groupIndexInPart,
                     questionIndex,
                   );
-                  let isNoted = isNotedQuestion(
+                  const isNoted = isNotedQuestion(
                     PART,
-                    groupIndex,
+                    groupIndexInPart,
                     questionIndex,
                   );
                   return (
                     <Box
                       sx={{
-                        // display: "flex",
-                        // flexDirection: "column",
-                        // alignItems: "center",
                         mb: 1,
                         padding: "20px",
                       }}
                     >
                       <Box
-                        key={`question-${groupIndex}-${questionIndex}`}
+                        key={`question-${groupIndexInPart}-${questionIndex}`}
                         ref={(el) => {
                           if (el) {
                             if (!questionRefs.current[PART]) {
                               questionRefs.current[PART] = [];
                             }
-                            if (!questionRefs.current[PART][groupIndex]) {
-                              questionRefs.current[PART][groupIndex] = [];
+                            if (!questionRefs.current[PART][groupIndexInPart]) {
+                              questionRefs.current[PART][groupIndexInPart] = [];
                             }
-                            questionRefs.current[PART][groupIndex][
+                            questionRefs.current[PART][groupIndexInPart][
                               questionIndex
                             ] = el as HTMLDivElement;
                           }
@@ -320,7 +314,11 @@ const Part6: React.FC<Part6Props> = ({
                             cursor: "pointer",
                           }}
                           onClick={() =>
-                            handleNotedQuestion(PART, groupIndex, questionIndex)
+                            handleNotedQuestion(
+                              PART,
+                              groupIndexInPart,
+                              questionIndex,
+                            )
                           }
                         >
                           {question.questionNumber}
@@ -336,80 +334,84 @@ const Part6: React.FC<Part6Props> = ({
                       </Box>
                       <Box sx={{ width: "100%" }}>
                         <Stack spacing={1}>
-                          {question.answer.map((answer, answerIndex) => {
-                            let isActive =
-                              activeAnswers[PART]?.[groupIndex]?.[
-                                questionIndex
-                              ] === answerIndex;
-                            let isCorrect =
-                              answer === question.correctAnswer &&
-                              mode === "review";
-                            let isIncorrect =
-                              answer === question.userAnswer?.userAnswer &&
-                              answer !== question.correctAnswer;
-                            let isChosen =
-                              answer === question.userAnswer?.userAnswer;
-                            console.log("part6", isDisabled);
-                            return (
-                              <Item
-                                key={answerIndex}
-                                isActive={isActive}
-                                isDisabled={isDisabled}
-                                isCorrect={isCorrect}
-                                isIncorrect={isIncorrect}
-                                isChosen={isChosen}
-                                onClick={() =>
-                                  !isDisabled &&
-                                  handleClick(
-                                    PART,
-                                    groupIndex,
-                                    questionIndex,
-                                    answerIndex,
-                                    question.questionId || "",
-                                    answer,
-                                  )
-                                }
-                                sx={{
-                                  display: "flex",
-                                  gap: "15px",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <Box
-                                  className="innerBox"
+                          {ABCD.map((answerLabel) => question[answerLabel]).map(
+                            (answer, answerIndex) => {
+                              const answerLabel =
+                                answerIndexToLabel(answerIndex);
+                              const isActive =
+                                activeAnswers[PART]?.[groupIndexInPart]?.[
+                                  questionIndex
+                                ] === answerIndex;
+                              const isCorrect =
+                                answerLabel === question.correctAnswer &&
+                                mode === "review";
+                              const isIncorrect =
+                                answerLabel ===
+                                  question.userAnswer?.userAnswer &&
+                                answerLabel !== question.correctAnswer;
+                              const isChosen =
+                                answerLabel === question.userAnswer?.userAnswer;
+                              return (
+                                <Item
+                                  key={answerIndex}
+                                  isActive={isActive}
+                                  isDisabled={isDisabled}
+                                  isCorrect={isCorrect}
+                                  isIncorrect={isIncorrect}
+                                  isChosen={isChosen}
+                                  onClick={() =>
+                                    !isDisabled &&
+                                    handleClick(
+                                      PART,
+                                      groupIndexInPart,
+                                      questionIndex,
+                                      answerIndex,
+                                      question.id,
+                                      answerLabel,
+                                    )
+                                  }
                                   sx={{
-                                    background: isActive
-                                      ? "#0071F9"
-                                      : isCorrect
-                                        ? "#00B035"
-                                        : isIncorrect
-                                          ? "#E20D2C"
-                                          : "#F3F4F6",
-                                    color: isActive
-                                      ? "white"
-                                      : isCorrect
-                                        ? "#F0FDF4"
-                                        : isIncorrect
-                                          ? "#FDF2F3"
-                                          : "",
-                                    fontWeight: "500",
-                                    borderRadius: "50%",
-                                    padding: "15px",
-                                    width: "35px",
-                                    height: "35px",
                                     display: "flex",
-                                    justifyContent: "center",
+                                    gap: "15px",
                                     alignItems: "center",
                                   }}
                                 >
-                                  {String.fromCharCode(65 + answerIndex)}
-                                </Box>
-                                <Typography sx={{ fontWeight: "500" }}>
-                                  {answer}
-                                </Typography>
-                              </Item>
-                            );
-                          })}
+                                  <Box
+                                    className="innerBox"
+                                    sx={{
+                                      background: isActive
+                                        ? "#0071F9"
+                                        : isCorrect
+                                          ? "#00B035"
+                                          : isIncorrect
+                                            ? "#E20D2C"
+                                            : "#F3F4F6",
+                                      color: isActive
+                                        ? "white"
+                                        : isCorrect
+                                          ? "#F0FDF4"
+                                          : isIncorrect
+                                            ? "#FDF2F3"
+                                            : "",
+                                      fontWeight: "500",
+                                      borderRadius: "50%",
+                                      padding: "15px",
+                                      width: "35px",
+                                      height: "35px",
+                                      display: "flex",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    {String.fromCharCode(65 + answerIndex)}
+                                  </Box>
+                                  <Typography sx={{ fontWeight: "500" }}>
+                                    {answer}
+                                  </Typography>
+                                </Item>
+                              );
+                            },
+                          )}
                           {isExplain && (
                             <Item
                               isDisabled={isDisabled}
@@ -417,7 +419,7 @@ const Part6: React.FC<Part6Props> = ({
                               onClick={() =>
                                 handleExpandExplain(
                                   PART,
-                                  groupIndex,
+                                  groupIndexInPart,
                                   questionIndex,
                                 )
                               }
@@ -458,8 +460,8 @@ const Part6: React.FC<Part6Props> = ({
                                   >
                                     <Divider />
                                     <Typography mt={1}>
-                                      {question.explain
-                                        ? parse(question.explain)
+                                      {question.explanation
+                                        ? parse(question.explanation)
                                         : "No explain"}
                                     </Typography>
                                   </Box>

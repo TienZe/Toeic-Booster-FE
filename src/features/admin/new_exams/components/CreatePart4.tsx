@@ -12,7 +12,7 @@ import { useState } from "react";
 import { TOEIC_PARTS } from "../types/examType";
 import Grid from "@mui/material/Grid2";
 import Editor from "../../../../components/UI/Editor";
-import { answerIndexToLabel, QuestionGroup } from "../../../../types/ToeicExam";
+import { QuestionGroup } from "../../../../types/ToeicExam";
 import { file2Base64 } from "../../../../utils/helper";
 import { SaveToeicTestRequest } from "../types/SaveToeicTestRequest";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -20,7 +20,7 @@ import { CrPartProps } from "../types/CrPartProps";
 import _ from "lodash";
 import { Image } from "../../../../components/UI/Image";
 import { getQuestionGroupChipStyle } from "../utils/helper";
-
+import { answerIndexToLabel } from "../../../../utils/toeicExamHelper";
 const part4Group = Array.from({
   length: TOEIC_PARTS.Part4.groupQuestion,
 });

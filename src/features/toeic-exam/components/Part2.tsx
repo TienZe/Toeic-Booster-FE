@@ -1,6 +1,5 @@
 import { Box, Divider, Paper, Stack, styled, Typography } from "@mui/material";
 
-import { partData } from "../../admin/new_exams/types/examType";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setAnswer,
@@ -14,9 +13,12 @@ import parse from "html-react-parser";
 import useScrollToTop from "../hooks/useScrollToTop";
 import { useQuestionContext } from "./QuestionProvider";
 import { setScript } from "../../../stores/selectedScript";
+import { QuestionGroup } from "../../../types/ToeicExam";
+import { ABC, ABCD, answerIndexToLabel } from "../../../utils/toeicExamHelper";
 
 interface Part2Props {
-  partData?: partData;
+  questionGroups?: QuestionGroup[];
+
   mode?: string;
   handleNotedQuestion?: (
     part: number,
@@ -89,12 +91,11 @@ const Item = styled(Paper)(
 );
 
 const Part2: React.FC<Part2Props> = ({
-  partData,
+  questionGroups,
   mode,
   handleNotedQuestion = () => {},
   isNotedQuestion = () => false,
 }) => {
-  console.log(partData);
   const { questionRefs } = useQuestionContext();
   const PART = 2;
   useScrollToTop();
@@ -113,7 +114,7 @@ const Part2: React.FC<Part2Props> = ({
     groupIndex: number,
     questionIndex: number,
     answerIndex: number,
-    questionId: string,
+    questionId: number,
     answer: string,
   ) => {
     dispatch(
@@ -186,10 +187,14 @@ const Part2: React.FC<Part2Props> = ({
       </Typography>
 
       {/* Group Questions */}
-      {partData?.groupQuestionData.map((group, groupIndex) => {
-        let isDisabled = mode === "review";
-        let isExplain = mode === "review";
-        let isScriptExpanded = checkScriptExpanded(PART, groupIndex);
+      {questionGroups?.map((group, groupIndexInPart) => {
+        const isDisabled = mode === "review";
+        const isExplain = mode === "review";
+        const isScriptExpanded = checkScriptExpanded(PART, groupIndexInPart);
+
+        const audioUrl = group.medias.find(
+          (media) => media.fileType === "audio",
+        )?.fileUrl;
 
         return (
           <Box
@@ -214,11 +219,11 @@ const Part2: React.FC<Part2Props> = ({
               >
                 <>
                   <audio controls>
-                    <source src={group?.audioUrl ?? ""} type="audio/mp3" />
+                    <source src={audioUrl ?? ""} type="audio/mp3" />
                     Your browser does not support the audio element.
                   </audio>
                 </>
-                {group.image?.map((img, imgIndex) => {
+                {/* {group.image?.map((img, imgIndex) => {
                   return (
                     <img
                       key={imgIndex}
@@ -231,13 +236,13 @@ const Part2: React.FC<Part2Props> = ({
                       }}
                     />
                   );
-                })}
+                })} */}
               </Stack>
               {isExplain && (
                 <Item
                   isDisabled={isDisabled}
                   isExplain={isExplain}
-                  onClick={() => handleExpandScript(PART, groupIndex)}
+                  onClick={() => handleExpandScript(PART, groupIndexInPart)}
                   sx={{
                     display: "flex",
                     gap: "15px",
@@ -285,15 +290,18 @@ const Part2: React.FC<Part2Props> = ({
 
             {/* List of Items */}
             <Box sx={{ width: "100%" }}>
-              {group.questionData.map((question, questionIndex) => {
-                let isCorrectQuestion = question.userAnswer?.isCorrect;
-                let isExplain = mode === "review";
-                let isExpanded = isItemExpanded(
+              {group.questions.map((question, questionIndex) => {
+                const isCorrectQuestion = question.userAnswer?.isCorrect;
+                const isExpanded = isItemExpanded(
                   PART,
-                  groupIndex,
+                  groupIndexInPart,
                   questionIndex,
                 );
-                let isNoted = isNotedQuestion(PART, groupIndex, questionIndex);
+                const isNoted = isNotedQuestion(
+                  PART,
+                  groupIndexInPart,
+                  questionIndex,
+                );
                 return (
                   <Stack spacing={1} marginTop={1}>
                     <Box
@@ -302,10 +310,10 @@ const Part2: React.FC<Part2Props> = ({
                           if (!questionRefs.current[PART]) {
                             questionRefs.current[PART] = [];
                           }
-                          if (!questionRefs.current[PART][groupIndex]) {
-                            questionRefs.current[PART][groupIndex] = [];
+                          if (!questionRefs.current[PART][groupIndexInPart]) {
+                            questionRefs.current[PART][groupIndexInPart] = [];
                           }
-                          questionRefs.current[PART][groupIndex][
+                          questionRefs.current[PART][groupIndexInPart][
                             questionIndex
                           ] = el as HTMLDivElement;
                         }
@@ -331,87 +339,106 @@ const Part2: React.FC<Part2Props> = ({
                         cursor: "pointer",
                       }}
                       onClick={() =>
-                        handleNotedQuestion(PART, groupIndex, questionIndex)
+                        handleNotedQuestion(
+                          PART,
+                          groupIndexInPart,
+                          questionIndex,
+                        )
                       }
                     >
                       {question.questionNumber}
                     </Box>
-                    {question.answer.map((answer, answerIndex) => {
-                      let isActive =
-                        activeAnswers[PART]?.[groupIndex]?.[questionIndex] ===
-                        answerIndex;
-                      let isCorrect =
-                        answer === question.correctAnswer && mode === "review";
-                      let isIncorrect =
-                        answer === question.userAnswer?.userAnswer &&
-                        answer !== question.correctAnswer;
-                      let isChosen = answer === question.userAnswer?.userAnswer;
-                      return (
-                        <Item
-                          key={answerIndex}
-                          isActive={isActive}
-                          isDisabled={isDisabled}
-                          isCorrect={isCorrect}
-                          isIncorrect={isIncorrect}
-                          isChosen={isChosen}
-                          onClick={() =>
-                            !isDisabled &&
-                            handleClick(
-                              PART,
-                              groupIndex,
-                              questionIndex,
-                              answerIndex,
-                              question.questionId || "",
-                              answer,
-                            )
-                          }
-                          sx={{
-                            display: "flex",
-                            gap: "15px",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Box
-                            className="innerBox"
+                    {ABC.map((answerLabel) => question[answerLabel]).map(
+                      (answer, answerIndex) => {
+                        const answerLabel = answerIndexToLabel(answerIndex);
+
+                        const isActive =
+                          activeAnswers[PART]?.[groupIndexInPart]?.[
+                            questionIndex
+                          ] === answerIndex;
+
+                        const isCorrect =
+                          answerLabel === question.correctAnswer &&
+                          mode === "review";
+
+                        const isIncorrect =
+                          answerLabel === question.userAnswer?.userAnswer &&
+                          answerLabel !== question.correctAnswer;
+
+                        const isChosen =
+                          answerLabel === question.userAnswer?.userAnswer;
+
+                        return (
+                          <Item
+                            key={answerIndex}
+                            isActive={isActive}
+                            isDisabled={isDisabled}
+                            isCorrect={isCorrect}
+                            isIncorrect={isIncorrect}
+                            isChosen={isChosen}
+                            onClick={() =>
+                              !isDisabled &&
+                              handleClick(
+                                PART,
+                                groupIndexInPart,
+                                questionIndex,
+                                answerIndex,
+                                question.id,
+                                answerLabel,
+                              )
+                            }
                             sx={{
-                              background: isActive
-                                ? "#0071F9"
-                                : isCorrect
-                                  ? "#00B035"
-                                  : isIncorrect
-                                    ? "#E20D2C"
-                                    : "#F3F4F6",
-                              color: isActive
-                                ? "white"
-                                : isCorrect
-                                  ? "#F0FDF4"
-                                  : isIncorrect
-                                    ? "#FDF2F3"
-                                    : "",
-                              fontWeight: "500",
-                              borderRadius: "50%",
-                              padding: "15px",
-                              width: "35px",
-                              height: "35px",
                               display: "flex",
-                              justifyContent: "center",
+                              gap: "15px",
                               alignItems: "center",
                             }}
                           >
-                            {String.fromCharCode(65 + answerIndex)}
-                          </Box>
-                          <Typography sx={{ fontWeight: "500" }}>
-                            {answer}
-                          </Typography>
-                        </Item>
-                      );
-                    })}
+                            <Box
+                              className="innerBox"
+                              sx={{
+                                background: isActive
+                                  ? "#0071F9"
+                                  : isCorrect
+                                    ? "#00B035"
+                                    : isIncorrect
+                                      ? "#E20D2C"
+                                      : "#F3F4F6",
+                                color: isActive
+                                  ? "white"
+                                  : isCorrect
+                                    ? "#F0FDF4"
+                                    : isIncorrect
+                                      ? "#FDF2F3"
+                                      : "",
+                                fontWeight: "500",
+                                borderRadius: "50%",
+                                padding: "15px",
+                                width: "35px",
+                                height: "35px",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                              }}
+                            >
+                              {String.fromCharCode(65 + answerIndex)}
+                            </Box>
+                            <Typography sx={{ fontWeight: "500" }}>
+                              {answer}
+                            </Typography>
+                          </Item>
+                        );
+                      },
+                    )}
                     {isExplain && (
                       <Item
                         isDisabled={isDisabled}
                         isExplain={isExplain}
                         onClick={() =>
-                          handleExpandExplain(PART, groupIndex, questionIndex)
+                          handleExpandExplain(
+                            PART,
+                            groupIndexInPart,
+                            questionIndex,
+                          )
                         }
                         sx={{
                           display: "flex",
@@ -447,8 +474,8 @@ const Part2: React.FC<Part2Props> = ({
                             <Box mt={1} onClick={(e) => e.stopPropagation()}>
                               <Divider />
                               <Typography mt={1}>
-                                {question.explain
-                                  ? parse(question.explain)
+                                {question.explanation
+                                  ? parse(question.explanation)
                                   : "No explain"}
                               </Typography>
                             </Box>

@@ -222,6 +222,7 @@ const theme = createTheme({
       light: "rgba(84, 86, 90, 0.6)",
       main: "#54565A",
       dark: "#202124",
+      extraLight: "#f8f9fa", // light gray used for background
     },
     text: {
       primary: "#54565A",

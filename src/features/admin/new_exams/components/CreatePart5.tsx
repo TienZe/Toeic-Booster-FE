@@ -12,11 +12,12 @@ import { useState } from "react";
 import { TOEIC_PARTS } from "../types/examType";
 import Grid from "@mui/material/Grid2";
 import Editor from "../../../../components/UI/Editor";
-import { answerIndexToLabel, QuestionGroup } from "../../../../types/ToeicExam";
+import { QuestionGroup } from "../../../../types/ToeicExam";
 import { SaveToeicTestRequest } from "../types/SaveToeicTestRequest";
 import { useFormContext, useWatch } from "react-hook-form";
 import { CrPartProps } from "../types/CrPartProps";
 import { getQuestionGroupChipStyle } from "../utils/helper";
+import { answerIndexToLabel } from "../../../../utils/toeicExamHelper";
 
 const part5Group = Array.from({
   length: TOEIC_PARTS.Part5.groupQuestion,

@@ -16,22 +16,23 @@ import {
   fetchListTags,
 } from "../../../admin/new_exams/api/examApi";
 import DotLoadingProgress from "../../../../components/UI/DotLoadingProgress";
-import { ExamSetInfo } from "../../types/ExamSetInfo";
 import ExamCard from "../../../home/components/ExamCard";
 import Content from "../../../../components/layout/Content";
 import { Tag } from "../../types/Tags";
 import { useSearchParams } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
 import { debounce } from "lodash";
+import usePaginatedToeicExams from "../../../../hooks/usePaginatedToeicExams";
+
+const LIMIT = 9;
 
 const ExamsLibraryPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const tagId = searchParams.get("tag_id") || "";
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [selectedTag, setSelectedTag] = useState<Tag | null>();
   const [search, setSearch] = useState("");
   const [searchValueDebounce, setSearchValueDebounce] = useState("");
-  const LIMIT = 9;
 
   useEffect(() => {
     if (!tagId) {
@@ -39,10 +40,14 @@ const ExamsLibraryPage = () => {
     }
   });
 
-  const { data: examSetData, isPending } = useQuery({
-    queryKey: ["fetchExam", tagId, page, LIMIT, searchValueDebounce],
-    queryFn: () => fetchAllExam(tagId, page, LIMIT, searchValueDebounce),
-  });
+  const { data: paginatedExams, isLoading: isLoadingPaginatedExams } =
+    usePaginatedToeicExams(
+      {},
+      {
+        page,
+        limit: LIMIT,
+      },
+    );
 
   const { data: tags, isPending: isPendingTags } = useQuery({
     queryKey: ["FetchListTags"],
@@ -75,7 +80,7 @@ const ExamsLibraryPage = () => {
             <Typography variant="h4" sx={{ marginBottom: 2 }}>
               Exam Library
             </Typography>
-            {isPendingTags && isPending ? (
+            {isPendingTags || isLoadingPaginatedExams ? (
               <Box sx={{ marginTop: 2 }}>
                 <DotLoadingProgress />
               </Box>
@@ -126,41 +131,30 @@ const ExamsLibraryPage = () => {
                   }}
                 />
 
-                {isPending ? (
+                {isLoadingPaginatedExams ? (
                   <Box sx={{ marginTop: 2 }}>
                     <DotLoadingProgress />
                   </Box>
                 ) : (
                   <Grid2 container rowGap={1.5} my={3}>
-                    {examSetData?.data?.length && examSetData?.data?.length > 0
-                      ? examSetData?.data
-                          .map((examSet) => {
-                            const examSetInfo: ExamSetInfo = {
-                              id: examSet.id,
-                              name: examSet.name,
-                              time: examSet.time,
-                              taken: examSet.taken,
-                              commentCount: examSet.commentCount,
-                            };
-                            return examSetInfo;
-                          })
-                          .map((examSet) => {
-                            return (
-                              <Grid2 sx={{ width: "275px" }}>
-                                <ExamCard
-                                  key={examSet.id}
-                                  id={examSet.id}
-                                  title={examSet.name}
-                                  duration={examSet.time.toString()}
-                                  totalParticipants={examSet.taken}
-                                  totalComments={examSet.commentCount}
-                                  numOfParts={7}
-                                  numOfQuestions={200}
-                                  tags={["Listening", "Reading"]}
-                                />
-                              </Grid2>
-                            );
-                          })
+                    {paginatedExams && paginatedExams.items.length > 0
+                      ? paginatedExams.items.map((exam) => {
+                          return (
+                            <Grid2 sx={{ width: "275px" }}>
+                              <ExamCard
+                                key={exam.id}
+                                id={exam.id}
+                                title={exam.name}
+                                duration={"120p"}
+                                totalParticipants={100}
+                                totalComments={123}
+                                numOfParts={7}
+                                numOfQuestions={200}
+                                tags={["Listening", "Reading"]}
+                              />
+                            </Grid2>
+                          );
+                        })
                       : "No data"}
                   </Grid2>
                 )}
@@ -174,11 +168,9 @@ const ExamsLibraryPage = () => {
               }}
             >
               <Pagination
-                count={Math.ceil(
-                  (examSetData?.total || 1) / (examSetData?.limit || 1),
-                )}
-                page={page}
-                onChange={(_, value) => setPage(value)}
+                count={paginatedExams?.totalPages || 1}
+                page={page + 1}
+                onChange={(_, value) => setPage(value - 1)}
                 color="primary"
               />
             </Box>

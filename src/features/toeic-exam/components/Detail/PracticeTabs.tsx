@@ -44,7 +44,7 @@ function CustomTabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ px: 0, py: 2 }}>{children}</Box>}
     </div>
   );
 }
@@ -129,7 +129,7 @@ export default function PracticeTabs() {
             sx={{
               background: "#D8F0E2",
               py: 1,
-              px: 2,
+              px: 1,
               borderRadius: 2,
               mb: 1,
             }}
@@ -237,7 +237,7 @@ export default function PracticeTabs() {
             sx={{
               background: "#FFEFD8",
               py: 1,
-              px: 2,
+              px: 1,
               borderRadius: 2,
               mb: 0.5,
             }}

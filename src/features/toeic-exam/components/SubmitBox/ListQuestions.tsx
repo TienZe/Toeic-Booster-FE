@@ -1,17 +1,18 @@
 import { Box, Button, Typography } from "@mui/material";
-import { partData } from "../../../admin/new_exams/types/examType";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../stores";
 import { useQuestionContext } from "../QuestionProvider";
+import { Part, PartData } from "../../../../types/ToeicExam";
 
 interface partDataChosenProps {
-  partDataChosen: partData[];
-  setCurrentIndex: (index: number) => void;
+  partDataChosen: PartData;
+  setCurrentPart: (part: Part) => void;
+
   mode?: string;
 }
 const ListQuestion: React.FC<partDataChosenProps> = ({
   partDataChosen,
-  setCurrentIndex,
+  setCurrentPart,
 }) => {
   console.log("chosen", partDataChosen);
   const activeAnswers = useSelector(
@@ -23,9 +24,8 @@ const ListQuestion: React.FC<partDataChosenProps> = ({
 
   const { scrollToQuestion } = useQuestionContext();
 
-  const convertPartChosen = (partChosen: string) => {
-    return +partChosen[partChosen.length - 1];
-  };
+  console.log("partDataChosen", partDataChosen);
+  console.log("Object.keys(partDataChosen)", Object.keys(partDataChosen));
 
   const isNotedQuestion = (
     part: number,
@@ -42,11 +42,11 @@ const ListQuestion: React.FC<partDataChosenProps> = ({
   };
   return (
     <>
-      {partDataChosen.map((partChosen, PartChosenIndex) => {
-        const part = convertPartChosen(partChosen.part);
-
+      {Object.keys(partDataChosen).map((partChosen) => {
+        const part = +partChosen[partChosen.length - 1]; // part number
+        const questionGroupsOfChosenParts = partDataChosen[partChosen];
         return (
-          <Box key={PartChosenIndex}>
+          <Box key={part}>
             <Typography
               sx={{
                 fontWeight: "600",
@@ -57,9 +57,9 @@ const ListQuestion: React.FC<partDataChosenProps> = ({
               {`Part ${part}`}
             </Typography>
             <Box>
-              {partChosen.groupQuestionData.map((group, groupIndex) => {
-                return group.questionData.map((question, questionIndex) => {
-                  let isNoted = isNotedQuestion(
+              {questionGroupsOfChosenParts.map((group, groupIndex) => {
+                return group.questions.map((question, questionIndex) => {
+                  const isNoted = isNotedQuestion(
                     part,
                     groupIndex,
                     questionIndex,
@@ -73,7 +73,7 @@ const ListQuestion: React.FC<partDataChosenProps> = ({
                     <Button
                       key={`btn-${groupIndex}-${questionIndex}`}
                       onClick={() => {
-                        setCurrentIndex(PartChosenIndex);
+                        setCurrentPart(partChosen as Part);
                         scrollToQuestion(part, groupIndex, questionIndex);
                       }}
                       sx={{

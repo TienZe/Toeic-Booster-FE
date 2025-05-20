@@ -3,18 +3,21 @@ import ResultTable from "./ResultTable";
 import PracticeTabs from "./PracticeTabs";
 
 import TestDetailInfo from "./TestDetailInfo";
+import { useToeicExamInfo } from "../../hooks/useToeicExamInfo";
 
 interface DetailProps {
-  examId?: string;
+  examId: number;
 }
 const DetailContent: React.FC<DetailProps> = ({ examId }) => {
-  // const routeParams = useParams<{ examId: string }>();
-  // const examId = routeParams.examId;
-
+  const { data: toeicExamInfo } = useToeicExamInfo(examId);
   return (
     <>
       <Box sx={{ pb: 2 }}>
-        <TestDetailInfo examId={examId} />
+        <TestDetailInfo
+          testName={toeicExamInfo?.name || ""}
+          commentCount={toeicExamInfo?.commentCount || 0}
+          takenStudents={toeicExamInfo?.takenStudents || 0}
+        />
       </Box>
 
       <Divider />
@@ -27,7 +30,7 @@ const DetailContent: React.FC<DetailProps> = ({ examId }) => {
         <Typography variant="h6" sx={{ mb: 1, color: "black" }}>
           Your result
         </Typography>
-        <ResultTable examId={examId} />
+        {/* <ResultTable examId={examId} /> */}
       </Box>
 
       <Box sx={{ width: "100%", my: 2 }}>

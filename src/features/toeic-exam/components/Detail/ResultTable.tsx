@@ -24,7 +24,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 interface ResultTableProps {
-  examId?: string;
+  examId?: number;
 }
 
 const HeadRowStyle = {

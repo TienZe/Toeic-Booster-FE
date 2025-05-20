@@ -12,7 +12,7 @@ import { useState } from "react";
 import { TOEIC_PARTS } from "../types/examType";
 import Grid from "@mui/material/Grid2";
 import Editor from "../../../../components/UI/Editor";
-import { answerIndexToLabel, QuestionGroup } from "../../../../types/ToeicExam";
+import { QuestionGroup } from "../../../../types/ToeicExam";
 import { file2Base64 } from "../../../../utils/helper";
 import { SaveToeicTestRequest } from "../types/SaveToeicTestRequest";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -20,6 +20,7 @@ import { CrPartProps } from "../types/CrPartProps";
 import _ from "lodash";
 import { Image } from "../../../../components/UI/Image";
 import { getQuestionGroupChipStyle } from "../utils/helper";
+import { answerIndexToLabel } from "../../../../utils/toeicExamHelper";
 
 const part7Group = Array.from({
   length: TOEIC_PARTS.Part7.groupQuestion,
@@ -151,7 +152,7 @@ const Part7Form: React.FC<Part1FormProps> = ({ groupIndex, onClose }) => {
 
   return (
     <Grid container spacing={3}>
-      <Grid size={3}>
+      <Grid size={4}>
         <Stack>
           <Box
             display="flex"
@@ -188,7 +189,7 @@ const Part7Form: React.FC<Part1FormProps> = ({ groupIndex, onClose }) => {
                 >
                   <Image
                     src={image.fileUrl}
-                    sx={{ width: 150, height: "auto", borderRadius: 1 }}
+                    sx={{ width: "100%", height: "auto", borderRadius: 1 }}
                   />
                 </Box>
               ))}
@@ -208,7 +209,7 @@ const Part7Form: React.FC<Part1FormProps> = ({ groupIndex, onClose }) => {
         </Stack>
       </Grid>
 
-      <Grid size={9}>
+      <Grid size={8}>
         <Typography my={0.75}>Passage</Typography>
         <Stack flexDirection="column" flexGrow={1}>
           <Editor

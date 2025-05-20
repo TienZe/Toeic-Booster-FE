@@ -36,9 +36,21 @@ export interface ToeicExam {
   tag?: number;
   questionGroups?: QuestionGroup[];
 
+  commentCount?: number;
+  takenStudents?: number;
+
   createdAt: string;
 }
 
-export function answerIndexToLabel(index: number) {
-  return ["A", "B", "C", "D"][index] as "A" | "B" | "C" | "D";
-}
+export type Part =
+  | "part1"
+  | "part2"
+  | "part3"
+  | "part4"
+  | "part5"
+  | "part6"
+  | "part7";
+
+export type PartData = {
+  [key: string]: QuestionGroup[];
+};

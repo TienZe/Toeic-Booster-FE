@@ -7,7 +7,7 @@ import CustomCard from "./CustomCard";
 import { Link } from "react-router-dom";
 
 interface ExamCardProps {
-  id: string;
+  id: number;
   title: string;
   duration: string;
   totalParticipants: number;

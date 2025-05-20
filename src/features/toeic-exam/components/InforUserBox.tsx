@@ -39,7 +39,7 @@ const InforUserBox = () => {
       {isLoading ? (
         <CustomBackdrop open />
       ) : (
-        <>
+        <Box>
           <Box sx={{ mb: 1 }}>
             <Stack
               direction="column"
@@ -80,7 +80,7 @@ const InforUserBox = () => {
               </Button>
             </Stack>
           </Box>
-        </>
+        </Box>
       )}
     </>
   );

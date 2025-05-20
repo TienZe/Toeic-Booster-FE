@@ -15,15 +15,17 @@ import { resetAnswers } from "../../../../stores/userAnswer";
 import { clearSelectedParts } from "../../../../stores/selectedPartsSlice";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
 import ConfirmDrawer from "./ConfirmDrawer";
+import { Part, PartData } from "../../../../types/ToeicExam";
+import { PARTS as ALL_PARTS } from "../../../../utils/toeicExamHelper";
 
 interface PartDataProps {
-  partData: partData[];
-  setCurrentIndex: (index: number) => void;
+  partData: PartData;
+  setCurrentPart: (part: Part) => void;
   mode?: string;
 }
 const SubMitBox: React.FC<PartDataProps> = ({
   partData,
-  setCurrentIndex,
+  setCurrentPart,
   mode,
 }) => {
   console.log("submit box", partData);
@@ -40,16 +42,8 @@ const SubMitBox: React.FC<PartDataProps> = ({
   const parts = searchParams.getAll("part");
   const isFullTest = parts.includes("full");
   console.log(isFullTest);
-  const allParts = [
-    "part1",
-    "part2",
-    "part3",
-    "part4",
-    "part5",
-    "part6",
-    "part7",
-  ];
-  const selectedPartsQuery = isFullTest ? allParts : parts;
+
+  const selectedPartsQuery = isFullTest ? ALL_PARTS : parts;
   const TOTAL_QUESTIONS = countTotalQuestions(selectedPartsQuery);
 
   const timerCountDownRef = useRef<TimerCountdownRef>(null);
@@ -61,12 +55,12 @@ const SubMitBox: React.FC<PartDataProps> = ({
 
   useEffect(() => {
     const selectedPartsClone =
-      mode === "review" ? [...allParts] : [...selectedPartsQuery];
-    const partDataChosen = partData.filter((partItem) =>
-      selectedPartsClone.includes(partItem.part),
-    );
-    console.log("chosen", partDataChosen);
-    setPartDataChosen(partDataChosen);
+      mode === "review" ? [...ALL_PARTS] : [...selectedPartsQuery];
+    // const partDataChosen = partData.filter((partItem) =>
+    //   selectedPartsClone.includes(partItem.part),
+    // );
+    // console.log("chosen", partDataChosen);
+    // setPartDataChosen(partDataChosen);
   }, [partData]);
 
   const mutation = useMutation({
@@ -161,8 +155,9 @@ const SubMitBox: React.FC<PartDataProps> = ({
 
           <Box>
             <ListQuestion
-              partDataChosen={partDataChosen}
-              setCurrentIndex={setCurrentIndex}
+              // partDataChosen={partDataChosen}
+              partDataChosen={partData}
+              setCurrentPart={setCurrentPart}
               mode={mode}
             />
           </Box>

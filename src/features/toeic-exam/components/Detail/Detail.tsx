@@ -7,9 +7,9 @@ import { useParams } from "react-router-dom";
 
 const Detail = () => {
   const routeParams = useParams<{ examId: string }>();
-  const examId = routeParams.examId;
+  const examId = Number(routeParams.examId);
   return (
-    <Content>
+    <Content sx={{ backgroundColor: "secondary.extraLight" }}>
       <Container>
         <Box
           sx={{
@@ -26,6 +26,7 @@ const Detail = () => {
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 borderRadius: 2,
                 marginBottom: 2,
+                backgroundColor: "white",
               }}
             >
               <DetailContent examId={examId} />
@@ -35,6 +36,7 @@ const Detail = () => {
                 padding: 3,
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 borderRadius: 2,
+                backgroundColor: "white",
               }}
             >
               <Comments examId={examId} />
@@ -47,6 +49,7 @@ const Detail = () => {
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
               borderRadius: 2,
               height: "fit-content",
+              backgroundColor: "white",
             }}
           >
             <InforUserBox />

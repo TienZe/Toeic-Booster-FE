@@ -1,13 +1,9 @@
 import { Box, Button, Container, Grid2, Stack } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import Part1 from "./Part1";
 import Part2 from "./Part2";
 import Part3 from "./Part3";
-import { useQuery } from "@tanstack/react-query";
-import { fetchExamById } from "../../admin/new_exams/api/examApi";
-import NewExamRequest from "../../admin/new_exams/types/NewExamRequest";
-import { convertExamResponse } from "../../admin/new_exams/utils/helper";
 import Part4 from "./Part4";
 import Part5 from "./Part5";
 import Part7 from "./Part7";
@@ -22,6 +18,10 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop";
+import useToeicExam from "../../../hooks/useToeicExam";
+import { splitQuestionGroupsToParts } from "../../../utils/toeicExamHelper";
+import { PARTS as ALL_PARTS } from "../../../utils/toeicExamHelper";
+import { Part } from "../../../types/ToeicExam";
 
 const PartIndex = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -40,20 +40,11 @@ const PartIndex = () => {
   const parts = searchParams.getAll("part");
   const isFullTest = parts.includes("full");
   console.log(isFullTest);
-  const allParts = [
-    "part1",
-    "part2",
-    "part3",
-    "part4",
-    "part5",
-    "part6",
-    "part7",
-  ];
-  const selectedParts = isFullTest ? allParts : parts;
+
+  const selectedParts = isFullTest ? ALL_PARTS : parts;
   //console.log(selectedParts);
   const dispatch = useDispatch();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [examData, setExamData] = useState<NewExamRequest>();
+  const [currentIndex, setCurrentIndex] = useState(0); // current part index
   const notedQuestions = useSelector(
     (state: RootState) => state.notedQuestions.notedQuestions,
   );
@@ -82,22 +73,18 @@ const PartIndex = () => {
 
   const routeParams = useParams<{ examId: string }>();
   const examId = routeParams.examId;
-  const { isPending, data: ExamSetData } = useQuery({
-    queryKey: ["FetchExamSet", examId],
-    queryFn: () => fetchExamById(examId!),
-    enabled: !!examId,
-  });
 
-  useEffect(() => {
-    if (examId && ExamSetData) {
-      console.log("exam ", ExamSetData);
-      console.log("converve data", convertExamResponse(ExamSetData));
-      const convertedData = convertExamResponse(ExamSetData);
-      setExamData(convertedData);
-    }
-  }, [ExamSetData]);
+  const { data: toeicExam, isLoading: isLoadingToeicExam } = useToeicExam(
+    Number(examId),
+    {
+      enabled: !!examId,
+    },
+  );
 
-  console.log("examset", ExamSetData);
+  const part2QuestionGroups = useMemo(
+    () => splitQuestionGroupsToParts(toeicExam?.questionGroups || []),
+    [toeicExam?.questionGroups],
+  );
 
   const handleNext = () => setCurrentIndex((prev) => prev + 1);
   const handlePrevious = () => setCurrentIndex((prev) => prev - 1);
@@ -109,7 +96,7 @@ const PartIndex = () => {
       case "part1":
         return (
           <Part1
-            partData={examData?.partData[0]}
+            questionGroups={part2QuestionGroups.part1}
             handleNotedQuestion={handleNotedQuestion}
             isNotedQuestion={isNotedQuestion}
           />
@@ -117,7 +104,7 @@ const PartIndex = () => {
       case "part2":
         return (
           <Part2
-            partData={examData?.partData[1]}
+            questionGroups={part2QuestionGroups.part2}
             handleNotedQuestion={handleNotedQuestion}
             isNotedQuestion={isNotedQuestion}
           />
@@ -125,7 +112,7 @@ const PartIndex = () => {
       case "part3":
         return (
           <Part3
-            partData={examData?.partData[2]}
+            questionGroups={part2QuestionGroups.part3}
             handleNotedQuestion={handleNotedQuestion}
             isNotedQuestion={isNotedQuestion}
           />
@@ -133,7 +120,7 @@ const PartIndex = () => {
       case "part4":
         return (
           <Part4
-            partData={examData?.partData[3]}
+            questionGroups={part2QuestionGroups.part4}
             handleNotedQuestion={handleNotedQuestion}
             isNotedQuestion={isNotedQuestion}
           />
@@ -141,7 +128,7 @@ const PartIndex = () => {
       case "part5":
         return (
           <Part5
-            partData={examData?.partData[4]}
+            questionGroups={part2QuestionGroups.part5}
             handleNotedQuestion={handleNotedQuestion}
             isNotedQuestion={isNotedQuestion}
           />
@@ -149,7 +136,7 @@ const PartIndex = () => {
       case "part6":
         return (
           <Part6
-            partData={examData?.partData[5]}
+            questionGroups={part2QuestionGroups.part6}
             handleNotedQuestion={handleNotedQuestion}
             isNotedQuestion={isNotedQuestion}
           />
@@ -157,7 +144,7 @@ const PartIndex = () => {
       case "part7":
         return (
           <Part7
-            partData={examData?.partData[6]}
+            questionGroups={part2QuestionGroups.part7}
             handleNotedQuestion={handleNotedQuestion}
             isNotedQuestion={isNotedQuestion}
           />
@@ -167,16 +154,17 @@ const PartIndex = () => {
     }
   };
   return (
-    <Content>
+    <Content sx={{ backgroundColor: "secondary.extraLight" }}>
       <Container maxWidth="sm">
         <QuestionProvider>
           <Box my={2}>
-            {isPending ? (
+            {isLoadingToeicExam ? (
               <CustomBackdrop open />
             ) : (
               <Grid2 container spacing={2}>
                 <Grid2 size={9.5}>
                   <Stack direction={"column"} gap={1}>
+                    {/* Part Navigation */}
                     <Box
                       sx={{
                         width: "100%",
@@ -188,6 +176,7 @@ const PartIndex = () => {
                         alignItems: "center",
                         gap: 1,
                         padding: "0 20px",
+                        backgroundColor: "white",
                       }}
                     >
                       <Stack direction={"row"} gap={0.5}>
@@ -233,10 +222,13 @@ const PartIndex = () => {
                         <ArrowForwardIosIcon />
                       </Button>
                     </Box>
+
+                    {/* Part Content */}
                     <Box
                       sx={{
                         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                         borderRadius: 3,
+                        backgroundColor: "white",
                       }}
                       padding={3}
                     >
@@ -253,11 +245,14 @@ const PartIndex = () => {
                       position: "sticky",
                       top: "50px",
                       alignSelf: "flex-start",
+                      backgroundColor: "white",
                     }}
                   >
                     <SubMitBox
-                      partData={examData?.partData || []}
-                      setCurrentIndex={setCurrentIndex}
+                      partData={part2QuestionGroups}
+                      setCurrentPart={(part: Part) => {
+                        setCurrentIndex(selectedParts.indexOf(part));
+                      }}
                     />
                   </Box>
                 </Grid2>
