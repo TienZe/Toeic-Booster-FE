@@ -101,6 +101,7 @@ const Part1: React.FC<Part1Props> = ({
   const PART = 1;
   useScrollToTop();
   const dispatch = useDispatch();
+
   const activeAnswers = useSelector(
     (state: RootState) => state.userAnswers.activeAnswers,
   );
@@ -110,6 +111,7 @@ const Part1: React.FC<Part1Props> = ({
   const expandedScript = useSelector(
     (state: RootState) => state.seletedScript.expandedScript,
   );
+
   const handleClick = (
     part: number,
     groupIndex: number,
@@ -289,7 +291,7 @@ const Part1: React.FC<Part1Props> = ({
               )}
             </Box>
 
-            {/* List of Items */}
+            {/* List of Questions */}
             <Box sx={{ width: "100%" }}>
               {group.questions.map((question, questionIndex) => {
                 // let isCorrectQuestion = question.userAnswer?.isCorrect;
@@ -354,23 +356,20 @@ const Part1: React.FC<Part1Props> = ({
                     </Box>
                     {ABCD.map((answerLabel) => question[answerLabel]).map(
                       (answer, answerIndex) => {
-                        // let isActive =
-                        //   activeAnswers[PART]?.[groupIndex]?.[questionIndex] ===
-                        //   answerIndex;
+                        const isActive =
+                          activeAnswers[PART]?.[groupIndexInPart]?.[
+                            questionIndex
+                          ] === answerIndex;
 
-                        const isActive = answerIndex == 4;
                         const answerLabel = answerIndexToLabel(answerIndex);
                         const isCorrect =
                           answerLabel === question.correctAnswer &&
                           mode === "review";
-                        // const isIncorrect =
-                        //   answerLabel === question.userAnswer?.userAnswer &&
-                        //   answer !== question.correctAnswer;
-                        // const isChosen =
-                        //   answerLabel === question.userAnswer?.userAnswer;
-
-                        const isIncorrect = false;
-                        const isChosen = false;
+                        const isIncorrect =
+                          answerLabel === question.userAnswer?.userAnswer &&
+                          answer !== question.correctAnswer;
+                        const isChosen =
+                          answerLabel === question.userAnswer?.userAnswer;
 
                         return (
                           <Item
@@ -388,7 +387,7 @@ const Part1: React.FC<Part1Props> = ({
                                 questionIndex,
                                 answerIndex,
                                 question.id,
-                                answer,
+                                answerLabel,
                               )
                             }
                             sx={{

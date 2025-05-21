@@ -4,17 +4,14 @@ import { RootState } from "../../../../stores";
 import { useQuestionContext } from "../QuestionProvider";
 import { Part, PartData } from "../../../../types/ToeicExam";
 
-interface partDataChosenProps {
+interface ListQuestionProps {
   partDataChosen: PartData;
   setCurrentPart: (part: Part) => void;
-
-  mode?: string;
 }
-const ListQuestion: React.FC<partDataChosenProps> = ({
+const ListQuestion: React.FC<ListQuestionProps> = ({
   partDataChosen,
   setCurrentPart,
 }) => {
-  console.log("chosen", partDataChosen);
   const activeAnswers = useSelector(
     (state: RootState) => state.userAnswers.activeAnswers,
   );

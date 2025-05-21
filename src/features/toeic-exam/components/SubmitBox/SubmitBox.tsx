@@ -19,18 +19,16 @@ import { Part, PartData } from "../../../../types/ToeicExam";
 import { PARTS as ALL_PARTS } from "../../../../utils/toeicExamHelper";
 
 interface PartDataProps {
-  partData: PartData;
+  partDataChosen: PartData;
   setCurrentPart: (part: Part) => void;
   mode?: string;
 }
 const SubMitBox: React.FC<PartDataProps> = ({
-  partData,
+  partDataChosen,
   setCurrentPart,
   mode,
 }) => {
-  console.log("submit box", partData);
   const [openComfirm, setOpenConfirm] = useState<boolean>(false);
-  const [partDataChosen, setPartDataChosen] = useState<partData[]>([]);
   const dispatch = useDispatch();
   const limitTime = useSelector(
     (state: RootState) => state.selectedParts.limitTime,
@@ -38,30 +36,23 @@ const SubMitBox: React.FC<PartDataProps> = ({
   const userAnswers = useSelector(
     (state: RootState) => state.userAnswers.userAnswers,
   );
-  const [searchParams] = useSearchParams();
-  const parts = searchParams.getAll("part");
-  const isFullTest = parts.includes("full");
-  console.log(isFullTest);
 
-  const selectedPartsQuery = isFullTest ? ALL_PARTS : parts;
-  const TOTAL_QUESTIONS = countTotalQuestions(selectedPartsQuery);
+  // const selectedPartsQuery = isFullTest ? ALL_PARTS : parts;
+  // const TOTAL_QUESTIONS = countTotalQuestions(selectedPartsQuery);
+  const TOTAL_QUESTIONS = 123;
+  const selectedParts = Object.keys(partDataChosen);
+  const isFullTest = selectedParts.length === ALL_PARTS.length;
 
   const timerCountDownRef = useRef<TimerCountdownRef>(null);
 
   const routeParams = useParams<{ examId: string }>();
   const examId = routeParams.examId;
   const navigate = useNavigate();
-  console.log("part", selectedPartsQuery);
 
-  useEffect(() => {
-    const selectedPartsClone =
-      mode === "review" ? [...ALL_PARTS] : [...selectedPartsQuery];
-    // const partDataChosen = partData.filter((partItem) =>
-    //   selectedPartsClone.includes(partItem.part),
-    // );
-    // console.log("chosen", partDataChosen);
-    // setPartDataChosen(partDataChosen);
-  }, [partData]);
+  // useEffect(() => {
+  //   const selectedPartsClone =
+  //     mode === "review" ? [...ALL_PARTS] : [...selectedPartsQuery];
+  // }, [partData]);
 
   const mutation = useMutation({
     mutationFn: async (data: PracticeRequest) => {
@@ -155,10 +146,8 @@ const SubMitBox: React.FC<PartDataProps> = ({
 
           <Box>
             <ListQuestion
-              // partDataChosen={partDataChosen}
-              partDataChosen={partData}
+              partDataChosen={partDataChosen}
               setCurrentPart={setCurrentPart}
-              mode={mode}
             />
           </Box>
         </>

@@ -22,10 +22,9 @@ import {
   setSelectedParts,
 } from "../../../../stores/selectedPartsSlice";
 import { useNavigate, useParams } from "react-router-dom";
-import { sortPartArray } from "../../utils/helper";
 import { resetAnswers } from "../../../../stores/userAnswer";
-import { toast } from "react-toastify";
 import { resetNotedQuestion } from "../../../../stores/notedQuestionSlice";
+import { PARTS } from "../../../../utils/toeicExamHelper";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -95,20 +94,22 @@ export default function PracticeTabs() {
   };
 
   const handlePractice = (isFullTest: boolean) => {
-    const selectedPartsClone = [...selectedParts];
-    const sortedSelectedParts = sortPartArray(selectedPartsClone);
-    if (selectedPartsClone.length === 0 && !isFullTest) {
-      toast.error("Please choose at least one part!");
-      return;
-    }
+    // const selectedPartsClone = [...selectedParts];
+    // const sortedSelectedParts = sortPartArray(selectedPartsClone);
+    // if (selectedPartsClone.length === 0 && !isFullTest) {
+    //   toast.error("Please choose at least one part!");
+    //   return;
+    // }
     if (isFullTest) {
       dispatch(setLimitTime("7200"));
+      dispatch(setSelectedParts(PARTS));
     }
-    const query = isFullTest
-      ? "part=full"
-      : sortedSelectedParts.map((part) => `part=${part}`).join("&");
+    // const query = isFullTest
+    //   ? "part=full"
+    //   : sortedSelectedParts.map((part) => `part=${part}`).join("&");
 
-    navigate(`/exams/${examId}/partIndex?${query}`);
+    // navigate(`/exams/${examId}/partIndex?${query}`);
+    navigate(`/exams/${examId}/partIndex`);
   };
 
   return (

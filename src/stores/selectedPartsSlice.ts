@@ -15,7 +15,8 @@ const selectedPartsSlice = createSlice({
   initialState,
   reducers: {
     setSelectedParts: (state, action: PayloadAction<string[]>) => {
-      state.selectedParts = action.payload;
+      const sortedSelectedParts = action.payload.slice().sort();
+      state.selectedParts = sortedSelectedParts;
     },
     setLimitTime: (state, action: PayloadAction<string>) => {
       state.limitTime = action.payload;

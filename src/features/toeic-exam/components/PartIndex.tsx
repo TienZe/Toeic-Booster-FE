@@ -1,6 +1,6 @@
 import { Box, Button, Container, Grid2, Stack } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Part1 from "./Part1";
 import Part2 from "./Part2";
 import Part3 from "./Part3";
@@ -20,31 +20,35 @@ import NavigationIcon from "@mui/icons-material/Navigation";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop";
 import useToeicExam from "../../../hooks/useToeicExam";
 import { splitQuestionGroupsToParts } from "../../../utils/toeicExamHelper";
-import { PARTS as ALL_PARTS } from "../../../utils/toeicExamHelper";
 import { Part } from "../../../types/ToeicExam";
 
 const PartIndex = () => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+
+  const selectedPracticeParts = useSelector(
+    (state: RootState) => state.selectedParts.selectedParts,
+  );
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      setIsVisible(scrollTop > 0);
+      setShowScrollToTop(scrollTop > 0);
     };
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-  const [searchParams] = useSearchParams();
-  const parts = searchParams.getAll("part");
-  const isFullTest = parts.includes("full");
-  console.log(isFullTest);
 
-  const selectedParts = isFullTest ? ALL_PARTS : parts;
+  // const [searchParams] = useSearchParams();
+  // const parts = searchParams.getAll("part");
+  // const isFullTest = parts.includes("full");
+  // console.log(isFullTest);
+
+  // const selectedParts = isFullTest ? ALL_PARTS : parts;
   //console.log(selectedParts);
   const dispatch = useDispatch();
-  const [currentIndex, setCurrentIndex] = useState(0); // current part index
+  const [currentPartIndex, setCurrentPartIndex] = useState(0); // current part index
   const notedQuestions = useSelector(
     (state: RootState) => state.notedQuestions.notedQuestions,
   );
@@ -82,15 +86,21 @@ const PartIndex = () => {
   );
 
   const part2QuestionGroups = useMemo(
-    () => splitQuestionGroupsToParts(toeicExam?.questionGroups || []),
-    [toeicExam?.questionGroups],
-  );
+    () =>
+      splitQuestionGroupsToParts(
+        toeicExam?.questionGroups || [],
+        selectedPracticeParts as Part[],
+      ),
+    [toeicExam?.questionGroups, selectedPracticeParts],
+  ); // object mapping chosen parts to its question groups
 
-  const handleNext = () => setCurrentIndex((prev) => prev + 1);
-  const handlePrevious = () => setCurrentIndex((prev) => prev - 1);
+  console.log("part2QuestionGroups", part2QuestionGroups);
+
+  const handleNext = () => setCurrentPartIndex((prev) => prev + 1);
+  const handlePrevious = () => setCurrentPartIndex((prev) => prev - 1);
 
   const renderPart = () => {
-    const currentPart = selectedParts[currentIndex];
+    const currentPart = selectedPracticeParts[currentPartIndex];
 
     switch (currentPart) {
       case "part1":
@@ -182,7 +192,7 @@ const PartIndex = () => {
                       <Stack direction={"row"} gap={0.5}>
                         <Button
                           variant="text"
-                          disabled={currentIndex === 0}
+                          disabled={currentPartIndex === 0}
                           onClick={handlePrevious}
                           sx={{
                             borderRadius: 3,
@@ -190,11 +200,11 @@ const PartIndex = () => {
                         >
                           <ArrowBackIosIcon />
                         </Button>
-                        {selectedParts.map((part, partIndex) => {
+                        {selectedPracticeParts.map((part, partIndex) => {
                           return (
                             <Button
                               variant={
-                                currentIndex === partIndex
+                                currentPartIndex === partIndex
                                   ? "contained"
                                   : "outlined"
                               }
@@ -203,7 +213,7 @@ const PartIndex = () => {
                                 borderRadius: 3,
                                 padding: "0 18px",
                               }}
-                              onClick={() => setCurrentIndex(partIndex)}
+                              onClick={() => setCurrentPartIndex(partIndex)}
                             >
                               {`Part ${part[4]}`}
                             </Button>
@@ -213,7 +223,9 @@ const PartIndex = () => {
 
                       <Button
                         variant="text"
-                        disabled={currentIndex === selectedParts.length - 1}
+                        disabled={
+                          currentPartIndex === selectedPracticeParts.length - 1
+                        }
                         onClick={handleNext}
                         sx={{
                           borderRadius: 3,
@@ -249,9 +261,11 @@ const PartIndex = () => {
                     }}
                   >
                     <SubMitBox
-                      partData={part2QuestionGroups}
+                      partDataChosen={part2QuestionGroups}
                       setCurrentPart={(part: Part) => {
-                        setCurrentIndex(selectedParts.indexOf(part));
+                        setCurrentPartIndex(
+                          selectedPracticeParts.indexOf(part),
+                        );
                       }}
                     />
                   </Box>
@@ -261,7 +275,9 @@ const PartIndex = () => {
           </Box>
         </QuestionProvider>
       </Container>
-      {isVisible && (
+
+      {/* Scroll to top button */}
+      {showScrollToTop && (
         <div
           style={{
             padding: 0,

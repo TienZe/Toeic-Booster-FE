@@ -17,10 +17,13 @@ export function answerIndexToLabel(index: number) {
   return ["A", "B", "C", "D"][index] as "A" | "B" | "C" | "D";
 }
 
-export function splitQuestionGroupsToParts(questionGroups: QuestionGroup[]) {
-  const parts = PARTS.map((part) => {
+export function splitQuestionGroupsToParts(
+  allQuestionGroups: QuestionGroup[],
+  onlyParts: Part[] = PARTS,
+) {
+  const parts = PARTS.filter((part) => onlyParts.includes(part)).map((part) => {
     return {
-      [part]: questionGroups.filter((group) => group.part === part),
+      [part]: allQuestionGroups.filter((group) => group.part === part),
     };
   });
 

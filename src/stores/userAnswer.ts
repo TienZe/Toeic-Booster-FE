@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UserAnswer {
-  idQuestion: string;
+  idQuestion: number;
   answer: string;
 }
 
@@ -21,7 +21,7 @@ interface ExpandedItem {
 }
 
 interface UserAnswersState {
-  userAnswers: UserAnswer[];
+  userAnswers: Omit<UserAnswer, "id">[];
   activeAnswers: ActiveAnswerState;
   explainAnswers: ExpandedItem[];
 }
@@ -38,13 +38,17 @@ const userAnswersSlice = createSlice({
   reducers: {
     setAnswer: (state, action: PayloadAction<UserAnswer>) => {
       const { idQuestion, answer } = action.payload;
+
+      // Try to find the existing question
       const existingAnswerIndex = state.userAnswers.findIndex(
         (ans) => ans.idQuestion === idQuestion,
       );
 
       if (existingAnswerIndex !== -1) {
+        // If the question exists, update the answer
         state.userAnswers[existingAnswerIndex].answer = answer;
       } else {
+        // If the question does not exist, add it to the list
         state.userAnswers.push(action.payload);
       }
     },
@@ -65,6 +69,8 @@ const userAnswersSlice = createSlice({
       if (!state.activeAnswers[part][groupIndex]) {
         state.activeAnswers[part][groupIndex] = {};
       }
+
+      // Save the selected answer INDEX for the question
       state.activeAnswers[part][groupIndex][questionIndex] = answerIndex;
     },
 
