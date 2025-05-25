@@ -112,7 +112,7 @@ const Part1: React.FC<Part1Props> = ({
     (state: RootState) => state.seletedScript.expandedScript,
   );
 
-  const handleClick = (
+  const handleClickQuestionChoice = (
     part: number,
     groupIndex: number,
     questionIndex: number,
@@ -294,8 +294,7 @@ const Part1: React.FC<Part1Props> = ({
             {/* List of Questions */}
             <Box sx={{ width: "100%" }}>
               {group.questions.map((question, questionIndex) => {
-                // let isCorrectQuestion = question.userAnswer?.isCorrect;
-                const isCorrectQuestion = false;
+                const isCorrectQuestion = question.userAnswer?.isCorrect;
 
                 const isExplain = mode === "review";
                 const isExpanded = isItemExpanded(
@@ -331,7 +330,7 @@ const Part1: React.FC<Part1Props> = ({
                             ? "#00B035"
                             : isCorrectQuestion === false
                               ? "#E20D2C"
-                              : "var(--color-primary-main)",
+                              : "primary.main",
                         color: "white",
                         fontWeight: "400",
                         borderRadius: "50%",
@@ -381,7 +380,7 @@ const Part1: React.FC<Part1Props> = ({
                             isChosen={isChosen}
                             onClick={() =>
                               !isDisabled &&
-                              handleClick(
+                              handleClickQuestionChoice(
                                 PART,
                                 groupIndexInPart,
                                 questionIndex,

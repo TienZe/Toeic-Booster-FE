@@ -1,9 +1,9 @@
-import { UserAnswer } from "./PracticeDetailConverted";
+import { UserAnswer } from "../../../types/ToeicExam";
 
-export interface PracticeRequest {
-  userId: string;
-  testId: string;
-  time: number;
-  isFullTest: boolean;
-  userAnswer: Omit<UserAnswer, "id">[];
+export interface SaveToeicTestAttemptRequest {
+  userId: number;
+  toeicTestId: number;
+  takenTime: number; // in seconds
+  selectedParts: string; // comma separated values
+  userAnswers: Omit<UserAnswer, "id">[];
 }

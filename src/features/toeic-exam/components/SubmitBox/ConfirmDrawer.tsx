@@ -16,7 +16,12 @@ const ConfirmDrawer: React.FC<ConfirmDrawerProps> = ({
   return (
     <div>
       <Drawer anchor="bottom" open={openConfirm} onClose={handleCancel}>
-        <Stack px={4} py={2} direction={"row"} justifyContent={"space-between"}>
+        <Stack
+          sx={{ maxWidth: "900px", width: "100%", margin: "0 auto", px: 2 }}
+          py={2}
+          direction={"row"}
+          justifyContent={"space-between"}
+        >
           <div>
             <Typography variant="h5" gutterBottom>
               Confirm
@@ -24,7 +29,7 @@ const ConfirmDrawer: React.FC<ConfirmDrawerProps> = ({
             <Typography>Are you sure you want to submit</Typography>
           </div>
 
-          <Box display="flex" justifyContent="flex-end">
+          <Box display="flex" justifyContent="flex-end" alignItems="center">
             <Button
               variant="outlined"
               color="secondary"

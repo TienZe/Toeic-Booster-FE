@@ -1,22 +1,19 @@
 import { Box, Button } from "@mui/material";
 import TimerCountdown, { TimerCountdownRef } from "./TimerCountdown";
 import ListQuestion from "./ListQuestions";
-import { partData } from "../../../admin/new_exams/types/examType";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../stores";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { PracticeRequest } from "../../types/PracticeRequest";
+import { useCallback, useRef, useState } from "react";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { SaveToeicTestAttemptRequest } from "../../types/PracticeRequest";
 import { useMutation } from "@tanstack/react-query";
-import { postPractice } from "../../api/api";
+import { postToeicTestAttempt } from "../../api/api";
 import { toast } from "react-toastify";
-import { countTotalQuestions } from "../../utils/helper";
 import { resetAnswers } from "../../../../stores/userAnswer";
 import { clearSelectedParts } from "../../../../stores/selectedPartsSlice";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
 import ConfirmDrawer from "./ConfirmDrawer";
 import { Part, PartData } from "../../../../types/ToeicExam";
-import { PARTS as ALL_PARTS } from "../../../../utils/toeicExamHelper";
 
 interface PartDataProps {
   partDataChosen: PartData;
@@ -28,7 +25,7 @@ const SubMitBox: React.FC<PartDataProps> = ({
   setCurrentPart,
   mode,
 }) => {
-  const [openComfirm, setOpenConfirm] = useState<boolean>(false);
+  const [openConfirm, setOpenConfirm] = useState<boolean>(false);
   const dispatch = useDispatch();
   const limitTime = useSelector(
     (state: RootState) => state.selectedParts.limitTime,
@@ -41,12 +38,12 @@ const SubMitBox: React.FC<PartDataProps> = ({
   // const TOTAL_QUESTIONS = countTotalQuestions(selectedPartsQuery);
   const TOTAL_QUESTIONS = 123;
   const selectedParts = Object.keys(partDataChosen);
-  const isFullTest = selectedParts.length === ALL_PARTS.length;
+  // const isFullTest = selectedParts.length === ALL_PARTS.length;
 
   const timerCountDownRef = useRef<TimerCountdownRef>(null);
 
   const routeParams = useParams<{ examId: string }>();
-  const examId = routeParams.examId;
+  const examId = Number(routeParams.examId);
   const navigate = useNavigate();
 
   // useEffect(() => {
@@ -55,22 +52,17 @@ const SubMitBox: React.FC<PartDataProps> = ({
   // }, [partData]);
 
   const mutation = useMutation({
-    mutationFn: async (data: PracticeRequest) => {
-      const responseData = await postPractice(data);
-      return responseData;
-    },
+    mutationFn: postToeicTestAttempt,
     onSuccess: (responseData) => {
       console.log("Post successfull, reponseData", responseData);
-      navigate(`/exams/result/${responseData.id}`, {
-        state: { responseData, TOTAL_QUESTIONS },
-      });
+      // navigate(`/exams/result/${responseData.id}`, {
+      //   state: { responseData, TOTAL_QUESTIONS },
+      // });
       dispatch(resetAnswers());
       dispatch(clearSelectedParts());
-      // queryClient.setQueryData(
-      //   responseData,
-      // );
+
       setOpenConfirm(false);
-      toast.success("Submit succesfully");
+      toast.success("Submit successfully");
     },
     onError: (error) => {
       console.error("Post failed:", error);
@@ -86,19 +78,29 @@ const SubMitBox: React.FC<PartDataProps> = ({
     setOpenConfirm(true);
   };
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmitExam = useCallback(() => {
     const remainingTime = timerCountDownRef.current?.submit() || 0;
     const implementTime = Math.abs(+limitTime - remainingTime);
-    const practiceRequest: PracticeRequest = {
-      userId: "4d6fffbc-72e7-4895-a0bb-eba4b17f0615",
-      testId: examId || "",
-      isFullTest: isFullTest,
-      time: implementTime,
-      userAnswer: userAnswers,
+    const practiceRequest: SaveToeicTestAttemptRequest = {
+      userId: 1,
+      toeicTestId: examId,
+      selectedParts: selectedParts.join(","),
+      takenTime: implementTime,
+      userAnswers: userAnswers.map((answer) => ({
+        questionId: answer.idQuestion,
+        choice: answer.answer,
+      })),
     };
+
+    console.log("practiceRequest", practiceRequest);
 
     mutation.mutate(practiceRequest);
   }, [limitTime, examId, userAnswers]);
+
+  if (!examId) {
+    return <Navigate to="/exams" />;
+  }
+
   return (
     <>
       {mutation.isPending ? (
@@ -116,7 +118,7 @@ const SubMitBox: React.FC<PartDataProps> = ({
                 <TimerCountdown
                   duration={limitTime}
                   timerRef={timerCountDownRef}
-                  handleSubmit={handleSubmit}
+                  handleSubmit={handleSubmitExam}
                 />
               </Box>
               <Box
@@ -128,12 +130,13 @@ const SubMitBox: React.FC<PartDataProps> = ({
                   sx={{
                     padding: "8px 50px",
                     borderRadius: "5px",
-                    color: "var(--color-primary-main)",
-                    border: "1px solid var(--color-primary-main)",
+                    color: "primary.main",
+                    border: "1px solid",
+                    borderColor: "primary.main",
                     background: "white",
                     ":hover": {
                       color: "white",
-                      background: "var(--color-primary-main)",
+                      backgroundColor: "primary.main",
                     },
                   }}
                   onClick={handleButtonSubmit}
@@ -153,9 +156,9 @@ const SubMitBox: React.FC<PartDataProps> = ({
         </>
       )}
       <ConfirmDrawer
-        openConfirm={openComfirm}
+        openConfirm={openConfirm}
         setOpenConfirm={setOpenConfirm}
-        handleSubmit={handleSubmit}
+        handleSubmit={handleSubmitExam}
       />
     </>
   );

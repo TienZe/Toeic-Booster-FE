@@ -2,13 +2,18 @@ import axiosClient from "../../../axios";
 import ApiResponse from "../../../types/ApiResponse";
 import { ToeicExam } from "../../../types/ToeicExam";
 import { PracticeDetailResponse } from "../types/PracticeDetailResponse";
-import { PracticeRequest } from "../types/PracticeRequest";
+import { SaveToeicTestAttemptRequest } from "../types/PracticeRequest";
 import { TestDetailWithPractice } from "../types/TestDetailWithPractice";
 
-const postPractice = async (practiceRequest: PracticeRequest) => {
-  const response = await axiosClient.post(`test-practice`, practiceRequest);
-  return response.data;
-};
+export async function postToeicTestAttempt(
+  practiceRequest: SaveToeicTestAttemptRequest,
+) {
+  const response = await axiosClient.post(
+    `toeic-test-attempts`,
+    practiceRequest,
+  );
+  return response.data.data;
+}
 
 const fetchPracticeDetailUser = async (reviewId: string) => {
   const response = await axiosClient.get<PracticeDetailResponse>(
@@ -32,4 +37,4 @@ export async function getToeicExamInfo(id: number) {
   return response.data.data;
 }
 
-export { postPractice, fetchPracticeDetailUser, fetchTestDetailWithPractice };
+export { fetchPracticeDetailUser, fetchTestDetailWithPractice };

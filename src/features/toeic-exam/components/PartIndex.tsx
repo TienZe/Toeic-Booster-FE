@@ -21,13 +21,21 @@ import CustomBackdrop from "../../../components/UI/CustomBackdrop";
 import useToeicExam from "../../../hooks/useToeicExam";
 import { splitQuestionGroupsToParts } from "../../../utils/toeicExamHelper";
 import { Part } from "../../../types/ToeicExam";
+import { PARTS as ALL_PARTS } from "../../../utils/toeicExamHelper";
 
 const PartIndex = () => {
   const [showScrollToTop, setShowScrollToTop] = useState(false);
 
-  const selectedPracticeParts = useSelector(
+  const storedSelectedPracticeParts = useSelector(
     (state: RootState) => state.selectedParts.selectedParts,
   );
+
+  const selectedPracticeParts = useMemo(() => {
+    if (storedSelectedPracticeParts.length == 0) {
+      return ALL_PARTS;
+    }
+    return storedSelectedPracticeParts;
+  }, [storedSelectedPracticeParts]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -85,14 +93,12 @@ const PartIndex = () => {
     },
   );
 
-  const part2QuestionGroups = useMemo(
-    () =>
-      splitQuestionGroupsToParts(
-        toeicExam?.questionGroups || [],
-        selectedPracticeParts as Part[],
-      ),
-    [toeicExam?.questionGroups, selectedPracticeParts],
-  ); // object mapping chosen parts to its question groups
+  const part2QuestionGroups = useMemo(() => {
+    return splitQuestionGroupsToParts(
+      toeicExam?.questionGroups || [],
+      selectedPracticeParts as Part[],
+    );
+  }, [toeicExam?.questionGroups, selectedPracticeParts]); // object mapping chosen parts to its question groups
 
   console.log("part2QuestionGroups", part2QuestionGroups);
 

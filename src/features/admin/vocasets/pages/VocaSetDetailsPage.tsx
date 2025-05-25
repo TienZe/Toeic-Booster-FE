@@ -329,7 +329,6 @@ const VocaSetDetailsPage = () => {
                         float: "right",
                         px: "24px",
                         minWidth: "110px",
-                        background: theme.palette.gradient.main,
                       })}
                       type="submit"
                       disabled={vocaSetUpdateMutation.isPending}

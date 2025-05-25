@@ -54,3 +54,8 @@ export type Part =
 export type PartData = {
   [key: string]: QuestionGroup[];
 };
+
+export interface UserAnswer {
+  questionId: number;
+  choice: string;
+}
