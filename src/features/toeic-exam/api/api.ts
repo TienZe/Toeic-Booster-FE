@@ -1,9 +1,9 @@
 import axiosClient from "../../../axios";
 import ApiResponse from "../../../types/ApiResponse";
-import { ToeicExam } from "../../../types/ToeicExam";
+import { ToeicExam, ToeicTestAttempt } from "../../../types/ToeicExam";
+import { GetAttemptsRequest } from "../types/GetAttemptsRequest";
 import { PracticeDetailResponse } from "../types/PracticeDetailResponse";
 import { SaveToeicTestAttemptRequest } from "../types/PracticeRequest";
-import { TestDetailWithPractice } from "../types/TestDetailWithPractice";
 
 export async function postToeicTestAttempt(
   practiceRequest: SaveToeicTestAttemptRequest,
@@ -22,13 +22,6 @@ const fetchPracticeDetailUser = async (reviewId: string) => {
   return response.data;
 };
 
-const fetchTestDetailWithPractice = async (testId: string) => {
-  const response = await axiosClient.get<TestDetailWithPractice>(
-    `test/${testId}/user`,
-  );
-  return response.data;
-};
-
 export async function getToeicExamInfo(id: number) {
   const response = await axiosClient.get<ApiResponse<ToeicExam>>(
     `toeic-tests/${id}/info`,
@@ -37,4 +30,15 @@ export async function getToeicExamInfo(id: number) {
   return response.data.data;
 }
 
-export { fetchPracticeDetailUser, fetchTestDetailWithPractice };
+export async function getAttempts(request: GetAttemptsRequest) {
+  const response = await axiosClient.get<ApiResponse<ToeicTestAttempt[]>>(
+    `toeic-test-attempts`,
+    {
+      params: request,
+    },
+  );
+
+  return response.data.data;
+}
+
+export { fetchPracticeDetailUser };

@@ -30,7 +30,7 @@ const DetailContent: React.FC<DetailProps> = ({ examId }) => {
         <Typography variant="h6" sx={{ mb: 1, color: "black" }}>
           Your result
         </Typography>
-        {/* <ResultTable examId={examId} /> */}
+        <ResultTable examId={examId} />
       </Box>
 
       <Box sx={{ width: "100%", my: 2 }}>

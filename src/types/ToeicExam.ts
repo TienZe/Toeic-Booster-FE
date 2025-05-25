@@ -59,3 +59,16 @@ export interface UserAnswer {
   questionId: number;
   choice: string;
 }
+
+export interface ToeicTestAttempt {
+  id: number;
+  takenTime: number;
+  selectedParts: Part[];
+  isFullTest: boolean;
+  createdAt: string;
+
+  totalQuestions?: number;
+  numberOfCorrectQuestions?: number;
+
+  toeicTestId: number;
+}

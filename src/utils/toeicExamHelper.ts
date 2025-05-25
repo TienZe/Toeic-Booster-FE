@@ -38,3 +38,7 @@ export function splitQuestionGroupsToParts(
 
   return combinedParts;
 }
+
+export function getDisplayedPart(part: Part) {
+  return "Part " + part.replace("part", "");
+}

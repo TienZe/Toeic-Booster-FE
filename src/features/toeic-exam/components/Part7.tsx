@@ -332,7 +332,6 @@ const Part7: React.FC<Part7Props> = ({
                         <Typography
                           sx={{
                             fontWeight: "600",
-                            fontSize: "18px",
                           }}
                         >
                           {question.question}
