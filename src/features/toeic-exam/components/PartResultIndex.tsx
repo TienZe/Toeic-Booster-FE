@@ -1,11 +1,8 @@
 import { Box, Button, Container, Grid2, Stack } from "@mui/material";
 import Content from "../../../components/layout/Content";
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { PracticeDetailConverted } from "../types/PracticeDetailConverted";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchPracticeDetailUser } from "../api/api";
-import { convertPracticeResponse } from "../utils/helper";
 import Part1 from "./Part1";
 import Part2 from "./Part2";
 import Part3 from "./Part3";
@@ -19,85 +16,94 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import SubMitBox from "./SubmitBox/SubmitBox";
+import { splitQuestionGroupsToParts } from "../../../utils/toeicExamHelper";
+import { Part } from "../../../types/ToeicExam";
+import { getAttemptDetails } from "../api/api";
 
 const PartResultIndex = () => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      setIsVisible(scrollTop > 0);
+      setShowScrollToTop(scrollTop > 0);
     };
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const routeParams = useParams<{ reviewId: string }>();
-  const reviewId = routeParams.reviewId;
-  const [examDataReview, setExamDataReview] =
-    useState<PracticeDetailConverted>();
 
-  const { isPending, data: ExamSetReviewData } = useQuery({
-    queryKey: ["FetchTestPractice", reviewId],
-    queryFn: () => fetchPracticeDetailUser(reviewId!),
-    enabled: !!reviewId,
-  });
+  const [currentPartIndex, setCurrentPartIndex] = useState(0);
+  const routeParams = useParams<{ attemptId: string }>();
+  const attemptId = Number(routeParams.attemptId);
 
-  useEffect(() => {
-    if (reviewId && ExamSetReviewData) {
-      console.log("exam ", ExamSetReviewData);
-      console.log("converve data", convertPracticeResponse(ExamSetReviewData));
-      const convertedData = convertPracticeResponse(ExamSetReviewData);
-      setExamDataReview(convertedData);
-    }
-  }, [ExamSetReviewData]);
+  const { isLoading: isLoadingAttemptDetails, data: attemptDetails } = useQuery(
+    {
+      queryKey: ["attemptDetails", { attemptId: attemptId }],
+      queryFn: () => getAttemptDetails(attemptId),
+      enabled: !!attemptId,
+    },
+  );
 
-  const selectedParts = [
-    "part1",
-    "part2",
-    "part3",
-    "part4",
-    "part5",
-    "part6",
-    "part7",
-  ];
+  console.log("attemptDetails", attemptDetails);
 
-  const handleNext = () => setCurrentIndex((prev) => prev + 1);
-  const handlePrevious = () => setCurrentIndex((prev) => prev - 1);
+  const selectedParts = attemptDetails?.selectedParts || [];
+
+  const part2QuestionGroups = useMemo(() => {
+    return splitQuestionGroupsToParts(
+      attemptDetails?.toeicTest?.questionGroups || [],
+    );
+  }, [attemptDetails?.toeicTest?.questionGroups]); // object mapping chosen parts to its question groups
+
+  const handleNext = () => setCurrentPartIndex((prev) => prev + 1);
+  const handlePrevious = () => setCurrentPartIndex((prev) => prev - 1);
 
   const renderPart = () => {
-    const currentPart = selectedParts[currentIndex];
+    const currentPart = selectedParts[currentPartIndex];
 
     switch (currentPart) {
       case "part1":
-        return <Part1 partData={examDataReview?.partData[0]} mode={"review"} />;
+        return (
+          <Part1 questionGroups={part2QuestionGroups.part1} mode={"review"} />
+        );
       case "part2":
-        return <Part2 partData={examDataReview?.partData[1]} mode={"review"} />;
+        return (
+          <Part2 questionGroups={part2QuestionGroups.part2} mode={"review"} />
+        );
       case "part3":
-        return <Part3 partData={examDataReview?.partData[2]} mode={"review"} />;
+        return (
+          <Part3 questionGroups={part2QuestionGroups.part3} mode={"review"} />
+        );
       case "part4":
-        return <Part4 partData={examDataReview?.partData[3]} mode={"review"} />;
+        return (
+          <Part4 questionGroups={part2QuestionGroups.part4} mode={"review"} />
+        );
       case "part5":
-        return <Part5 partData={examDataReview?.partData[4]} mode={"review"} />;
+        return (
+          <Part5 questionGroups={part2QuestionGroups.part5} mode={"review"} />
+        );
       case "part6":
-        return <Part6 partData={examDataReview?.partData[5]} mode={"review"} />;
+        return (
+          <Part6 questionGroups={part2QuestionGroups.part6} mode={"review"} />
+        );
       case "part7":
-        return <Part7 partData={examDataReview?.partData[6]} mode={"review"} />;
+        return (
+          <Part7 questionGroups={part2QuestionGroups.part7} mode={"review"} />
+        );
       default:
         return <div>Cannot find this part</div>;
     }
   };
 
   return (
-    <Content>
+    <Content sx={{ backgroundColor: "secondary.extraLight" }}>
       <Container maxWidth="sm">
         <QuestionProvider>
           <Box my={2}>
             <Grid2 container spacing={2}>
               <Grid2 size={9.5}>
-                {isPending ? (
+                {isLoadingAttemptDetails ? (
                   <Box sx={{ marginTop: 2 }}>
                     <DotLoadingProgress />
                   </Box>
@@ -114,12 +120,13 @@ const PartResultIndex = () => {
                         alignItems: "center",
                         gap: 1,
                         padding: "0 20px",
+                        backgroundColor: "white",
                       }}
                     >
                       <Stack direction={"row"} gap={0.5}>
                         <Button
                           variant="text"
-                          disabled={currentIndex === 0}
+                          disabled={currentPartIndex === 0}
                           onClick={handlePrevious}
                           sx={{
                             borderRadius: 3,
@@ -131,7 +138,7 @@ const PartResultIndex = () => {
                           return (
                             <Button
                               variant={
-                                currentIndex === partIndex
+                                currentPartIndex === partIndex
                                   ? "contained"
                                   : "outlined"
                               }
@@ -140,7 +147,7 @@ const PartResultIndex = () => {
                                 borderRadius: 3,
                                 padding: "0 18px",
                               }}
-                              onClick={() => setCurrentIndex(partIndex)}
+                              onClick={() => setCurrentPartIndex(partIndex)}
                             >
                               {`Part ${part[4]}`}
                             </Button>
@@ -150,7 +157,7 @@ const PartResultIndex = () => {
 
                       <Button
                         variant="text"
-                        disabled={currentIndex === selectedParts.length - 1}
+                        disabled={currentPartIndex === selectedParts.length - 1}
                         onClick={handleNext}
                         sx={{
                           borderRadius: 3,
@@ -163,6 +170,7 @@ const PartResultIndex = () => {
                       sx={{
                         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                         borderRadius: 3,
+                        backgroundColor: "white",
                       }}
                       padding={3}
                     >
@@ -180,11 +188,14 @@ const PartResultIndex = () => {
                     position: "sticky",
                     top: "50px",
                     alignSelf: "flex-start",
+                    backgroundColor: "white",
                   }}
                 >
                   <SubMitBox
-                    partData={examDataReview?.partData || []}
-                    setCurrentIndex={setCurrentIndex}
+                    partDataChosen={part2QuestionGroups}
+                    setCurrentPart={(part: Part) => {
+                      setCurrentPartIndex(selectedParts.indexOf(part));
+                    }}
                     mode={"review"}
                   />
                 </Box>
@@ -193,7 +204,7 @@ const PartResultIndex = () => {
           </Box>
         </QuestionProvider>
       </Container>
-      {isVisible && (
+      {showScrollToTop && (
         <div
           style={{
             padding: 0,

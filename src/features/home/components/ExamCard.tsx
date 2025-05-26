@@ -89,6 +89,7 @@ const ExamCard: React.FC<ExamCardProps> = ({
       <Stack direction="row" spacing={1} sx={{ minHeight: "22px" }}>
         {tags?.map((tag) => (
           <Chip
+            key={tag}
             label={`#${tag}`}
             sx={{ color: "primary.main", backgroundColor: "#f0f8ff" }}
           />

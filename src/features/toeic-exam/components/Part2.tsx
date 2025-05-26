@@ -1,4 +1,4 @@
-import { Box, Divider, Paper, Stack, styled, Typography } from "@mui/material";
+import { Box, Divider, Stack, Typography } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -14,7 +14,9 @@ import useScrollToTop from "../hooks/useScrollToTop";
 import { useQuestionContext } from "./QuestionProvider";
 import { setScript } from "../../../stores/selectedScript";
 import { QuestionGroup } from "../../../types/ToeicExam";
-import { ABC, ABCD, answerIndexToLabel } from "../../../utils/toeicExamHelper";
+import { ABC, answerIndexToLabel } from "../../../utils/toeicExamHelper";
+import Item from "./Item";
+import { ClosedCaptionRounded } from "@mui/icons-material";
 
 interface Part2Props {
   questionGroups?: QuestionGroup[];
@@ -31,64 +33,6 @@ interface Part2Props {
     questionIndex: number,
   ) => boolean;
 }
-
-const Item = styled(Paper)(
-  ({
-    isActive,
-    isDisabled,
-    isCorrect,
-    isIncorrect,
-    isChosen,
-    isExplain,
-  }: {
-    isActive?: boolean;
-    isDisabled?: boolean;
-    isCorrect?: boolean;
-    isIncorrect?: boolean;
-    isChosen?: boolean;
-    isExplain?: boolean;
-  }) => ({
-    backgroundColor: isActive
-      ? "#EBF5FF"
-      : isCorrect && isChosen
-        ? "#F0FDF4"
-        : isCorrect
-          ? "white"
-          : isIncorrect
-            ? "#FDF2F3"
-            : "#fff",
-    padding: "15px",
-    border: isActive
-      ? "1px solid #0071F9"
-      : isCorrect
-        ? "1px solid #00B035"
-        : isIncorrect
-          ? "1px solid #E20D2C"
-          : isExplain && isDisabled
-            ? "1px solid #0071F9"
-            : isDisabled
-              ? ""
-              : "1px solid #f0f0f0",
-    borderRadius: "10px",
-    "&:hover": {
-      backgroundColor: isActive ? "#EBF5FF" : isDisabled ? "" : "",
-      border: isDisabled
-        ? undefined
-        : isActive
-          ? "1px solid #0071F9"
-          : "1px solid #F9A95A",
-      cursor: "pointer",
-      "& .innerBox": {
-        backgroundColor: isDisabled
-          ? undefined
-          : isActive
-            ? "#0071F9"
-            : "#6B7280",
-        color: isDisabled ? undefined : "white",
-      },
-    },
-  }),
-);
 
 const Part2: React.FC<Part2Props> = ({
   questionGroups,
@@ -199,9 +143,6 @@ const Part2: React.FC<Part2Props> = ({
         return (
           <Box
             sx={{
-              // display: "flex",
-              // flexDirection: "column",
-              // alignItems: "center",
               mb: 1,
               padding: "20px",
             }}
@@ -223,20 +164,6 @@ const Part2: React.FC<Part2Props> = ({
                     Your browser does not support the audio element.
                   </audio>
                 </>
-                {/* {group.image?.map((img, imgIndex) => {
-                  return (
-                    <img
-                      key={imgIndex}
-                      src={img.fileUrl}
-                      alt="Test"
-                      style={{
-                        maxWidth: "80%",
-                        height: "auto",
-                        objectFit: "contain",
-                      }}
-                    />
-                  );
-                })} */}
               </Stack>
               {isExplain && (
                 <Item
@@ -258,7 +185,7 @@ const Part2: React.FC<Part2Props> = ({
                       }}
                     >
                       <Stack direction="row" gap={1}>
-                        <InfoIcon color="primary" />
+                        <ClosedCaptionRounded color="primary" />
                         <Typography
                           sx={{
                             fontWeight: "500",
@@ -349,7 +276,7 @@ const Part2: React.FC<Part2Props> = ({
                       {question.questionNumber}
                     </Box>
                     {ABC.map((answerLabel) => question[answerLabel]).map(
-                      (answer, answerIndex) => {
+                      (_, answerIndex) => {
                         const answerLabel = answerIndexToLabel(answerIndex);
 
                         const isActive =
@@ -362,11 +289,11 @@ const Part2: React.FC<Part2Props> = ({
                           mode === "review";
 
                         const isIncorrect =
-                          answerLabel === question.userAnswer?.userAnswer &&
+                          answerLabel === question.userAnswer?.choice &&
                           answerLabel !== question.correctAnswer;
 
                         const isChosen =
-                          answerLabel === question.userAnswer?.userAnswer;
+                          answerLabel === question.userAnswer?.choice;
 
                         return (
                           <Item
@@ -422,9 +349,6 @@ const Part2: React.FC<Part2Props> = ({
                             >
                               {String.fromCharCode(65 + answerIndex)}
                             </Box>
-                            <Typography sx={{ fontWeight: "500" }}>
-                              {answer}
-                            </Typography>
                           </Item>
                         );
                       },

@@ -22,9 +22,17 @@ export function splitQuestionGroupsToParts(
   onlyParts: Part[] = PARTS,
 ) {
   const parts = PARTS.filter((part) => onlyParts.includes(part)).map((part) => {
-    return {
-      [part]: allQuestionGroups.filter((group) => group.part === part),
-    };
+    const questionGroups = allQuestionGroups.filter(
+      (group) => group.part === part,
+    );
+
+    if (questionGroups.length > 0) {
+      return {
+        [part]: questionGroups,
+      };
+    }
+
+    return {};
   });
 
   // Combine all parts into one object

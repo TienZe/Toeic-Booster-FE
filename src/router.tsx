@@ -94,7 +94,7 @@ export const router = createBrowserRouter([
         element: <ResultPage />,
       },
       {
-        path: "review/:reviewId",
+        path: "review/:attemptId",
         element: <PartResultIndex />,
       },
     ],

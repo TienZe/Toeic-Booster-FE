@@ -1,6 +1,5 @@
-import { Box, Divider, Paper, Stack, styled, Typography } from "@mui/material";
+import { Box, Divider, Stack, Typography } from "@mui/material";
 
-import { partData } from "../../admin/new_exams/types/examType";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setAnswer,
@@ -16,6 +15,7 @@ import { useQuestionContext } from "./QuestionProvider";
 import { setScript } from "../../../stores/selectedScript";
 import { QuestionGroup } from "../../../types/ToeicExam";
 import { ABCD, answerIndexToLabel } from "../../../utils/toeicExamHelper";
+import Item from "./Item";
 
 interface Part1Props {
   mode?: string;
@@ -32,64 +32,6 @@ interface Part1Props {
     questionIndex: number,
   ) => boolean;
 }
-
-const Item = styled(Paper)(
-  ({
-    isActive,
-    isDisabled,
-    isCorrect,
-    isIncorrect,
-    isChosen,
-    isExplain,
-  }: {
-    isActive?: boolean;
-    isDisabled?: boolean;
-    isCorrect?: boolean;
-    isIncorrect?: boolean;
-    isChosen?: boolean;
-    isExplain?: boolean;
-  }) => ({
-    backgroundColor: isActive
-      ? "#EBF5FF"
-      : isCorrect && isChosen
-        ? "#F0FDF4"
-        : isCorrect
-          ? "white"
-          : isIncorrect
-            ? "#FDF2F3"
-            : "#fff",
-    padding: "15px",
-    border: isActive
-      ? "1px solid #0071F9"
-      : isCorrect
-        ? "1px solid #00B035"
-        : isIncorrect
-          ? "1px solid #E20D2C"
-          : isExplain && isDisabled
-            ? "1px solid #0071F9"
-            : isDisabled
-              ? ""
-              : "1px solid #f0f0f0",
-    borderRadius: "10px",
-    "&:hover": {
-      backgroundColor: isActive ? "#EBF5FF" : isDisabled ? "" : "",
-      border: isDisabled
-        ? undefined
-        : isActive
-          ? "1px solid #0071F9"
-          : "1px solid #F9A95A",
-      cursor: "pointer",
-      "& .innerBox": {
-        backgroundColor: isDisabled
-          ? undefined
-          : isActive
-            ? "#0071F9"
-            : "#6B7280",
-        color: isDisabled ? undefined : "white",
-      },
-    },
-  }),
-);
 
 const Part1: React.FC<Part1Props> = ({
   mode,
@@ -324,7 +266,7 @@ const Part1: React.FC<Part1Props> = ({
                         }
                       }}
                       sx={{
-                        background: isNoted
+                        backgroundColor: isNoted
                           ? "orange"
                           : isCorrectQuestion === true
                             ? "#00B035"
@@ -354,7 +296,7 @@ const Part1: React.FC<Part1Props> = ({
                       {question.questionNumber}
                     </Box>
                     {ABCD.map((answerLabel) => question[answerLabel]).map(
-                      (answer, answerIndex) => {
+                      (_, answerIndex) => {
                         const isActive =
                           activeAnswers[PART]?.[groupIndexInPart]?.[
                             questionIndex
@@ -365,10 +307,11 @@ const Part1: React.FC<Part1Props> = ({
                           answerLabel === question.correctAnswer &&
                           mode === "review";
                         const isIncorrect =
-                          answerLabel === question.userAnswer?.userAnswer &&
-                          answer !== question.correctAnswer;
+                          answerLabel === question.userAnswer?.choice &&
+                          answerLabel !== question.correctAnswer;
+
                         const isChosen =
-                          answerLabel === question.userAnswer?.userAnswer;
+                          answerLabel === question.userAnswer?.choice;
 
                         return (
                           <Item
@@ -424,9 +367,6 @@ const Part1: React.FC<Part1Props> = ({
                             >
                               {String.fromCharCode(65 + answerIndex)}
                             </Box>
-                            <Typography sx={{ fontWeight: "500" }}>
-                              {answer}
-                            </Typography>
                           </Item>
                         );
                       },

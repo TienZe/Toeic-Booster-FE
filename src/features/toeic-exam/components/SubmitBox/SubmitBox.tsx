@@ -4,7 +4,7 @@ import ListQuestion from "./ListQuestions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../stores";
 import { useCallback, useRef, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { SaveToeicTestAttemptRequest } from "../../types/PracticeRequest";
 import { useMutation } from "@tanstack/react-query";
 import { postToeicTestAttempt } from "../../api/api";
@@ -34,30 +34,19 @@ const SubMitBox: React.FC<PartDataProps> = ({
     (state: RootState) => state.userAnswers.userAnswers,
   );
 
-  // const selectedPartsQuery = isFullTest ? ALL_PARTS : parts;
-  // const TOTAL_QUESTIONS = countTotalQuestions(selectedPartsQuery);
-  const TOTAL_QUESTIONS = 123;
   const selectedParts = Object.keys(partDataChosen);
-  // const isFullTest = selectedParts.length === ALL_PARTS.length;
 
   const timerCountDownRef = useRef<TimerCountdownRef>(null);
 
   const routeParams = useParams<{ examId: string }>();
   const examId = Number(routeParams.examId);
-  const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   const selectedPartsClone =
-  //     mode === "review" ? [...ALL_PARTS] : [...selectedPartsQuery];
-  // }, [partData]);
 
   const mutation = useMutation({
     mutationFn: postToeicTestAttempt,
     onSuccess: (responseData) => {
-      console.log("Post successfull, reponseData", responseData);
-      // navigate(`/exams/result/${responseData.id}`, {
-      //   state: { responseData, TOTAL_QUESTIONS },
-      // });
+      console.log("Post successfully, responseData", responseData);
+
+      // Reset redux state
       dispatch(resetAnswers());
       dispatch(clearSelectedParts());
 
@@ -97,7 +86,7 @@ const SubMitBox: React.FC<PartDataProps> = ({
     mutation.mutate(practiceRequest);
   }, [limitTime, examId, userAnswers]);
 
-  if (!examId) {
+  if (!examId && mode !== "review") {
     return <Navigate to="/exams" />;
   }
 

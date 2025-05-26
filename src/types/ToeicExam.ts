@@ -20,6 +20,8 @@ export interface Question {
   C: string;
   D: string;
   correctAnswer: string | null;
+
+  userAnswer?: UserAnswer;
 }
 
 export interface QuestionMedia {
@@ -58,6 +60,8 @@ export type PartData = {
 export interface UserAnswer {
   questionId: number;
   choice: string;
+  correctAnswer: string;
+  isCorrect: boolean;
 }
 
 export interface ToeicTestAttempt {
@@ -71,4 +75,5 @@ export interface ToeicTestAttempt {
   numberOfCorrectQuestions?: number;
 
   toeicTestId: number;
+  toeicTest?: ToeicExam;
 }

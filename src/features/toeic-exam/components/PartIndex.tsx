@@ -48,13 +48,6 @@ const PartIndex = () => {
     };
   }, []);
 
-  // const [searchParams] = useSearchParams();
-  // const parts = searchParams.getAll("part");
-  // const isFullTest = parts.includes("full");
-  // console.log(isFullTest);
-
-  // const selectedParts = isFullTest ? ALL_PARTS : parts;
-  //console.log(selectedParts);
   const dispatch = useDispatch();
   const [currentPartIndex, setCurrentPartIndex] = useState(0); // current part index
   const notedQuestions = useSelector(

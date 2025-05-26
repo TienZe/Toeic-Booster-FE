@@ -140,9 +140,8 @@ const ExamsLibraryPage = () => {
                     {paginatedExams && paginatedExams.items.length > 0
                       ? paginatedExams.items.map((exam) => {
                           return (
-                            <Grid2 sx={{ width: "275px" }}>
+                            <Grid2 key={exam.id} sx={{ width: "275px" }}>
                               <ExamCard
-                                key={exam.id}
                                 id={exam.id}
                                 title={exam.name}
                                 duration={"120p"}
