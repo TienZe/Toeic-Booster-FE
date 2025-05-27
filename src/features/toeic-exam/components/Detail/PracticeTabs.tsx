@@ -40,7 +40,6 @@ function CustomTabPanel(props: TabPanelProps) {
       role="tabpanel"
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
       {value === index && <Box sx={{ px: 0, py: 2 }}>{children}</Box>}
@@ -94,21 +93,11 @@ export default function PracticeTabs() {
   };
 
   const handlePractice = (isFullTest: boolean) => {
-    // const selectedPartsClone = [...selectedParts];
-    // const sortedSelectedParts = sortPartArray(selectedPartsClone);
-    // if (selectedPartsClone.length === 0 && !isFullTest) {
-    //   toast.error("Please choose at least one part!");
-    //   return;
-    // }
     if (isFullTest) {
       dispatch(setLimitTime("7200"));
       dispatch(setSelectedParts(PARTS));
     }
-    // const query = isFullTest
-    //   ? "part=full"
-    //   : sortedSelectedParts.map((part) => `part=${part}`).join("&");
 
-    // navigate(`/exams/${examId}/partIndex?${query}`);
     navigate(`/exams/${examId}/partIndex`);
   };
 
@@ -120,7 +109,11 @@ export default function PracticeTabs() {
           onChange={handleChangeTab}
           aria-label="basic tabs example"
         >
-          <Tab label="Practice" {...a11yProps(0)} />
+          <Tab
+            label="Practice"
+            {...a11yProps(0)}
+            sx={{ fontSize: "0.875rem" }}
+          />
           <Tab label="Full test" {...a11yProps(1)} />
         </Tabs>
       </Box>

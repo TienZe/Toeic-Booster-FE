@@ -1,14 +1,14 @@
 import { Box, Button, Divider, Stack, Typography } from "@mui/material";
-import userIcon from "../assets/user_icon.webp";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../stores";
-import { AuthState } from "../../../stores/authSlice";
-import { me } from "../../auth/api/account-api";
+import { RootState } from "../stores";
+import { AuthState } from "../stores/authSlice";
+import { me } from "../features/auth/api/account-api";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { differenceInDays, format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import CustomBackdrop from "../../../components/UI/CustomBackdrop";
+import CustomBackdrop from "./UI/CustomBackdrop";
+import DefaultAvatar from "../assets/avatars/default.svg";
 
 const InforUserBox = () => {
   const navigate = useNavigate();
@@ -47,9 +47,9 @@ const InforUserBox = () => {
               justifyContent="center"
             >
               <span style={{ width: "50px", height: "auto" }}>
-                <img src={user?.avatar ?? userIcon} />
+                <img src={user?.avatar ?? DefaultAvatar} />
               </span>
-              <Typography variant="h6">{user?.name}</Typography>
+              <Typography>{user?.name}</Typography>
             </Stack>
           </Box>
 
@@ -75,9 +75,15 @@ const InforUserBox = () => {
                   {user?.targetScore ?? "450"}
                 </Typography>
               </Stack>
-              <Button variant="contained" onClick={() => navigate("/history")}>
-                Analysis your result
-              </Button>
+              <Box sx={{ pt: 0.5 }}>
+                <Button
+                  variant="contained"
+                  onClick={() => navigate("/history")}
+                  sx={{ boxShadow: "none", width: "100%" }}
+                >
+                  Analysis your result
+                </Button>
+              </Box>
             </Stack>
           </Box>
         </Box>

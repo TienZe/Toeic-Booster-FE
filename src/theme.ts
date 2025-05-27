@@ -141,7 +141,7 @@ const theme = createTheme({
         root: {
           "& .MuiTab-root": {
             textTransform: "none",
-            fontSize: "1rem",
+            fontSize: "0.875rem",
             paddingLeft: "1.5rem",
             paddingRight: "1.5rem",
           },
@@ -170,6 +170,11 @@ const theme = createTheme({
     MuiTab: {
       defaultProps: {
         disableRipple: true,
+      },
+      styleOverrides: {
+        root: {
+          fontSize: "0.875rem",
+        },
       },
     },
     MuiMenuItem: {
