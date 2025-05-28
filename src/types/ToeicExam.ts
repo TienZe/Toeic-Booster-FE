@@ -19,7 +19,7 @@ export interface Question {
   B: string;
   C: string;
   D: string;
-  correctAnswer: string | null;
+  correctAnswer: string;
 
   userAnswer?: UserAnswer;
 }

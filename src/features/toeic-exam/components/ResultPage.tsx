@@ -1,5 +1,5 @@
 import { Box, Button, Grid2, Paper, Stack, Typography } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { resetNotedQuestion } from "../../../stores/notedQuestionSlice";
 import UserToeicInfoLayout from "../../../components/layout/toeic/UserToeicInfoLayout";
@@ -20,6 +20,12 @@ import TOEICChatbotPage from "./Chatbot/ToeicChatBot";
 import { useAttemptDetails } from "../../../hooks/useAttemptDetails";
 import { secondToHHMMSS } from "../../../utils/helper";
 import { useParams } from "react-router-dom";
+import ResultAnswerList from "./ResultAnswerList";
+import {
+  getDisplayedPart,
+  splitQuestionGroupsToParts,
+} from "../../../utils/toeicExamHelper";
+import { Part } from "../../../types/ToeicExam";
 
 const ResultPage = () => {
   const dispatch = useDispatch();
@@ -52,6 +58,18 @@ const ResultPage = () => {
 
   const isFullTest = attemptDetails?.isFullTest;
 
+  const selectedParts = useMemo(
+    () => (attemptDetails?.selectedParts || []) as Part[],
+    [attemptDetails?.selectedParts],
+  );
+
+  const part2QuestionGroups = useMemo(() => {
+    return splitQuestionGroupsToParts(
+      attemptDetails?.toeicTest?.questionGroups || [],
+      selectedParts,
+    );
+  }, [attemptDetails?.toeicTest?.questionGroups, selectedParts]);
+
   useEffect(() => {
     dispatch(resetNotedQuestion());
   }, []);
@@ -74,7 +92,15 @@ const ResultPage = () => {
 
         {/* Action Buttons */}
         <Stack direction="row" spacing={1} sx={{ mb: 2 }} alignItems="start">
-          <Button variant="contained" sx={{ boxShadow: "none" }}>
+          <Button
+            variant="contained"
+            sx={{ boxShadow: "none" }}
+            onClick={() => {
+              document
+                .getElementById("result-answers")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
             View answers
           </Button>
           <Link to={`/exams/${attemptDetails?.toeicTest?.id}`}>
@@ -273,33 +299,34 @@ const ResultPage = () => {
         </Grid2>
 
         <Stack direction="row" justifyContent="space-between" sx={{ my: 2 }}>
-          <Typography variant="h5">Answers</Typography>
+          <Typography variant="h5" id="result-answers">
+            Answers
+          </Typography>
           <Link to={`/exams/review/${attemptId}`}>
             <Button variant="text">View detailed answers</Button>
           </Link>
         </Stack>
 
         <Stack gap={2} sx={{ mt: 2 }}>
-          <Box>
-            <Typography variant="h6" sx={{ mb: 1 }}>
-              Part 1
-            </Typography>
+          {selectedParts.map((part) => {
+            const questions = part2QuestionGroups[part]
+              .map((questionGroup) => questionGroup.questions)
+              .flat();
 
-            <Box
-              display="grid"
-              gridTemplateColumns={{ xs: "1fr", md: "1fr 1fr" }}
-              gap={2}
-            >
-              {/* Each child will be a cell in the grid */}
-              {Array.from({ length: 10 }).map((_, index) => (
-                <ResultAnswerItem
-                  questionNumber={index + 1}
-                  correctAnswer="D"
-                  userChoice="D"
-                />
-              ))}
-            </Box>
-          </Box>
+            return (
+              <ResultAnswerList
+                label={getDisplayedPart(part)}
+                questions={questions.map((question) => ({
+                  id: question.id,
+                  correctAnswer:
+                    question.userAnswer?.correctAnswer ||
+                    question.correctAnswer,
+                  userChoice: question.userAnswer?.choice,
+                  questionNumber: question.questionNumber,
+                }))}
+              />
+            );
+          })}
         </Stack>
       </Box>
       <TOEICChatbotPage />
