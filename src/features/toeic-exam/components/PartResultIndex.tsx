@@ -2,7 +2,6 @@ import { Box, Button, Container, Grid2, Stack } from "@mui/material";
 import Content from "../../../components/layout/Content";
 import { useParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import Part1 from "./Part1";
 import Part2 from "./Part2";
 import Part3 from "./Part3";
@@ -18,7 +17,7 @@ import NavigationIcon from "@mui/icons-material/Navigation";
 import SubMitBox from "./SubmitBox/SubmitBox";
 import { splitQuestionGroupsToParts } from "../../../utils/toeicExamHelper";
 import { Part } from "../../../types/ToeicExam";
-import { getAttemptDetails } from "../api/api";
+import { useAttemptDetails } from "../../../hooks/useAttemptDetails";
 
 const PartResultIndex = () => {
   const [showScrollToTop, setShowScrollToTop] = useState(false);
@@ -38,15 +37,10 @@ const PartResultIndex = () => {
   const routeParams = useParams<{ attemptId: string }>();
   const attemptId = Number(routeParams.attemptId);
 
-  const { isLoading: isLoadingAttemptDetails, data: attemptDetails } = useQuery(
-    {
-      queryKey: ["attemptDetails", { attemptId: attemptId }],
-      queryFn: () => getAttemptDetails(attemptId),
+  const { isLoading: isLoadingAttemptDetails, data: attemptDetails } =
+    useAttemptDetails(attemptId, {
       enabled: !!attemptId,
-    },
-  );
-
-  console.log("attemptDetails", attemptDetails);
+    });
 
   const selectedParts = attemptDetails?.selectedParts || [];
 

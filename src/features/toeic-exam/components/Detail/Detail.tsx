@@ -8,7 +8,7 @@ const Detail = () => {
   const routeParams = useParams<{ examId: string }>();
   const examId = Number(routeParams.examId);
   return (
-    <UserToeicInfoLayout>
+    <UserToeicInfoLayout grayBackground>
       <Box
         sx={{
           padding: 3,

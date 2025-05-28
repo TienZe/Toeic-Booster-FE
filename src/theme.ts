@@ -230,7 +230,8 @@ const theme = createTheme({
       extraLight: "#f8f9fa", // light gray used for background
     },
     text: {
-      primary: "#54565A",
+      // primary: "#54565A",
+      primary: "#466372",
       secondary: "rgba(84, 86, 90, 0.6)",
     },
     success: {

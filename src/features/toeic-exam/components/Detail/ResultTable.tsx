@@ -22,6 +22,7 @@ import { format } from "date-fns";
 import { getDisplayedPart } from "../../../../utils/toeicExamHelper";
 import { ToeicTestAttempt } from "../../../../types/ToeicExam";
 import Link from "../../../../components/UI/Link";
+import { secondToHHMMSS } from "../../../../utils/helper";
 
 interface ResultTableProps {
   examId?: number;
@@ -35,19 +36,6 @@ const chipStyle = {
   backgroundColor: "#ff6f00",
   color: "white",
   marginBottom: "5px",
-};
-
-const toHHMMSS = (secs: number) => {
-  //const sec_num = parseInt(secs, 10);
-  const sec_num = secs;
-  const hours = Math.floor(sec_num / 3600);
-  const minutes = Math.floor(sec_num / 60) % 60;
-  const seconds = sec_num % 60;
-
-  return [hours, minutes, seconds]
-    .map((v) => (v < 10 ? "0" + v : v))
-    .filter((v, i) => v !== "00" || i > 0)
-    .join(":");
 };
 
 const ROW_per_PAGE = 5;
@@ -129,7 +117,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ examId }) => {
                     {row.numberOfCorrectQuestions}/{row.totalQuestions}
                   </TableCell>
                   <TableCell sx={{ ...RowStyle }}>
-                    {toHHMMSS(row.takenTime)}
+                    {secondToHHMMSS(row.takenTime)}
                   </TableCell>
                   <TableCell sx={{ ...RowStyle }} align="center">
                     <Link

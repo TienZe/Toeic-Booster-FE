@@ -70,9 +70,15 @@ export interface ToeicTestAttempt {
   selectedParts: Part[];
   isFullTest: boolean;
   createdAt: string;
+  score: number;
+  listeningScore: number;
+  readingScore: number;
 
   totalQuestions?: number;
   numberOfCorrectQuestions?: number;
+  numberOfIncorrectQuestions?: number;
+  numCorrectLcQuestions?: number;
+  numCorrectRcQuestions?: number;
 
   toeicTestId: number;
   toeicTest?: ToeicExam;

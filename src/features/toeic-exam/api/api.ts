@@ -14,13 +14,6 @@ export async function postToeicTestAttempt(
   return response.data.data;
 }
 
-export async function getAttemptDetails(attemptId: number) {
-  const response = await axiosClient.get<ApiResponse<ToeicTestAttempt>>(
-    `toeic-test-attempts/${attemptId}/details`,
-  );
-  return response.data.data;
-}
-
 export async function getToeicExamInfo(id: number) {
   const response = await axiosClient.get<ApiResponse<ToeicExam>>(
     `toeic-tests/${id}/info`,

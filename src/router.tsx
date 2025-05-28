@@ -90,7 +90,7 @@ export const router = createBrowserRouter([
         element: <PartIndex />,
       },
       {
-        path: "result/:resultId",
+        path: "result/:attemptId",
         element: <ResultPage />,
       },
       {
