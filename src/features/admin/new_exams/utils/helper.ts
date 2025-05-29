@@ -310,6 +310,6 @@ export function getQuestionGroupChipStyle(
   // valid
   return {
     color: "success.main",
-    backgroundColor: "success.light",
+    backgroundColor: "success.extraLight",
   };
 }

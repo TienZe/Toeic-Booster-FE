@@ -17,12 +17,13 @@ import { getAttempts } from "../../api/api";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
 import useResultTable from "../../hooks/useResultTable";
 import TablePaginationActions from "../../../../components/UI/TablePaginationActions";
-import AdminTableContainer from "../../../admin/vocasets/components/AdminTableContainer";
 import { format } from "date-fns";
 import { getDisplayedPart } from "../../../../utils/toeicExamHelper";
 import { ToeicTestAttempt } from "../../../../types/ToeicExam";
 import Link from "../../../../components/UI/Link";
 import { secondToHHMMSS } from "../../../../utils/helper";
+import TableContainer from "../../../../components/UI/TableContainer";
+import Badge from "../../../../components/UI/Badge";
 
 interface ResultTableProps {
   examId?: number;
@@ -58,7 +59,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ examId }) => {
       {isLoadingAttempts ? (
         <CustomBackdrop open />
       ) : (
-        <AdminTableContainer>
+        <TableContainer sx={{ boxShadow: "none" }}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
@@ -89,22 +90,19 @@ const ResultTable: React.FC<ResultTableProps> = ({ examId }) => {
                       sx={{ flexWrap: "wrap" }}
                     >
                       {row.isFullTest ? (
-                        <Chip
-                          label="Full test"
-                          sx={{ ...chipStyle, backgroundColor: "success.main" }}
-                        />
+                        <Badge color="success" label="Full test" />
                       ) : (
                         <>
                           <Box sx={{ mb: 1 }}>
-                            <Chip label="Practice" sx={{ ...chipStyle }} />
+                            <Badge color="warning" label="Practice" />
                           </Box>
 
                           {row.selectedParts.map((part) => {
                             return (
                               <Box sx={{ mb: 1 }}>
-                                <Chip
+                                <Badge
+                                  color="info"
                                   label={getDisplayedPart(part)}
-                                  sx={{ ...chipStyle }}
                                 />
                               </Box>
                             );
@@ -150,7 +148,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ examId }) => {
               </TableRow>
             </TableFooter>
           </Table>
-        </AdminTableContainer>
+        </TableContainer>
       )}
     </>
   );

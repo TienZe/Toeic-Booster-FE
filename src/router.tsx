@@ -45,6 +45,7 @@ import WordIndexPage from "./features/admin/vocasets/pages/WordIndexPage.tsx";
 import VocaLearningInstructionPage from "./features/voca/components/VocaLearningInstructionPage.tsx";
 import VocaFilteringPage from "./features/voca/components/VocaFilteringPage.tsx";
 import ExamIndexPage from "./features/admin/new_exams/components/ExamIndexPage.tsx";
+import ToeicStatisticsPage from "./features/toeic-exam/components/ToeicStatisticsPage.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -130,6 +131,16 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <UserHistoryPage />,
+      },
+    ],
+  },
+  {
+    path: "toeic-statistics",
+    element: <ProtectedRoute />,
+    children: [
+      {
+        index: true,
+        element: <ToeicStatisticsPage />,
       },
     ],
   },

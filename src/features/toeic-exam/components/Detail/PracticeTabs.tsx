@@ -121,7 +121,7 @@ export default function PracticeTabs() {
         <Stack>
           <Box
             sx={{
-              background: "#D8F0E2",
+              backgroundColor: "success.extraLight",
               py: 1,
               px: 1,
               borderRadius: 2,
@@ -129,7 +129,7 @@ export default function PracticeTabs() {
             }}
           >
             <Stack>
-              <Typography sx={{ color: "#1F5E39" }}>
+              <Typography sx={{ color: "success.dark" }}>
                 Practicing by individual sections and choosing appropriate
                 timing will help you focus on answering the questions correctly,
                 as you are under the pressure to complete the test.
@@ -229,7 +229,7 @@ export default function PracticeTabs() {
         <Stack>
           <Box
             sx={{
-              background: "#FFEFD8",
+              backgroundColor: "warning.extraLight",
               py: 1,
               px: 1,
               borderRadius: 2,

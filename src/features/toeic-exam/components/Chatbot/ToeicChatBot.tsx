@@ -433,7 +433,6 @@ export default function TOEICChatbot() {
                       placeholder="Hỏi về câu hỏi này..."
                       variant="outlined"
                       size="small"
-                      multiline
                       maxRows={3}
                       disabled={isLoading}
                       sx={{

@@ -225,17 +225,17 @@ const theme = createTheme({
     },
     secondary: {
       light: "rgba(84, 86, 90, 0.6)",
-      main: "#54565A",
+      main: "#466372",
       dark: "#202124",
       extraLight: "#f8f9fa", // light gray used for background
     },
     text: {
       // primary: "#54565A",
-      primary: "#466372",
-      secondary: "rgba(84, 86, 90, 0.6)",
+      primary: "#466372", // body1
+      secondary: "rgba(84, 86, 90, 0.6)", // body2
     },
     success: {
-      light: "#F0FDF4",
+      extraLight: "#F0FDF4",
       main: "#00B035",
       contrastText: "#fff",
     },
@@ -245,9 +245,16 @@ const theme = createTheme({
     warning: {
       light: "#ff9800",
       main: "#ed6c02",
-      dark: "#e65100",
+      dark: "#855A1F",
       contrastText: "#fff",
-      extraLight: "hsl(27 98% 95% / 1)",
+      extraLight: "rgba(249, 115, 22, 0.1)",
+    },
+    info: {
+      extraLight: "rgba(14, 165, 233, 0.1)",
+      main: "#0288d1",
+      light: "#03a9f4",
+      dark: "#01579b",
+      contrastText: "#fff",
     },
   },
   typography: {
