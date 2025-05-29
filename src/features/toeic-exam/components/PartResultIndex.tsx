@@ -1,6 +1,13 @@
-import { Box, Button, Container, Grid2, Stack } from "@mui/material";
+import {
+  Box,
+  Button,
+  Container,
+  Grid2,
+  Stack,
+  Typography,
+} from "@mui/material";
 import Content from "../../../components/layout/Content";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import Part1 from "./Part1";
 import Part2 from "./Part2";
@@ -18,9 +25,15 @@ import SubMitBox from "./SubmitBox/SubmitBox";
 import { splitQuestionGroupsToParts } from "../../../utils/toeicExamHelper";
 import { Part } from "../../../types/ToeicExam";
 import { useAttemptDetails } from "../../../hooks/useAttemptDetails";
+import { GoBackButton } from "../../../components/UI/GoBackButton";
+import TOEICChatbot from "./Chatbot/ToeicChatBot";
+import { assistantQuestionActions } from "../../../stores/assistantQuestionSlice";
+import { useDispatch } from "react-redux";
 
 const PartResultIndex = () => {
+  const dispatch = useDispatch();
   const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,6 +63,15 @@ const PartResultIndex = () => {
     );
   }, [attemptDetails?.toeicTest?.questionGroups]); // object mapping chosen parts to its question groups
 
+  const handleAssistQuestion = (questionId: number) => {
+    dispatch(
+      assistantQuestionActions.setQuestion({
+        questionId,
+        attemptId,
+      }),
+    );
+  };
+
   const handleNext = () => setCurrentPartIndex((prev) => prev + 1);
   const handlePrevious = () => setCurrentPartIndex((prev) => prev - 1);
 
@@ -59,7 +81,11 @@ const PartResultIndex = () => {
     switch (currentPart) {
       case "part1":
         return (
-          <Part1 questionGroups={part2QuestionGroups.part1} mode={"review"} />
+          <Part1
+            questionGroups={part2QuestionGroups.part1}
+            mode={"review"}
+            onAssistant={handleAssistQuestion}
+          />
         );
       case "part2":
         return (
@@ -96,6 +122,17 @@ const PartResultIndex = () => {
         <QuestionProvider>
           <Box my={2}>
             <Grid2 container spacing={2}>
+              <Grid2 size={12} sx={{ mb: -1 }}>
+                <Stack direction={"row"} justifyContent={"space-between"}>
+                  <Typography variant="h4">
+                    {attemptDetails?.toeicTest?.name}
+                  </Typography>
+                  <GoBackButton
+                    label="Exit"
+                    onClick={() => navigate(`/exams/result/${attemptId}`)}
+                  />
+                </Stack>
+              </Grid2>
               <Grid2 size={9.5}>
                 {isLoadingAttemptDetails ? (
                   <Box sx={{ marginTop: 2 }}>
@@ -197,6 +234,8 @@ const PartResultIndex = () => {
             </Grid2>
           </Box>
         </QuestionProvider>
+
+        <TOEICChatbot />
       </Container>
       {showScrollToTop && (
         <div

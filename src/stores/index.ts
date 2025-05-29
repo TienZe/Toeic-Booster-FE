@@ -8,6 +8,7 @@ import seletedScript from "./selectedScript";
 import notedQuestions from "./notedQuestionSlice";
 import globalMessageReducer from "./globalMessageSlice";
 import lessonVocaFilteringReducer from "./lessonVocaFilteringSlice";
+import assistantQuestionReducer from "./assistantQuestionSlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -21,6 +22,7 @@ const store = configureStore({
     seletedScript: seletedScript,
     notedQuestions: notedQuestions,
     globalMessage: globalMessageReducer,
+    assistantQuestion: assistantQuestionReducer,
   },
 });
 

@@ -1,6 +1,13 @@
-import { Box, Button, Container, Grid2, Stack } from "@mui/material";
+import {
+  Box,
+  Button,
+  Container,
+  Grid2,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Part1 from "./Part1";
 import Part2 from "./Part2";
 import Part3 from "./Part3";
@@ -22,9 +29,11 @@ import useToeicExam from "../../../hooks/useToeicExam";
 import { splitQuestionGroupsToParts } from "../../../utils/toeicExamHelper";
 import { Part } from "../../../types/ToeicExam";
 import { PARTS as ALL_PARTS } from "../../../utils/toeicExamHelper";
+import { GoBackButton } from "../../../components/UI/GoBackButton";
 
 const PartIndex = () => {
   const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const navigate = useNavigate();
 
   const storedSelectedPracticeParts = useSelector(
     (state: RootState) => state.selectedParts.selectedParts,
@@ -171,6 +180,15 @@ const PartIndex = () => {
               <CustomBackdrop open />
             ) : (
               <Grid2 container spacing={2}>
+                <Grid2 size={12} sx={{ mb: -1 }}>
+                  <Stack direction={"row"} justifyContent={"space-between"}>
+                    <Typography variant="h4">{toeicExam?.name}</Typography>
+                    <GoBackButton
+                      label="Back to the exam page"
+                      onClick={() => navigate(`/exams/${examId}`)}
+                    />
+                  </Stack>
+                </Grid2>
                 <Grid2 size={9.5}>
                   <Stack direction={"column"} gap={1}>
                     {/* Part Navigation */}

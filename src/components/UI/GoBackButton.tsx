@@ -4,13 +4,17 @@ import { useNavigate } from "react-router-dom";
 
 interface GoBackButtonProps {
   onClick?: () => void;
+  label?: string;
 }
-export const GoBackButton: React.FC<GoBackButtonProps> = ({ onClick }) => {
+export const GoBackButton: React.FC<GoBackButtonProps> = ({
+  onClick,
+  label = "Back",
+}) => {
   const navigate = useNavigate();
 
   return (
     <Button sx={{ gap: 0.5 }} onClick={onClick ? onClick : () => navigate(-1)}>
-      <Typography>Back</Typography>
+      <Typography>{label}</Typography>
 
       <SvgIcon sx={{ fontSize: "1.3rem" }}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
