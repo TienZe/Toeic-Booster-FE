@@ -14,7 +14,6 @@ import {
 } from "@mui/icons-material";
 import ResultStatsItem from "./ResultStatsItem";
 import ResultScoreBox from "./ResultScoreBox";
-import ResultAnswerItem from "./ResultAnswerItem";
 import Link from "../../../components/UI/Link";
 import TOEICChatbotPage from "./Chatbot/ToeicChatBot";
 import { useAttemptDetails } from "../../../hooks/useAttemptDetails";
@@ -44,15 +43,12 @@ const ResultPage = () => {
     );
 
   const totalQuestions = attemptDetails?.totalQuestions || 0;
-  const numberOfCorrectQuestions =
-    attemptDetails?.numberOfCorrectQuestions || 0;
-  const numberOfIncorrectQuestions =
-    attemptDetails?.numberOfIncorrectQuestions || 0;
+  const numOfCorrectAnswers = attemptDetails?.numOfCorrectAnswers || 0;
+  const numOfIncorrectAnswers = attemptDetails?.numOfIncorrectAnswers || 0;
   const numSkippedQuestions =
-    totalQuestions - numberOfCorrectQuestions - numberOfIncorrectQuestions;
+    totalQuestions - numOfCorrectAnswers - numOfIncorrectAnswers;
   const accuracy = (
-    (numberOfCorrectQuestions /
-      (numberOfCorrectQuestions + numberOfIncorrectQuestions)) *
+    (numOfCorrectAnswers / (numOfCorrectAnswers + numOfIncorrectAnswers)) *
     100
   ).toFixed(2);
 
@@ -127,7 +123,7 @@ const ResultPage = () => {
                 <ResultStatsItem
                   icon={<Check sx={{ color: "#27ae60", fontSize: "20px" }} />}
                   title="Test result"
-                  value={`${numberOfCorrectQuestions}/${totalQuestions}`}
+                  value={`${numOfCorrectAnswers}/${totalQuestions}`}
                 />
 
                 {/* Accuracy */}
@@ -177,7 +173,7 @@ const ResultPage = () => {
                   labelSx={{
                     color: "success.main",
                   }}
-                  value={numberOfCorrectQuestions}
+                  value={numOfCorrectAnswers}
                   unit="questions"
                 />
               </Grid2>
@@ -204,7 +200,7 @@ const ResultPage = () => {
                   labelSx={{
                     color: "error.main",
                   }}
-                  value={numberOfIncorrectQuestions}
+                  value={numOfIncorrectAnswers}
                   unit="questions"
                 />
               </Grid2>

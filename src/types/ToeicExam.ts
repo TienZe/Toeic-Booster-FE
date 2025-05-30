@@ -75,8 +75,9 @@ export interface ToeicTestAttempt {
   readingScore: number;
 
   totalQuestions?: number;
-  numberOfCorrectQuestions?: number;
-  numberOfIncorrectQuestions?: number;
+  numOfCorrectAnswers?: number;
+  numOfIncorrectAnswers?: number;
+
   numCorrectLcQuestions?: number;
   numCorrectRcQuestions?: number;
 

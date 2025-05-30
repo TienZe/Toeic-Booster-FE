@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Box,
   Typography,
@@ -44,6 +44,13 @@ import {
 import Content from "../../../components/layout/Content";
 import { RotateCcw, Search } from "lucide-react";
 import TableContainer from "../../../components/UI/TableContainer";
+import useUser from "../../../hooks/useUser";
+import { differenceInDays, format } from "date-fns";
+import { getAttemptStats } from "../api/api";
+import { useQuery } from "@tanstack/react-query";
+import { secondToHHMMSS } from "../../../utils/helper";
+import { getDisplayedPart } from "../../../utils/toeicExamHelper";
+import { Part } from "../../../types/ToeicExam";
 
 // Types
 interface TestResult {
@@ -68,16 +75,32 @@ interface QuestionTypeData {
 }
 
 const ToeicStatisticsPage: React.FC = () => {
-  const [selectedDays, setSelectedDays] = useState<string>("30");
+  const [selectedDays, setSelectedDays] = useState<number>(7);
   const [skillTab, setSkillTab] = useState<number>(0);
 
-  // Sample data
-  const chartData: ChartData[] = [
-    { date: "2025-05-14", correct: 33.33 },
-    { date: "2025-05-15", correct: 15 },
-    { date: "2025-05-26", correct: 11.11 },
-    { date: "2025-05-27", correct: 50 },
-  ];
+  const { data: user } = useUser();
+
+  const { data: attemptStats } = useQuery({
+    queryKey: ["attempt-stats", { recentDays: selectedDays }],
+    queryFn: () => getAttemptStats(selectedDays),
+  });
+
+  const skillStats = skillTab === 0 ? attemptStats?.lc : attemptStats?.rc;
+
+  const getDefaultTestDate = useCallback(() => {
+    let createdDate = new Date();
+    if (user) {
+      createdDate = new Date(user.createdAt);
+    }
+    const defaultTestDate = createdDate;
+    defaultTestDate.setMonth(defaultTestDate.getMonth() + 3);
+
+    return defaultTestDate;
+  }, [user]);
+
+  const userTestDate = useMemo(() => {
+    return user?.testDate ? new Date(user.testDate) : getDefaultTestDate();
+  }, [user?.testDate, getDefaultTestDate]);
 
   const questionTypeData: QuestionTypeData[] = [
     {
@@ -348,40 +371,40 @@ const ToeicStatisticsPage: React.FC = () => {
             <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
               <StatCard
                 icon={<Assignment fontSize="large" />}
-                title="Số đề đã làm"
-                value="4"
-                subtitle="đề thi"
+                title="Number of practice tests"
+                value={attemptStats?.numberOfPracticeTests || 0}
+                subtitle="tests"
               />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
               <StatCard
                 icon={<AccessTime fontSize="large" />}
-                title="Thời gian luyện thi"
-                value="5"
-                subtitle="phút"
+                title="Practice time"
+                value={attemptStats?.practiceTime || 0}
+                subtitle="minutes"
               />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
               <StatCard
                 icon={<CalendarToday fontSize="large" />}
-                title="Ngày dự thi"
-                value="29/05/2025"
-                subtitle={<Edit fontSize="small" sx={{ color: "#64748b" }} />}
+                title="Exam date"
+                value={format(userTestDate, "dd/MM/yyyy")}
+                subtitle={<Edit fontSize="small" />}
               />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
               <StatCard
                 icon={<TrendingUp fontSize="large" />}
-                title="Tới kỳ thi"
-                value="0"
-                subtitle="ngày"
+                title="Days to exam"
+                value={differenceInDays(userTestDate, new Date())}
+                subtitle="days"
               />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
               <StatCard
                 icon={<GpsFixed fontSize="large" />}
-                title="Điểm mục tiêu"
-                value="600.0"
+                title="Target score"
+                value={user?.targetScore?.toString() || "450"}
                 isTarget
               />
             </Grid2>
@@ -418,19 +441,43 @@ const ToeicStatisticsPage: React.FC = () => {
           {/* Performance Cards */}
           <Grid2 container spacing={3} sx={{ mb: 2 }}>
             <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
-              <StatCard title="Số đề đã làm" value="3" subtitle="đề thi" />
+              <StatCard
+                title="Practice tests completed"
+                value={skillStats?.practiceTests || 0}
+                subtitle="đề thi"
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
-              <StatCard title="Độ chính xác (#đúng/#tổng)" value="25.00%" />
+              <StatCard
+                title="Accuracy (#correct/#total)"
+                value={
+                  (
+                    ((skillStats?.correctAnswers || 0) /
+                      (skillStats?.answers || 1)) *
+                    100
+                  ).toFixed(2) + "%"
+                }
+                subtitle={`${skillStats?.correctAnswers}/${skillStats?.answers}`}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
-              <StatCard title="Thời gian trung bình" value="0:00:12" />
+              <StatCard
+                title="Average time"
+                value={secondToHHMMSS(skillStats?.averageTime || 0)}
+                subtitle="minutes"
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
-              <StatCard title="Điểm trung bình" value="20/495" />
+              <StatCard
+                title="Average score"
+                value={`${skillStats?.averageScore}/495`}
+              />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
-              <StatCard title="Điểm cao nhất" value="20/495" />
+              <StatCard
+                title="Highest score"
+                value={`${skillStats?.maxScore}/495`}
+              />
             </Grid2>
           </Grid2>
 
@@ -469,7 +516,7 @@ const ToeicStatisticsPage: React.FC = () => {
                 </Box>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
-                    data={chartData}
+                    data={skillStats?.accuracyByDate || []}
                     margin={{ top: 30, right: 30, left: 20, bottom: 5 }}
                   >
                     <CartesianGrid
@@ -487,7 +534,7 @@ const ToeicStatisticsPage: React.FC = () => {
                     />
                     <Line
                       type="monotone"
-                      dataKey="correct"
+                      dataKey="accuracy"
                       stroke="#f43f5e"
                       strokeWidth={2}
                       dot={{ fill: "#f43f5e", strokeWidth: 2, r: 4 }}
@@ -506,25 +553,35 @@ const ToeicStatisticsPage: React.FC = () => {
               gutterBottom
               sx={{ fontWeight: 600, color: "secondary.dark", mb: 1 }}
             >
-              Độ chính xác theo từng part
+              Accuracy by part
             </Typography>
             <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow>
                     <TableCell>Part</TableCell>
-                    <TableCell align="center">Số câu đúng</TableCell>
-                    <TableCell align="center">Số câu sai</TableCell>
-                    <TableCell align="center">Độ chính xác</TableCell>
+                    <TableCell align="center">
+                      Number of correct answers
+                    </TableCell>
+                    <TableCell align="center">
+                      Number of wrong answers
+                    </TableCell>
+                    <TableCell align="center">Accuracy</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {questionTypeData.map((row, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{row.type}</TableCell>
-                      <TableCell align="center">{row.correct}</TableCell>
-                      <TableCell align="center">{row.wrong}</TableCell>
-                      <TableCell align="center">{row.accuracy}</TableCell>
+                  {Object.entries(
+                    attemptStats?.numOfCorrectAnswersGroupedByPart || {},
+                  ).map(([part, row]) => (
+                    <TableRow key={part}>
+                      <TableCell>{getDisplayedPart(part as Part)}</TableCell>
+                      <TableCell align="center">{row.numCorrect}</TableCell>
+                      <TableCell align="center">
+                        {row.total - row.numCorrect}
+                      </TableCell>
+                      <TableCell align="center">
+                        {((row.numCorrect / row.total) * 100).toFixed(2) + "%"}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

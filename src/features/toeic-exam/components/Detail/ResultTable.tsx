@@ -112,7 +112,7 @@ const ResultTable: React.FC<ResultTableProps> = ({ examId }) => {
                     </Stack>
                   </TableCell>
                   <TableCell sx={{ ...RowStyle }}>
-                    {row.numberOfCorrectQuestions}/{row.totalQuestions}
+                    {row.numOfCorrectAnswers}/{row.totalQuestions}
                   </TableCell>
                   <TableCell sx={{ ...RowStyle }}>
                     {secondToHHMMSS(row.takenTime)}

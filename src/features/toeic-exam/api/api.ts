@@ -3,6 +3,7 @@ import ApiResponse from "../../../types/ApiResponse";
 import { ToeicExam, ToeicTestAttempt } from "../../../types/ToeicExam";
 import { GetAttemptsRequest } from "../types/GetAttemptsRequest";
 import { SaveToeicTestAttemptRequest } from "../types/PracticeRequest";
+import { ToeicAttemptStats } from "../types/toeic-exam";
 
 export async function postToeicTestAttempt(
   practiceRequest: SaveToeicTestAttemptRequest,
@@ -27,6 +28,19 @@ export async function getAttempts(request: GetAttemptsRequest) {
     `toeic-test-attempts`,
     {
       params: request,
+    },
+  );
+
+  return response.data.data;
+}
+
+export async function getAttemptStats(recentDays: number = 7) {
+  const response = await axiosClient.get<ApiResponse<ToeicAttemptStats>>(
+    `toeic-test-attempts/stats`,
+    {
+      params: {
+        recentDays,
+      },
     },
   );
 
