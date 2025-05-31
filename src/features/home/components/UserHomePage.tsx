@@ -186,7 +186,7 @@ const UserHomePage = () => {
               sx={{ py: 2 }}
             >
               <Typography variant="h5">Latest Practice Results</Typography>
-              <Link to="/history?tab=analysis">
+              <Link to="/toeic-statistics">
                 <Button variant="outlined" sx={{ px: 1, py: 0.25 }}>
                   Analysis your practice
                 </Button>

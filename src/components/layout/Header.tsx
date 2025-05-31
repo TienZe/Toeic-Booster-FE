@@ -148,7 +148,7 @@ const Header: React.FC = () => {
                   </MenuItem>
                 </Link>
 
-                <Link to="/history">
+                <Link to="/toeic-statistics">
                   <MenuItem>
                     <ListItemIcon>
                       <BarChart fontSize="small" />

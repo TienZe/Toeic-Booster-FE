@@ -6,7 +6,7 @@ import { me } from "../features/auth/api/account-api";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { differenceInDays, format } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CustomBackdrop from "./UI/CustomBackdrop";
 import DefaultAvatar from "../assets/avatars/default.svg";
 
@@ -33,7 +33,7 @@ const InforUserBox = () => {
   const userTestDate = useMemo(() => {
     return user?.testDate ? new Date(user.testDate) : getDefaultTestDate();
   }, [user?.testDate, getDefaultTestDate]);
-  //kkk
+
   return (
     <>
       {isLoading ? (
@@ -76,13 +76,15 @@ const InforUserBox = () => {
                 </Typography>
               </Stack>
               <Box sx={{ pt: 0.5 }}>
-                <Button
-                  variant="contained"
-                  onClick={() => navigate("/history")}
-                  sx={{ boxShadow: "none", width: "100%" }}
-                >
-                  Analysis your result
-                </Button>
+                <Link to="/toeic-statistics">
+                  <Button
+                    variant="contained"
+                    onClick={() => navigate("/history")}
+                    sx={{ boxShadow: "none", width: "100%" }}
+                  >
+                    Analysis your result
+                  </Button>
+                </Link>
               </Box>
             </Stack>
           </Box>

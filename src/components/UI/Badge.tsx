@@ -40,6 +40,9 @@ const Badge: React.FC<ChipProps> = ({ sx, color, ...props }) => {
         borderRadius: "0.375rem",
         border: "1px solid",
         ...getBadgeColor(color || "primary"),
+        "& .MuiChip-label": {
+          px: 0.25,
+        },
         ...sx,
       }}
       {...props}

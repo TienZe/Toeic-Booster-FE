@@ -1,7 +1,5 @@
-"use client";
-
 import type React from "react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
   Typography,
@@ -17,7 +15,6 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Chip,
   Link,
   FormControl,
   type SelectChangeEvent,
@@ -50,33 +47,48 @@ import { getAttemptStats } from "../api/api";
 import { useQuery } from "@tanstack/react-query";
 import { secondToHHMMSS } from "../../../utils/helper";
 import { getDisplayedPart } from "../../../utils/toeicExamHelper";
-import { Part } from "../../../types/ToeicExam";
+import { Part, ToeicTestAttempt } from "../../../types/ToeicExam";
+import { useAttempts } from "../../../hooks/useAttempts";
+import Badge from "../../../components/UI/Badge";
 
-// Types
-interface TestResult {
-  date: string;
-  testName: string;
-  score: string;
-  time: string;
-  tags: string[];
-  parts: string[];
-}
+const HISTORY_ATTEMPT_PAGE_SIZE = 10;
 
-interface ChartData {
-  date: string;
-  correct: number;
-}
-
-interface QuestionTypeData {
-  type: string;
-  correct: number;
-  wrong: number;
-  accuracy: string;
-}
+const RECENT_DAY_OPTIONS = [
+  {
+    label: "3 most recent days",
+    value: "3d",
+  },
+  {
+    label: "7 most recent days",
+    value: "7d",
+  },
+  {
+    label: "30 days",
+    value: "30d",
+  },
+  {
+    label: "60 days",
+    value: "60d",
+  },
+  {
+    label: "90 days",
+    value: "90d",
+  },
+  {
+    label: "6 months",
+    value: "6m",
+  },
+  {
+    label: "1 year",
+    value: "1y",
+  },
+];
 
 const ToeicStatisticsPage: React.FC = () => {
-  const [selectedDays, setSelectedDays] = useState<number>(7);
+  const [selectedDays, setSelectedDays] = useState<string>("30d");
   const [skillTab, setSkillTab] = useState<number>(0);
+  const [historyAttemptPage, setHistoryAttemptPage] = useState<number>(0);
+  const [attempts, setAttempts] = useState<ToeicTestAttempt[]>([]);
 
   const { data: user } = useUser();
 
@@ -84,6 +96,26 @@ const ToeicStatisticsPage: React.FC = () => {
     queryKey: ["attempt-stats", { recentDays: selectedDays }],
     queryFn: () => getAttemptStats(selectedDays),
   });
+
+  const { data: paginatedAttempts } = useAttempts(
+    {},
+    {
+      recentDays: selectedDays,
+      page: historyAttemptPage,
+      limit: HISTORY_ATTEMPT_PAGE_SIZE,
+    },
+  );
+
+  useEffect(() => {
+    setAttempts([]);
+    setHistoryAttemptPage(0);
+  }, [selectedDays]);
+
+  useEffect(() => {
+    if (paginatedAttempts) {
+      setAttempts((prev) => [...prev, ...paginatedAttempts.items]);
+    }
+  }, [paginatedAttempts]);
 
   const skillStats = skillTab === 0 ? attemptStats?.lc : attemptStats?.rc;
 
@@ -102,106 +134,12 @@ const ToeicStatisticsPage: React.FC = () => {
     return user?.testDate ? new Date(user.testDate) : getDefaultTestDate();
   }, [user?.testDate, getDefaultTestDate]);
 
-  const questionTypeData: QuestionTypeData[] = [
-    {
-      type: "[Part 1] Tranh tả cả người và vật",
-      correct: 2,
-      wrong: 3,
-      accuracy: "40.00%",
-    },
-    {
-      type: "[Part 1] Tranh tả người",
-      correct: 1,
-      wrong: 2,
-      accuracy: "33.33%",
-    },
-  ];
-
-  const testResults: TestResult[] = [
-    {
-      date: "29/05/2025",
-      testName: "New Economy TOEIC Test 2",
-      score: "0/200",
-      time: "0:00:12",
-      tags: ["Full test"],
-      parts: [],
-    },
-    {
-      date: "27/05/2025",
-      testName: "New Economy TOEIC Test 3",
-      score: "2/200 (Điểm: 20)",
-      time: "0:00:14",
-      tags: ["Full test"],
-      parts: [],
-    },
-    {
-      date: "26/05/2025",
-      testName: "New Economy TOEIC Test 3",
-      score: "1/39",
-      time: "0:00:38",
-      tags: ["Luyện tập"],
-      parts: ["Part 3"],
-    },
-    {
-      date: "15/05/2025",
-      testName: "New Economy TOEIC Test 3",
-      score: "0/6",
-      time: "0:00:05",
-      tags: ["Luyện tập"],
-      parts: ["Part 1"],
-    },
-    {
-      date: "14/05/2025",
-      testName: "Practice Set TOEIC 2021 Test 2",
-      score: "1/54",
-      time: "0:00:11",
-      tags: ["Luyện tập"],
-      parts: ["Part 7"],
-    },
-    {
-      date: "14/05/2025",
-      testName: "Practice Set TOEIC 2021 Test 2",
-      score: "1/16",
-      time: "0:00:05",
-      tags: ["Luyện tập"],
-      parts: ["Part 6"],
-    },
-    {
-      date: "14/05/2025",
-      testName: "Practice Set TOEIC 2021 Test 2",
-      score: "0/30",
-      time: "0:00:05",
-      tags: ["Luyện tập"],
-      parts: ["Part 5"],
-    },
-    {
-      date: "14/05/2025",
-      testName: "Practice Set TOEIC 2021 Test 2",
-      score: "0/30",
-      time: "0:00:04",
-      tags: ["Luyện tập"],
-      parts: ["Part 4"],
-    },
-    {
-      date: "14/05/2025",
-      testName: "Practice Set TOEIC 2021 Test 2",
-      score: "0/39",
-      time: "0:00:31",
-      tags: ["Luyện tập"],
-      parts: ["Part 3"],
-    },
-    {
-      date: "14/05/2025",
-      testName: "Practice Set TOEIC 2021 Test 2",
-      score: "1/25",
-      time: "0:00:04",
-      tags: ["Luyện tập"],
-      parts: ["Part 2"],
-    },
-  ];
-
-  const handleDaysChange = (event: SelectChangeEvent<string>) => {
+  const handleRecentDaysChange = (event: SelectChangeEvent<string>) => {
     setSelectedDays(event.target.value);
+  };
+
+  const handleResetSearch = () => {
+    setSelectedDays("30d");
   };
 
   const handleSkillTabChange = (
@@ -292,10 +230,10 @@ const ToeicStatisticsPage: React.FC = () => {
                     mb: 1,
                   }}
                 >
-                  Thống kê kết quả luyện thi
+                  TOEIC Practice Statistics
                 </Typography>
                 <Typography variant="body1" sx={{}}>
-                  Theo dõi tiến độ học tập và phân tích kết quả chi tiết
+                  Track your progress and analyze detailed results
                 </Typography>
               </Box>
             </Box>
@@ -312,9 +250,9 @@ const ToeicStatisticsPage: React.FC = () => {
             }}
           >
             <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-              <strong>Chú ý:</strong> Mặc định trang thống kê sẽ hiển thị các
-              bài làm trong khoảng thời gian 30 ngày gần nhất, để xem kết quả
-              trong khoảng thời gian xa hơn bạn chọn ô phần dropdown dưới đây.
+              <strong>Note:</strong> By default, the statistics page will
+              display the results of the last 30 days. To view results from a
+              longer period, select the dropdown below.
             </Typography>
           </Box>
 
@@ -337,19 +275,21 @@ const ToeicStatisticsPage: React.FC = () => {
                 }}
               >
                 <Typography variant="body1">
-                  Lọc kết quả theo ngày (tính từ bài thi cuối):
+                  Filter results by date (from last test):
                 </Typography>
                 <FormControl size="small">
                   <Select
                     value={selectedDays}
-                    onChange={handleDaysChange}
+                    onChange={handleRecentDaysChange}
                     sx={{
-                      minWidth: 140,
+                      minWidth: 200,
                     }}
                   >
-                    <MenuItem value="30">30 ngày</MenuItem>
-                    <MenuItem value="60">60 ngày</MenuItem>
-                    <MenuItem value="90">90 ngày</MenuItem>
+                    {RECENT_DAY_OPTIONS.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
                 <Button
@@ -357,10 +297,14 @@ const ToeicStatisticsPage: React.FC = () => {
                   disableElevation
                   startIcon={<Search size={16} />}
                 >
-                  Tìm kiếm
+                  Search
                 </Button>
-                <Button variant="outlined" startIcon={<RotateCcw size={16} />}>
-                  Đặt lại
+                <Button
+                  variant="outlined"
+                  startIcon={<RotateCcw size={16} />}
+                  onClick={handleResetSearch}
+                >
+                  Reset
                 </Button>
               </Box>
             </CardContent>
@@ -546,7 +490,7 @@ const ToeicStatisticsPage: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Question Types Table */}
+          {/* Accuracy by part table */}
           <Box sx={{ mb: 2 }}>
             <Typography
               variant="h6"
@@ -596,82 +540,60 @@ const ToeicStatisticsPage: React.FC = () => {
               gutterBottom
               sx={{ fontWeight: 600, color: "#0f172a", mb: 2 }}
             >
-              Danh sách đề thi đã làm:
+              Test History:
             </Typography>
             <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Ngày làm</TableCell>
-                    <TableCell>Đề thi</TableCell>
-                    <TableCell align="center">Kết quả</TableCell>
-                    <TableCell align="center">Thời gian làm bài</TableCell>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Test</TableCell>
+                    <TableCell align="center">Result</TableCell>
+                    <TableCell align="center">Time</TableCell>
                     <TableCell align="center">Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {testResults.map((result, index) => (
+                  {attempts?.map((attempt, index) => (
                     <TableRow key={index}>
-                      <TableCell>{result.date}</TableCell>
+                      <TableCell>
+                        {format(new Date(attempt.createdAt), "dd/MM/yyyy")}
+                      </TableCell>
                       <TableCell>
                         <Box>
                           <Typography
                             variant="body2"
-                            sx={{ fontWeight: 500, mb: 1 }}
+                            sx={{ fontWeight: 500, mb: 0.5 }}
                           >
-                            {result.testName}
+                            {attempt.toeicTest?.name}
                           </Typography>
                           <Box
                             sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}
                           >
-                            {result.tags.map((tag, tagIndex) => (
-                              <Chip
-                                key={tagIndex}
-                                label={tag}
-                                size="small"
-                                sx={{
-                                  backgroundColor:
-                                    tag === "Full test"
-                                      ? "success.extraLight"
-                                      : "warning.extraLight",
-                                  color:
-                                    tag === "Full test"
-                                      ? "success.main"
-                                      : "warning.main",
-                                  fontWeight: 500,
-                                  fontSize: "0.7rem",
-                                  borderRadius: "0.375rem",
-                                  border: "1px solid",
-                                  borderColor:
-                                    tag === "Full test"
-                                      ? "rgba(34, 197, 94, 0.2)"
-                                      : "rgba(249, 115, 22, 0.2)",
-                                }}
-                              />
-                            ))}
-                            {result.parts.map((part, partIndex) => (
-                              <Chip
-                                key={partIndex}
-                                label={part}
-                                size="small"
-                                sx={{
-                                  backgroundColor: "info.extraLight",
-                                  color: "info.main",
-                                  fontWeight: 500,
-                                  fontSize: "0.7rem",
-                                  borderRadius: "0.375rem",
-                                  border: "1px solid rgba(14, 165, 233, 0.2)",
-                                }}
-                              />
-                            ))}
+                            {attempt.isFullTest ? (
+                              <Badge label="Full test" color="success" />
+                            ) : (
+                              <>
+                                <Badge label="Practice" color="warning" />
+                                {attempt.selectedParts.map((part) => (
+                                  <Badge
+                                    key={part}
+                                    label={getDisplayedPart(part as Part)}
+                                    color="info"
+                                  />
+                                ))}
+                              </>
+                            )}
                           </Box>
                         </Box>
                       </TableCell>
-                      <TableCell align="center">{result.score}</TableCell>
-                      <TableCell align="center">{result.time}</TableCell>
+                      <TableCell align="center">{attempt.score}</TableCell>
+                      <TableCell align="center">
+                        {secondToHHMMSS(attempt.takenTime)}
+                      </TableCell>
                       <TableCell align="center">
                         <Link
-                          href="#"
+                          href={`/exams/result/${attempt.toeicTestId}`}
                           sx={{
                             color: "primary.main",
                             textDecoration: "none",
@@ -681,13 +603,30 @@ const ToeicStatisticsPage: React.FC = () => {
                             },
                           }}
                         >
-                          Xem chi tiết
+                          View details
                         </Link>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
+              {paginatedAttempts && paginatedAttempts.hasNext && (
+                <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    sx={{
+                      backgroundColor: "primary.extraLight",
+                      color: "primary.main",
+                    }}
+                    onClick={() =>
+                      setHistoryAttemptPage(historyAttemptPage + 1)
+                    }
+                  >
+                    Show more
+                  </Button>
+                </Box>
+              )}
             </TableContainer>
             <Box sx={{ mt: 3 }}>
               <Link

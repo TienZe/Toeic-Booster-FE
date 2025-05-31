@@ -325,7 +325,6 @@ const ResultPage = () => {
           })}
         </Stack>
       </Box>
-      <TOEICChatbotPage />
     </UserToeicInfoLayout>
   );
 };

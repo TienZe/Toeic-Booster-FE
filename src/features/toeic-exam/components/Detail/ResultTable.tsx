@@ -5,25 +5,22 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import {
   Box,
-  Chip,
   Stack,
   TableFooter,
   TablePagination,
   Typography,
 } from "@mui/material";
 
-import { useQuery } from "@tanstack/react-query";
-import { getAttempts } from "../../api/api";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
-import useResultTable from "../../hooks/useResultTable";
 import TablePaginationActions from "../../../../components/UI/TablePaginationActions";
 import { format } from "date-fns";
 import { getDisplayedPart } from "../../../../utils/toeicExamHelper";
-import { ToeicTestAttempt } from "../../../../types/ToeicExam";
 import Link from "../../../../components/UI/Link";
 import { secondToHHMMSS } from "../../../../utils/helper";
 import TableContainer from "../../../../components/UI/TableContainer";
 import Badge from "../../../../components/UI/Badge";
+import { useAttempts } from "../../../../hooks/useAttempts";
+import { useState } from "react";
 
 interface ResultTableProps {
   examId?: number;
@@ -33,26 +30,21 @@ const RowStyle = {
   wordWrap: "break-word",
 };
 
-const chipStyle = {
-  backgroundColor: "#ff6f00",
-  color: "white",
-  marginBottom: "5px",
-};
-
-const ROW_per_PAGE = 5;
+const ROW_PER_PAGE = 5;
 
 const ResultTable: React.FC<ResultTableProps> = ({ examId }) => {
-  const { data: attempts, isLoading: isLoadingAttempts } = useQuery({
-    queryKey: ["toeicTestAttempts", { toeicTestId: examId }],
-    queryFn: () => getAttempts({ toeicTestId: examId || "" }),
-    enabled: !!examId,
-  });
+  const [page, setPage] = useState(0);
 
-  const {
-    page,
-    pageData: attemptPageData,
-    handleChangePage,
-  } = useResultTable<ToeicTestAttempt>(attempts || [], ROW_per_PAGE);
+  const { data: paginatedAttempts, isLoading: isLoadingAttempts } = useAttempts(
+    {
+      enabled: !!examId,
+    },
+    {
+      toeicTestId: examId || "",
+      page,
+      limit: ROW_PER_PAGE,
+    },
+  );
 
   return (
     <>
@@ -63,15 +55,14 @@ const ResultTable: React.FC<ResultTableProps> = ({ examId }) => {
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell width={200}>Date</TableCell>
-                <TableCell width={200}>Part</TableCell>
-                <TableCell width={200}>Result</TableCell>
-                <TableCell width={200}>Time</TableCell>
-                <TableCell width={200}></TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell width={150}>Result</TableCell>
+                <TableCell width={150}>Time</TableCell>
+                <TableCell width={150}></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {attemptPageData?.map((row, rowIndex) => (
+              {paginatedAttempts?.items.map((row, rowIndex) => (
                 <TableRow
                   key={rowIndex}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -81,34 +72,28 @@ const ResultTable: React.FC<ResultTableProps> = ({ examId }) => {
                       <Typography>
                         {format(new Date(row.createdAt), "dd/MM/yyyy")}
                       </Typography>
-                    </Stack>
-                  </TableCell>
-                  <TableCell sx={{ ...RowStyle }}>
-                    <Stack
-                      direction="row"
-                      spacing={0.25}
-                      sx={{ flexWrap: "wrap" }}
-                    >
-                      {row.isFullTest ? (
-                        <Badge color="success" label="Full test" />
-                      ) : (
-                        <>
-                          <Box sx={{ mb: 1 }}>
+                      <Stack
+                        direction="row"
+                        gap={0.25}
+                        sx={{ flexWrap: "wrap" }}
+                      >
+                        {row.isFullTest ? (
+                          <Badge color="success" label="Full test" />
+                        ) : (
+                          <>
                             <Badge color="warning" label="Practice" />
-                          </Box>
 
-                          {row.selectedParts.map((part) => {
-                            return (
-                              <Box sx={{ mb: 1 }}>
+                            {row.selectedParts.map((part) => {
+                              return (
                                 <Badge
                                   color="info"
                                   label={getDisplayedPart(part)}
                                 />
-                              </Box>
-                            );
-                          })}
-                        </>
-                      )}
+                              );
+                            })}
+                          </>
+                        )}
+                      </Stack>
                     </Stack>
                   </TableCell>
                   <TableCell sx={{ ...RowStyle }}>
@@ -138,11 +123,11 @@ const ResultTable: React.FC<ResultTableProps> = ({ examId }) => {
             <TableFooter>
               <TableRow>
                 <TablePagination
-                  rowsPerPageOptions={[ROW_per_PAGE]}
-                  count={attempts?.length || 0}
-                  rowsPerPage={ROW_per_PAGE}
+                  rowsPerPageOptions={[ROW_PER_PAGE]}
+                  count={paginatedAttempts?.total || 0}
+                  rowsPerPage={ROW_PER_PAGE}
                   page={page}
-                  onPageChange={handleChangePage}
+                  onPageChange={(_, page) => setPage(page)}
                   ActionsComponent={TablePaginationActions}
                 />
               </TableRow>
