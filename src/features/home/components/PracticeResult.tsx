@@ -37,7 +37,7 @@ const PracticeResult: React.FC<PracticeResultProps> = ({
     <Card
       variant="outlined"
       sx={{
-        minWidth: "250px",
+        width: "260px",
         minHeight: "250px",
         boxShadow: "0px 4px 0px rgba(143, 156, 173, 0.2)",
         padding: 1,
@@ -49,7 +49,7 @@ const PracticeResult: React.FC<PracticeResultProps> = ({
     >
       <Stack spacing={0.5}>
         <CardTitle sx={{ marginBottom: 0.5 }}>{testTitle}</CardTitle>
-        <Stack direction="row" spacing={0.25}>
+        <Stack direction="row" gap={0.25} flexWrap="wrap">
           {tags.map((tag) => (
             <Chip label={tag} sx={{ ...chipStyle }} />
           ))}

@@ -15,7 +15,6 @@ import {
 import ResultStatsItem from "./ResultStatsItem";
 import ResultScoreBox from "./ResultScoreBox";
 import Link from "../../../components/UI/Link";
-import TOEICChatbotPage from "./Chatbot/ToeicChatBot";
 import { useAttemptDetails } from "../../../hooks/useAttemptDetails";
 import { secondToHHMMSS } from "../../../utils/helper";
 import { useParams } from "react-router-dom";
