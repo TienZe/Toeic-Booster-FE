@@ -1,13 +1,13 @@
 import axiosClient from "../../../axios";
 import ApiResponse from "../../../types/ApiResponse";
-import { ToeicExam } from "../../../types/ToeicExam";
+import { ToeicExam, ToeicTestAttempt } from "../../../types/ToeicExam";
 import { SaveToeicTestAttemptRequest } from "../types/PracticeRequest";
 import { ToeicAttemptStats } from "../types/toeic-exam";
 
 export async function postToeicTestAttempt(
   practiceRequest: SaveToeicTestAttemptRequest,
 ) {
-  const response = await axiosClient.post(
+  const response = await axiosClient.post<ApiResponse<ToeicTestAttempt>>(
     `toeic-test-attempts`,
     practiceRequest,
   );

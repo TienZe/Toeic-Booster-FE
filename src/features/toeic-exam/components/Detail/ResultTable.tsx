@@ -3,13 +3,7 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import {
-  Box,
-  Stack,
-  TableFooter,
-  TablePagination,
-  Typography,
-} from "@mui/material";
+import { Stack, TableFooter, TablePagination, Typography } from "@mui/material";
 
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
 import TablePaginationActions from "../../../../components/UI/TablePaginationActions";

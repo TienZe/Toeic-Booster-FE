@@ -1,9 +1,12 @@
-import { Button, Card, Chip, Stack, Typography } from "@mui/material";
+import { Button, Card, Stack, Typography } from "@mui/material";
 import CardTitle from "./CardTitle";
+import { getDisplayedPart } from "../../../utils/toeicExamHelper";
+import { Part } from "../../../types/ToeicExam";
+import Badge from "../../../components/UI/Badge";
 
 interface PracticeResultProps {
   testTitle: string;
-  tags?: string[];
+  selectedParts?: Part[];
   fullTest?: boolean;
   dateTaken: string;
   completionTime: string;
@@ -14,7 +17,7 @@ interface PracticeResultProps {
 
 const PracticeResult: React.FC<PracticeResultProps> = ({
   testTitle,
-  tags = [],
+  selectedParts = [],
   fullTest = false,
   dateTaken,
   completionTime,
@@ -22,22 +25,11 @@ const PracticeResult: React.FC<PracticeResultProps> = ({
   score,
   id,
 }) => {
-  const chipStyle = {
-    backgroundColor: "#ff6f00",
-    color: "white",
-  };
-  if (fullTest) {
-    tags = ["Full test", ...tags];
-    chipStyle.backgroundColor = "success.main";
-  } else {
-    tags = ["Practice", ...tags];
-  }
-
   return (
     <Card
       variant="outlined"
       sx={{
-        minWidth: "250px",
+        width: "260px",
         minHeight: "250px",
         boxShadow: "0px 4px 0px rgba(143, 156, 173, 0.2)",
         padding: 1,
@@ -49,10 +41,20 @@ const PracticeResult: React.FC<PracticeResultProps> = ({
     >
       <Stack spacing={0.5}>
         <CardTitle sx={{ marginBottom: 0.5 }}>{testTitle}</CardTitle>
-        <Stack direction="row" spacing={0.25}>
-          {tags.map((tag) => (
-            <Chip label={tag} sx={{ ...chipStyle }} />
-          ))}
+        <Stack direction="row" gap={0.25} flexWrap="wrap">
+          <Stack direction="row" gap={0.25} sx={{ flexWrap: "wrap" }}>
+            {fullTest ? (
+              <Badge color="success" label="Full test" />
+            ) : (
+              <>
+                <Badge color="warning" label="Practice" />
+
+                {selectedParts.map((part) => {
+                  return <Badge color="info" label={getDisplayedPart(part)} />;
+                })}
+              </>
+            )}
+          </Stack>
         </Stack>
         <Stack>
           <Typography>Date Taken: {dateTaken}</Typography>

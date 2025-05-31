@@ -4,7 +4,7 @@ import ListQuestion from "./ListQuestions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../stores";
 import { useCallback, useRef, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { SaveToeicTestAttemptRequest } from "../../types/PracticeRequest";
 import { useMutation } from "@tanstack/react-query";
 import { postToeicTestAttempt } from "../../api/api";
@@ -26,6 +26,7 @@ const SubMitBox: React.FC<PartDataProps> = ({
   mode,
 }) => {
   const [openConfirm, setOpenConfirm] = useState<boolean>(false);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const limitTime = useSelector(
     (state: RootState) => state.selectedParts.limitTime,
@@ -43,15 +44,15 @@ const SubMitBox: React.FC<PartDataProps> = ({
 
   const mutation = useMutation({
     mutationFn: postToeicTestAttempt,
-    onSuccess: (responseData) => {
-      console.log("Post successfully, responseData", responseData);
-
+    onSuccess: (createdAttempt) => {
       // Reset redux state
       dispatch(resetAnswers());
       dispatch(clearSelectedParts());
 
       setOpenConfirm(false);
       toast.success("Submit successfully");
+
+      navigate(`/exams/result/${createdAttempt.id}`);
     },
     onError: (error) => {
       console.error("Post failed:", error);

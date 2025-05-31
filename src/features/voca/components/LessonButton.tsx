@@ -5,7 +5,7 @@ const LessonButton = styled(Button)(({ theme, variant }) => ({
   width: "100%",
   fontSize: "14px",
   borderRadius: "10px",
-  minHeight: "53px",
+  minHeight: "44px",
   "&:hover": {
     boxShadow: "none",
   },

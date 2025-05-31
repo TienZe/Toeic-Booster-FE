@@ -41,10 +41,12 @@ import { updateUserProfile } from "../../user-profile/api/user-profile";
 import { toast } from "react-toastify";
 import { differenceInDays, format } from "date-fns";
 import CustomBackdrop from "../../../components/UI/CustomBackdrop";
-import { fetchLast4PracticeDetailUser } from "../api/lastPractice.api";
 import Link from "../../../components/UI/Link";
 import { getVocaSetsUserMightAlsoLike } from "../../shared-apis/vocaset-api";
 import PortraitCollectionCard from "../../../components/PortraitCollectionCard";
+import { useAttempts } from "../../../hooks/useAttempts";
+import { secondToHHMMSS } from "../../../utils/helper";
+import { getDisplayedPart } from "../../../utils/toeicExamHelper";
 
 type UserTargetFormData = {
   testDate: string;
@@ -60,22 +62,18 @@ const UserHomePage = () => {
     queryFn: () => me(token!),
   });
 
-  const { data: lastPractice } = useQuery({
-    queryKey: ["last4PracticeUser"],
-    queryFn: () => fetchLast4PracticeDetailUser(),
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
+  const { data: lastAttempts } = useAttempts(
+    {},
+    {
+      page: 0,
+      limit: 5,
+    },
+  );
 
   const { data: top8Vocab } = useQuery({
     queryKey: ["vocaSetsUserMightAlsoLike"],
     queryFn: () => getVocaSetsUserMightAlsoLike(),
   });
-
-  // const { data: topTest } = useQuery({
-  //   queryKey: ["top8Test"],
-  //   queryFn: () => getTopTestTaken(),
-  // });
 
   const topTest = [];
 
@@ -128,16 +126,7 @@ const UserHomePage = () => {
   const handleUpdateUserTarget: SubmitHandler<UserTargetFormData> = (data) => {
     updateUserTargetMutation.mutate(data);
   };
-  const convertSecondsToHMS = (seconds: number): string => {
-    const h = Math.floor(seconds / 3600)
-      .toString()
-      .padStart(2, "0");
-    const m = Math.floor((seconds % 3600) / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
-    return `${h}:${m}:${s}`;
-  };
+
   return (
     <>
       {isLoading && <CustomBackdrop />}
@@ -198,28 +187,32 @@ const UserHomePage = () => {
               useFlexGap
               sx={{ flexWrap: "wrap" }}
             >
-              {lastPractice?.lastPractice
-                ?.filter((practice) => practice.test != null)
-                .map((practice) => {
-                  return (
-                    <PracticeResult
-                      key={practice.id}
-                      id={practice.id}
-                      testTitle={practice.test.name}
-                      tags={practice.isFullTest ? [] : practice.listPart}
-                      fullTest={practice.isFullTest}
-                      dateTaken={format(
-                        new Date(practice.createdAt),
-                        "dd/MM/yyyy",
-                      )}
-                      completionTime={`${convertSecondsToHMS(practice.time)}`}
-                      result={`${practice.numCorrect}/${practice.totalQuestion}`}
-                      score={practice.LCScore + practice.RCScore}
-                    />
-                  );
-                })}
+              {lastAttempts?.items.map((attempt) => {
+                return (
+                  <PracticeResult
+                    key={attempt.id}
+                    id={attempt.id.toString()}
+                    testTitle={attempt.toeicTest?.name || ""}
+                    tags={
+                      attempt.isFullTest
+                        ? []
+                        : attempt.selectedParts.map((part) =>
+                            getDisplayedPart(part),
+                          )
+                    }
+                    fullTest={attempt.isFullTest}
+                    dateTaken={format(
+                      new Date(attempt.createdAt),
+                      "dd/MM/yyyy",
+                    )}
+                    completionTime={`${secondToHHMMSS(attempt.takenTime)}`}
+                    result={`${attempt.numOfCorrectAnswers}/${attempt.totalQuestions}`}
+                    score={attempt.score}
+                  />
+                );
+              })}
 
-              {lastPractice?.lastPractice?.length === 0 && (
+              {lastAttempts?.items.length === 0 && (
                 <Box>
                   <Typography>
                     No practice history yet. Take your first test and track your
@@ -237,7 +230,7 @@ const UserHomePage = () => {
               )}
             </Stack>
 
-            {lastPractice && lastPractice?.lastPractice?.length > 0 && (
+            {lastAttempts && lastAttempts.items.length > 0 && (
               <Link to="/history">
                 <ViewMoreButton>View All</ViewMoreButton>
               </Link>
