@@ -1,5 +1,4 @@
 import Button from "@mui/material/Button";
-import styles from "./NavLink.module.scss";
 
 const NavLink: React.FC<{
   children: React.ReactNode;
@@ -8,7 +7,12 @@ const NavLink: React.FC<{
   return (
     <Button
       disableRipple
-      className={styles.navlinkBtn + (isActive ? " " + styles.active : "")}
+      sx={{
+        color: isActive ? "primary.main" : "secondary.main",
+        "&:hover": {
+          color: "primary.main",
+        },
+      }}
     >
       {children}
     </Button>

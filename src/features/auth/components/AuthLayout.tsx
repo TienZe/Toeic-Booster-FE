@@ -11,6 +11,7 @@ import classes from "./AuthLayout.module.scss";
 
 import TabItem from "./TabItem";
 import { Link, Outlet, useLocation, Navigate } from "react-router-dom";
+import { Image } from "../../../components/UI/Image";
 
 const AuthLayout: React.FC = () => {
   const { pathname: activeRoute } = useLocation();
@@ -44,9 +45,12 @@ const AuthLayout: React.FC = () => {
               display: { xs: "none", lg: "flex" },
             }}
           >
-            <img
+            <Image
               src={isOnLoginPage ? LoginImg : RegisterImg}
-              className={classes.sideImg}
+              sx={{
+                width: "100%",
+                objectFit: "cover",
+              }}
             />
           </Grid>
           <Grid
@@ -70,8 +74,12 @@ const AuthLayout: React.FC = () => {
                 Welcome to EngFlash!
               </Typography>
               <Box
-                className={classes.tabGroup}
-                sx={{ backgroundColor: "primary.extraLight" }}
+                sx={{
+                  backgroundColor: "primary.extraLight",
+                  padding: "9px 13px",
+                  borderRadius: "33px",
+                  display: "inline-flex",
+                }}
               >
                 <Link to="login">
                   <TabItem isActive={isOnLoginPage}>Login</TabItem>
