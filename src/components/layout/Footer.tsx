@@ -58,9 +58,9 @@ const Footer: React.FC = () => {
   ];
 
   const contactInfo = [
-    { icon: Email, text: "hello@englash.com" },
-    { icon: Phone, text: "+1 (555) 123-4567" },
-    { icon: LocationOn, text: "San Francisco, CA" },
+    { icon: Email, text: "toeicbooster@dut.edu.com" },
+    { icon: Phone, text: "+84 909 090 909" },
+    { icon: LocationOn, text: "Da Nang City, Vietnam" },
   ];
 
   return (
@@ -96,7 +96,7 @@ const Footer: React.FC = () => {
               viewport={{ once: true }}
             >
               <Typography
-                variant="h4"
+                variant="h5"
                 component="div"
                 sx={{
                   fontWeight: "bold",
@@ -159,7 +159,7 @@ const Footer: React.FC = () => {
                     sx={{
                       mb: 1,
                       fontWeight: 600,
-                      fontSize: "1.1rem",
+                      fontSize: "1rem",
                     }}
                   >
                     Services
@@ -199,7 +199,7 @@ const Footer: React.FC = () => {
                     sx={{
                       mb: 1,
                       fontWeight: 600,
-                      fontSize: "1.1rem",
+                      fontSize: "1rem",
                     }}
                   >
                     Company
@@ -239,7 +239,7 @@ const Footer: React.FC = () => {
                     sx={{
                       mb: 1,
                       fontWeight: 600,
-                      fontSize: "1.1rem",
+                      fontSize: "1rem",
                     }}
                   >
                     Support
@@ -282,7 +282,7 @@ const Footer: React.FC = () => {
                 sx={{
                   mb: 1,
                   fontWeight: 600,
-                  fontSize: "1.1rem",
+                  fontSize: "1rem",
                 }}
               >
                 Follow Us
@@ -290,6 +290,7 @@ const Footer: React.FC = () => {
               <Stack direction="row" gap={1} flexWrap="wrap">
                 {socialLinks.map((social, index) => (
                   <IconButton
+                    size="small"
                     key={index}
                     sx={{
                       color: "rgba(255, 255, 255, 0.8)",
@@ -305,7 +306,7 @@ const Footer: React.FC = () => {
                     }}
                     aria-label={social.label}
                   >
-                    <social.icon />
+                    <social.icon sx={{ fontSize: 18 }} />
                   </IconButton>
                 ))}
               </Stack>

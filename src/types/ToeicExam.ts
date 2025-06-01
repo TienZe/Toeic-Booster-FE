@@ -39,8 +39,7 @@ export interface ToeicExam {
   questionGroups?: QuestionGroup[];
   category?: ToeicCategory;
 
-  commentCount?: number;
-  takenStudents?: number;
+  attemptsCount?: number;
 
   createdAt: string;
 }

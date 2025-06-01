@@ -47,6 +47,7 @@ import PortraitCollectionCard from "../../../components/PortraitCollectionCard";
 import { useAttempts } from "../../../hooks/useAttempts";
 import { secondToHHMMSS } from "../../../utils/helper";
 import { getDisplayedPart } from "../../../utils/toeicExamHelper";
+import { getMostTakenTests } from "../api/api";
 
 type UserTargetFormData = {
   testDate: string;
@@ -75,7 +76,10 @@ const UserHomePage = () => {
     queryFn: () => getVocaSetsUserMightAlsoLike(),
   });
 
-  const topTest = [];
+  const { data: mostTakenTests } = useQuery({
+    queryKey: ["mostTakenTests"],
+    queryFn: getMostTakenTests,
+  });
 
   const [openChangeTargetModal, setOpenChangeTargetModal] = useState(false);
 
@@ -193,13 +197,7 @@ const UserHomePage = () => {
                     key={attempt.id}
                     id={attempt.id.toString()}
                     testTitle={attempt.toeicTest?.name || ""}
-                    tags={
-                      attempt.isFullTest
-                        ? []
-                        : attempt.selectedParts.map((part) =>
-                            getDisplayedPart(part),
-                          )
-                    }
+                    selectedParts={attempt.selectedParts}
                     fullTest={attempt.isFullTest}
                     dateTaken={format(
                       new Date(attempt.createdAt),
@@ -241,9 +239,17 @@ const UserHomePage = () => {
       <Box sx={{ boxShadow: "0px -1px 10px rgba(0, 0, 0, 0.12)" }}>
         <Container fixed>
           {/* popular voca sets section */}
-          <Box sx={{ py: 7 }}>
-            <Typography variant="h4" color="primary.main" textAlign={"center"}>
+          <Box sx={{ py: 4 }}>
+            <Typography
+              variant="h4"
+              color="primary.main"
+              textAlign={"center"}
+              sx={{ mb: 0.5 }}
+            >
               Vocabulary Sets You Might Also Like
+            </Typography>
+            <Typography textAlign={"center"} sx={{ fontSize: "1rem" }}>
+              Discover more sets aligned with your preferences.
             </Typography>
 
             <Box
@@ -297,9 +303,17 @@ const UserHomePage = () => {
 
           <Divider />
           {/* Most recent tests section */}
-          <Box sx={{ py: 7 }}>
-            <Typography variant="h4" color="primary.main" textAlign={"center"}>
+          <Box sx={{ py: 4 }}>
+            <Typography
+              variant="h4"
+              color="primary.main"
+              textAlign={"center"}
+              sx={{ mb: 0.5 }}
+            >
               Most Taken Tests
+            </Typography>
+            <Typography textAlign={"center"} sx={{ fontSize: "1rem" }}>
+              See what learners are practicing the most.
             </Typography>
             <Box display="flex" justifyContent="center" sx={{ marginTop: 2 }}>
               <Grid2
@@ -309,17 +323,17 @@ const UserHomePage = () => {
                 columnSpacing={{ xs: "10px", md: 1.5 }}
                 justifyContent="center"
               >
-                {topTest?.map((test) => {
+                {mostTakenTests?.map((toeicTest) => {
                   return (
-                    <Grid2 key={test.testId}>
+                    <Grid2 key={toeicTest.id}>
                       <ExamCard
-                        id={test.testId}
-                        title={test.testName}
-                        duration={`${test.time} minutes`}
-                        totalParticipants={test.userCount}
-                        totalComments={test.commentCount}
-                        numOfParts={test.partCount}
-                        numOfQuestions={test.totalQuestion}
+                        id={toeicTest.id}
+                        title={toeicTest.name}
+                        duration={`120 minutes`}
+                        totalParticipants={toeicTest.attemptsCount || 0}
+                        totalComments={12}
+                        numOfParts={7}
+                        numOfQuestions={200}
                         tags={["Listening", "Reading"]}
                       />
                     </Grid2>
