@@ -11,7 +11,9 @@ const ExamSetRow: React.FC<{
     <TableRow>
       <TableCell>{examSet.id}</TableCell>
       <TableCell>{examSet.name}</TableCell>
-      <TableCell align="center">{examSet?.tagName}</TableCell>
+      <TableCell align="center">
+        {examSet.category?.category || "N/A"}
+      </TableCell>
       <TableCell align="center">
         <Stack direction="row" spacing={0.5} justifyContent="center">
           <Link to={`/admin/exam-set/${examSet.id}`}>

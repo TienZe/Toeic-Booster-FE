@@ -1,7 +1,7 @@
 import axiosClient from "../../axios";
 import ApiResponse from "../../types/ApiResponse";
 import PaginatedData from "../../types/PaginatedData";
-import { ToeicExam } from "../../types/ToeicExam";
+import { ToeicCategory, ToeicExam } from "../../types/ToeicExam";
 import { GetToeicExamsRequest } from "./types/GetToeicExamsRequest";
 
 export async function getToeicExams(request: GetToeicExamsRequest) {
@@ -18,6 +18,13 @@ export async function getToeicExamById(examId: number | string) {
   const response = await axiosClient.get<ApiResponse<ToeicExam>>(
     `toeic-tests/${examId}`,
   );
+
+  return response.data.data;
+}
+
+export async function getToeicCategories() {
+  const response =
+    await axiosClient.get<ApiResponse<ToeicCategory[]>>(`toeic-categories`);
 
   return response.data.data;
 }

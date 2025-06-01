@@ -34,11 +34,6 @@ import FolderPracticePage from "./features/voca/components/FolderPracticePage.ts
 import ListListenGroup from "./features/listen/pages/ListListenGroup.tsx";
 import ListenPractice from "./features/listen/pages/ListenPractice.tsx";
 
-import ListenGroupAdmin from "./features/admin/listen/pages/ListenGroupAdmin.tsx";
-import ListenGroupDetailAdmin from "./features/admin/listen/pages/ListenGroupDetailAdmin.tsx";
-import ListenLessonCreateAdmin from "./features/admin/listen/pages/ListenLessonCreateAdmin.tsx";
-import ListenLessonUpdateAdmin from "./features/admin/listen/pages/ListenLessonUpdateAdmin.tsx";
-
 import { RoleEnum } from "./types/auth.ts";
 import AccountIndexPage from "./features/admin/accounts/components/AccountIndexPage.tsx";
 import WordIndexPage from "./features/admin/vocasets/pages/WordIndexPage.tsx";
@@ -226,10 +221,6 @@ export const router = createBrowserRouter([
         index: true,
         element: <Dashboard />,
       },
-      // {
-      //   path: "createExam",
-      //   element: <CreateExam />,
-      // },
       {
         path: "exam-set",
         element: <ExamIndexPage />,
@@ -261,22 +252,6 @@ export const router = createBrowserRouter([
       {
         path: "word",
         element: <WordIndexPage />,
-      },
-      {
-        path: "listen-group",
-        element: <ListenGroupAdmin />,
-      },
-      {
-        path: "listen-group/:id",
-        element: <ListenGroupDetailAdmin />,
-      },
-      {
-        path: "listen-lesson/create",
-        element: <ListenLessonCreateAdmin />,
-      },
-      {
-        path: "listen-lesson",
-        element: <ListenLessonUpdateAdmin />,
       },
     ],
   },

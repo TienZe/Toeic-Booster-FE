@@ -1,8 +1,9 @@
-import { Add, FilterAlt, FilterAltOff } from "@mui/icons-material";
+import { Add, FilterAltOff } from "@mui/icons-material";
 import {
   Button,
   CircularProgress,
   Grid2,
+  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -14,12 +15,12 @@ import {
   Typography,
 } from "@mui/material";
 import { Box, Stack } from "@mui/system";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import RoundedInput from "../../../../components/UI/RoundedInput";
 import { useMutation } from "@tanstack/react-query";
 import { createExam, deleteEntireExam } from "../api/examApi";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AdminTableContainer from "../../vocasets/components/AdminTableContainer";
 import ExamSetRow from "./ExamSetRow";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
@@ -29,50 +30,78 @@ import { toast } from "react-toastify";
 import usePaginatedToeicExams from "../../../../hooks/usePaginatedToeicExams";
 import { ToeicExam } from "../../../../types/ToeicExam";
 import { DEFAULT_QUESTION_GROUP } from "../../../../utils/defaultToeicTestQuestionGroups";
+import useToeicCategories from "../../../../hooks/useToeicCategories";
+import BootstrapSelect from "../../../../components/UI/BootstrapSelect";
+import useDebounce from "../../../../hooks/useDebounce";
+import TablePaginationActions from "../../../../components/UI/TablePaginationActions";
 
 interface IFilterExamForm {
   filterName: string;
-  filterStatus: string;
+  filterCategory?: number;
 }
 
 interface NewExamForm {
   name: string;
-  tag: number;
+  category: number;
 }
 
 const DEFAULT_EXAM_FILTER_FORM: IFilterExamForm = {
   filterName: "",
-  filterStatus: "all",
+  filterCategory: undefined,
 };
 
-const EXAM_PAGE_SIZE = 5;
+const EXAM_PAGE_SIZE = 10;
 
 const ExamIndexPage = () => {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [deletedExam, setDeletedExam] = useState<number | null>(null);
   const [openNewModal, setOpenNewModal] = useState(false);
+
+  const newExamForm = useForm<NewExamForm>({
+    defaultValues: {
+      name: "",
+      category: undefined,
+    },
+  });
+
+  const [filterFormData, setFilterFormData] = useState<IFilterExamForm>(
+    DEFAULT_EXAM_FILTER_FORM,
+  );
+
+  const debouncedFilterName = useDebounce(filterFormData.filterName);
 
   const { data: paginatedExams, isLoading: isLoadingExams } =
     usePaginatedToeicExams(
       {},
       {
-        page: 0,
+        page,
         limit: EXAM_PAGE_SIZE,
+        search: debouncedFilterName,
+        filteredCategory: filterFormData.filterCategory,
       },
     );
 
-  const newExamForm = useForm<NewExamForm>({
-    defaultValues: {
-      name: "",
-      tag: 0,
-    },
-  });
+  const { data: categories } = useToeicCategories();
+
+  const categoryItems = useMemo(() => {
+    const items = categories?.map((category) => ({
+      label: category.category,
+      value: category.id,
+    }));
+
+    return [
+      {
+        label: "All",
+        value: undefined,
+      },
+      ...(items || []),
+    ];
+  }, [categories]);
 
   const newExamMutation = useMutation({
     mutationFn: createExam,
     onSuccess: (responseData) => {
-      toast.success("Create exam successfully!");
       navigate(`/admin/exam-set/${responseData.id}`);
     },
     onError: () => {
@@ -100,29 +129,8 @@ const ExamIndexPage = () => {
     }
   };
 
-  const {
-    reset: resetFilterForm,
-    control,
-    handleSubmit: handleFilter,
-  } = useForm<IFilterExamForm>({
-    defaultValues: DEFAULT_EXAM_FILTER_FORM,
-  });
-
-  const handleFilterExam: SubmitHandler<IFilterExamForm> = (data) => {
-    const { filterName } = data;
-    // const filteredData = examSetData?.data.filter(
-    //   (examSet) =>
-    //     (filterName === "" ||
-    //       examSet.name.toLowerCase().includes(filterName as string)) &&
-    //     (filterStatus === "all" || filterStatus === "inactive"),
-    // );
-    // setSearch(filterName);
-    setPage(0);
-  };
-
   const handleResetFilter = () => {
-    resetFilterForm(DEFAULT_EXAM_FILTER_FORM);
-    // setSearch("");
+    setFilterFormData(DEFAULT_EXAM_FILTER_FORM);
     setPage(0);
   };
 
@@ -153,53 +161,53 @@ const ExamIndexPage = () => {
           </Button>
         </Stack>
 
-        <form
-          id="filter-exam-form"
-          style={{ marginBottom: "2rem" }}
-          onSubmit={handleFilter(handleFilterExam)}
+        <Grid2
+          spacing={1}
+          container
+          sx={{ maxWidth: "900px", marginBottom: "2rem" }}
         >
-          <Grid2 spacing={1} container sx={{ maxWidth: "900px" }}>
-            <Grid2 size={5}>
-              <Controller
-                name="filterName"
-                control={control}
-                render={({ field }) => (
-                  <RoundedInput
-                    {...field}
-                    label="Name"
-                    placeholder="Enter the filter name"
-                    padding="16.5px 14px"
-                    borderRadius={4}
-                    gap={0.5}
-                    labelColor="secondary.main"
-                  />
-                )}
-              />
-            </Grid2>
-            <Grid2
-              size={4}
-              display="flex"
-              alignItems="end"
-              sx={{ columnGap: 1 }}
-            >
-              <Button
-                type="submit"
-                variant="contained"
-                startIcon={<FilterAlt />}
-              >
-                Search
-              </Button>
-              <Button
-                onClick={handleResetFilter}
-                type="reset"
-                variant="outlined"
-                startIcon={<FilterAltOff />}
-              >
-                Clear
-              </Button>
-            </Grid2>
+          <Grid2 size={5}>
+            <RoundedInput
+              label="Name"
+              placeholder="Enter the filter name"
+              padding="16.5px 14px"
+              borderRadius={4}
+              gap={0.5}
+              labelColor="secondary.main"
+              value={filterFormData.filterName}
+              onChange={(e) =>
+                setFilterFormData({
+                  ...filterFormData,
+                  filterName: e.target.value,
+                })
+              }
+            />
           </Grid2>
-        </form>
+          <Grid2 size={3}>
+            <BootstrapSelect
+              label="Category"
+              itemLabels={categoryItems.map((item) => item.label)}
+              itemValues={categoryItems.map((item) => item.value)}
+              value={filterFormData.filterCategory}
+              onChange={(e) =>
+                setFilterFormData({
+                  ...filterFormData,
+                  filterCategory: e.target.value as number,
+                })
+              }
+              sx={{ minWidth: "180px" }}
+            />
+          </Grid2>
+          <Grid2 size={4} display="flex" alignItems="end">
+            <Button
+              onClick={handleResetFilter}
+              variant="outlined"
+              startIcon={<FilterAltOff />}
+            >
+              Clear
+            </Button>
+          </Grid2>
+        </Grid2>
 
         {isLoadingExams ? (
           <CustomBackdrop open />
@@ -210,7 +218,7 @@ const ExamIndexPage = () => {
                 <TableRow>
                   <TableCell width="30%">ID</TableCell>
                   <TableCell width="25%">Name</TableCell>
-                  <TableCell width="10%">Tag</TableCell>
+                  <TableCell width="10%">Category</TableCell>
                   <TableCell>Action</TableCell>
                 </TableRow>
               </TableHead>
@@ -229,10 +237,11 @@ const ExamIndexPage = () => {
                     count={paginatedExams?.total || 0}
                     rowsPerPage={EXAM_PAGE_SIZE}
                     rowsPerPageOptions={[EXAM_PAGE_SIZE]}
-                    page={page - 1}
+                    page={page}
                     onPageChange={(_e, newPage) => {
-                      setPage(newPage + 1);
+                      setPage(newPage);
                     }}
+                    ActionsComponent={TablePaginationActions}
                   />
                 </TableRow>
               </TableFooter>
@@ -269,13 +278,19 @@ const ExamIndexPage = () => {
               />
 
               <TextField
-                label="Tag"
+                label="Category"
                 select
-                helperText={newExamForm.formState.errors.tag?.message}
-                error={!!newExamForm.formState.errors.tag}
-                {...newExamForm.register("tag")}
+                helperText={newExamForm.formState.errors.category?.message}
+                error={!!newExamForm.formState.errors.category}
+                {...newExamForm.register("category")}
                 sx={{ width: "100%" }}
-              />
+              >
+                {categories?.map((category) => (
+                  <MenuItem key={category.id} value={category.id}>
+                    {category.category}
+                  </MenuItem>
+                ))}
+              </TextField>
 
               <Stack direction="row" spacing={0.5} justifyContent="end">
                 <Button

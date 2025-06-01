@@ -4,7 +4,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useCallback, useEffect } from "react";
-import { Box, Stack } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
 import CreatePart1 from "./CreatePart1";
 import CreatePart3 from "./CreatePart3";
 import CreatePart2 from "./CreatePart2";
@@ -23,18 +23,25 @@ import RoundedInput from "../../../../components/UI/RoundedInput";
 import BootstrapSelect from "../../../../components/UI/BootstrapSelect";
 import { SaveToeicTestRequest } from "../types/SaveToeicTestRequest";
 import useToeicExam from "../../../../hooks/useToeicExam";
-import { FormProvider, useForm } from "react-hook-form";
+import {
+  Controller,
+  FormProvider,
+  SubmitHandler,
+  useForm,
+  UseFormSetValue,
+} from "react-hook-form";
 import { DEFAULT_QUESTION_GROUP } from "../../../../utils/defaultToeicTestQuestionGroups";
+import useToeicCategories from "../../../../hooks/useToeicCategories";
+import { Save } from "@mui/icons-material";
+import { ToeicExam } from "../../../../types/ToeicExam";
 
 const DEFAULT_FORM_VALUE: SaveToeicTestRequest = {
   name: "",
-  tag: undefined,
+  category: 0,
   questionGroups: DEFAULT_QUESTION_GROUP,
 };
 
 export default function CreateExam() {
-  // const navigate = useNavigate();
-  console.log("PARENT RENDER");
   const { examId } = useParams();
 
   const {
@@ -45,9 +52,19 @@ export default function CreateExam() {
     enabled: !!examId,
   });
 
+  const { data: categories } = useToeicCategories();
+
   const form = useForm<SaveToeicTestRequest>({
     defaultValues: DEFAULT_FORM_VALUE,
   });
+
+  // Customize the setValue passed into FormProvider with default shouldDirty = true
+  const setValue: UseFormSetValue<SaveToeicTestRequest> = useCallback(
+    (name, value, options) => {
+      form.setValue(name, value, { shouldDirty: true, ...options });
+    },
+    [form],
+  );
 
   const {
     mutate: updateExam,
@@ -55,15 +72,11 @@ export default function CreateExam() {
     reset: resetUpdateExam,
   } = useMutation({
     mutationFn: saveExam,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          "toeicExam",
-          {
-            examId: examId,
-          },
-        ],
-      });
+    onSuccess: (updatedToeicExam: ToeicExam) => {
+      queryClient.setQueryData(
+        ["toeicExam", { examId: examId }],
+        () => updatedToeicExam,
+      );
       toast.success("Update exam successfully!");
     },
     onSettled: () => {
@@ -73,6 +86,11 @@ export default function CreateExam() {
 
   const handleUpdateExam = useCallback(
     (groupIndex: number) => {
+      console.log("REQUEST UPDATE GROUP QUESTION", form.formState);
+      if (!form.formState.isDirty) {
+        return;
+      }
+
       const data = form.getValues(`questionGroups.${groupIndex}`);
 
       const request: SaveToeicTestRequest = {
@@ -86,26 +104,33 @@ export default function CreateExam() {
     [updateExam, form, toeicTest],
   );
 
+  const handleUpdateExamInfo: SubmitHandler<SaveToeicTestRequest> = (data) => {
+    const { name, category } = data;
+
+    if (!toeicTest) {
+      toast.error("Exam not found. Something went wrong!");
+      return;
+    }
+
+    updateExam({
+      id: toeicTest.id,
+      name: name!,
+      category: category!,
+    });
+  };
+
   useEffect(() => {
     if (toeicTest && !isUpdatingExam && !isFetchingToeicTest) {
-      form.reset(toeicTest);
+      form.reset({
+        name: toeicTest.name,
+        category: toeicTest.category?.id,
+        questionGroups: toeicTest.questionGroups,
+      });
     }
   }, [toeicTest, form, updateExam, isUpdatingExam, isFetchingToeicTest]);
 
-  useEffect(() => {
-    console.log("FORM CHANGED", form.getValues());
-  }, [form]);
-
-  useEffect(() => {
-    console.log("updateExam CHANGED");
-  }, [updateExam]);
-
-  useEffect(() => {
-    console.log("TOEIC TEST CHANGED", toeicTest);
-  }, [toeicTest]);
-
   return (
-    <FormProvider {...form}>
+    <FormProvider {...form} setValue={setValue}>
       <Box
         sx={{
           padding: 3,
@@ -122,13 +147,48 @@ export default function CreateExam() {
           <GoBackButton />
         </Stack>
 
-        <Stack spacing={1} sx={{ maxWidth: "500px" }}>
-          <RoundedInput label="Name" {...form.register("name")} />
-          <BootstrapSelect
-            label="Tag"
-            itemLabels={["2021", "2022"]}
-            itemValues={[1, 2]}
+        <Stack
+          spacing={1}
+          sx={{ maxWidth: "500px" }}
+          component="form"
+          onSubmit={form.handleSubmit(handleUpdateExamInfo)}
+        >
+          <RoundedInput
+            label="Name"
+            {...form.register("name", { required: "Name is required" })}
+            validationError={form.formState.errors.name?.message}
           />
+          <Controller
+            name="category"
+            control={form.control}
+            rules={{
+              required: "Category is required",
+              validate: (value) => {
+                return value != 0 || "Category is required";
+              },
+            }}
+            render={({ field }) => (
+              <BootstrapSelect
+                label="Category"
+                itemLabels={
+                  categories?.map((category) => category.category) || []
+                }
+                itemValues={categories?.map((category) => category.id) || []}
+                validationError={form.formState.errors.category?.message}
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+
+          <Button
+            variant="contained"
+            type="submit"
+            sx={{ alignSelf: "end" }}
+            startIcon={<Save />}
+          >
+            Update
+          </Button>
         </Stack>
 
         {isLoadingToeicTest ? (

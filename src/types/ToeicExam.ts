@@ -37,6 +37,7 @@ export interface ToeicExam {
 
   tag?: number;
   questionGroups?: QuestionGroup[];
+  category?: ToeicCategory;
 
   commentCount?: number;
   takenStudents?: number;
@@ -83,4 +84,9 @@ export interface ToeicTestAttempt {
 
   toeicTestId: number;
   toeicTest?: ToeicExam;
+}
+
+export interface ToeicCategory {
+  id: number;
+  category: string;
 }

@@ -59,7 +59,7 @@ const CreatePart7: React.FC<CrPartProps> = ({ onUpdate }) => {
           const actualGroupIndex =
             internalGroupIndex + TOEIC_PARTS.Part7.startGroupQuestionIndex;
           const respectiveQuestionGroup = questionGroups[actualGroupIndex];
-          console.log("respectiveQuestionGroup", respectiveQuestionGroup);
+          // console.log("respectiveQuestionGroup", respectiveQuestionGroup);
 
           const questionNumbers = respectiveQuestionGroup.questions.map(
             (question) => question.questionNumber,

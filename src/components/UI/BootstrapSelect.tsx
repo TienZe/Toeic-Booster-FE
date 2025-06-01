@@ -10,7 +10,7 @@ import { forwardRef } from "react";
 
 interface BootstrapSelectProps {
   itemLabels: string[];
-  itemValues: Array<string | number>;
+  itemValues: Array<string | number | undefined>;
   gap?: number;
   requiredSign?: boolean;
   validationError?: string;
@@ -45,6 +45,12 @@ const BootstrapSelect = forwardRef<
       <Select
         {...otherProps}
         inputRef={ref}
+        displayEmpty // the renderValue will still be called event if the value is undefined,
+        // so we have change to show meaningful label
+        renderValue={(value) => {
+          const labelIndex = itemValues.indexOf(value as string | number);
+          return itemLabels[labelIndex];
+        }}
         size="small"
         sx={{
           ...sx,

@@ -9,13 +9,8 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  // fetchAllExam,
-  fetchListTags,
-} from "../../../admin/new_exams/api/examApi";
 import DotLoadingProgress from "../../../../components/UI/DotLoadingProgress";
 import ExamCard from "../../../home/components/ExamCard";
-import { Tag } from "../../types/Tags";
 import { useSearchParams } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
 import { debounce } from "lodash";
@@ -47,12 +42,10 @@ const ExamsLibraryPage = () => {
       },
     );
 
-  const { data: tags, isPending: isPendingTags } = useQuery({
-    queryKey: ["FetchListTags"],
-    queryFn: () => fetchListTags(),
-  });
+  const tags = ["2021", "2022"];
+  const isPendingTags = false;
 
-  const handleTagClick = (tag: Tag) => {
+  const handleTagClick = (tag: string) => {
     setSelectedTag(tag);
     setSearchParams(tag.id !== "" ? { tag_id: tag.id } : {});
     setPage(1);
@@ -87,18 +80,18 @@ const ExamsLibraryPage = () => {
               label={"All"}
               clickable
               color={selectedTag === null ? "primary" : "default"}
-              onClick={() => handleTagClick({ id: "", name: "All" })}
+              // onClick={() => handleTagClick({ id: "", name: "All" })}
               sx={{ padding: 0.9, marginRight: 0.75 }}
             />
             {tags?.map((tag) => {
               return (
                 <Chip
-                  key={tag.id}
-                  label={tag.name}
+                  key={"1"}
+                  label={"2021"}
                   clickable
-                  color={
-                    selectedTag?.name.includes(tag.name) ? "primary" : "default"
-                  }
+                  // color={
+                  //   selectedTag?.name.includes(tag.name) ? "primary" : "default"
+                  // }
                   onClick={() => handleTagClick(tag)}
                   sx={{ padding: 0.9, marginRight: 0.75 }}
                 />

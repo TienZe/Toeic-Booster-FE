@@ -97,11 +97,12 @@ interface Part1FormProps {
 const Part1Form: React.FC<Part1FormProps> = ({ groupIndex, onClose }) => {
   const form = useFormContext<SaveToeicTestRequest>();
 
+  // useWatch for isolated re-render at this component level, don't effect the parent component that provide the form context
   const questionGroup = useWatch<SaveToeicTestRequest>({
     name: `questionGroups.${groupIndex}`,
   }) as QuestionGroup;
 
-  console.log("INSIDE FORM", questionGroup);
+  // console.log("INSIDE FORM", questionGroup);
 
   const handleAudioChange = async (
     groupIndex: number,
@@ -153,29 +154,6 @@ const Part1Form: React.FC<Part1FormProps> = ({ groupIndex, onClose }) => {
             order: 0,
           },
         ]);
-
-        // const currentImageOrder = Math.max(
-        //   ...groupMedias
-        //     .filter((media) => media.fileType == "image")
-        //     .map((media) => media.order || -1),
-        //   0,
-        // );
-
-        // setValue(
-        //   `questionGroups.${groupIndex}.medias`,
-        //   [
-        //     ...groupMedias,
-        //     {
-        //       id: 0,
-        //       fileUrl: imageBase64Url,
-        //       fileType: "image",
-        //       order: currentImageOrder + 1,
-        //     },
-        //   ],
-        //   {
-        //     shouldDirty: true,
-        //   },
-        // );
       }
     }
   };
@@ -323,12 +301,14 @@ const Part1Form: React.FC<Part1FormProps> = ({ groupIndex, onClose }) => {
                           question.correctAnswer ===
                           answerIndexToLabel(answerIndex)
                         }
-                        onChange={(_, checked) =>
-                          form.setValue(
-                            `questionGroups.${groupIndex}.questions.${questionIndex}.correctAnswer`,
-                            checked ? answerIndexToLabel(answerIndex) : null,
-                          )
-                        }
+                        onChange={(_, checked) => {
+                          if (checked) {
+                            form.setValue(
+                              `questionGroups.${groupIndex}.questions.${questionIndex}.correctAnswer`,
+                              answerIndexToLabel(answerIndex),
+                            );
+                          }
+                        }}
                       />
                     }
                     label=""
