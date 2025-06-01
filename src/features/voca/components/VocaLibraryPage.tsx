@@ -1,6 +1,5 @@
 import {
   Box,
-  Pagination,
   Typography,
   Paper,
   InputBase,
@@ -8,8 +7,9 @@ import {
   Divider,
   Stack,
   Grid2,
+  Button,
 } from "@mui/material";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import TranslateIcon from "@mui/icons-material/Translate";
 
@@ -22,7 +22,9 @@ import Link from "../../../components/UI/Link";
 import useCollectionTags from "../../../hooks/useCollectionTags";
 import DefaultVocaSetImg from "../../../assets/images/voca/default.png";
 import useRecommendedVocaSets from "../../../hooks/useRecommendedVocaSets";
-import { Controller, useForm } from "react-hook-form";
+import CustomBackdrop from "../../../components/UI/CustomBackdrop";
+import useDebounce from "../../../hooks/useDebounce";
+import VocaSetModel from "../../../types/VocaSetModel";
 
 const ratingOptions = [
   { value: 4.5, label: "4.5 & up", count: 10000 },
@@ -36,44 +38,54 @@ interface FilterCollectionFormData {
   filterCategories?: string[];
 }
 
+const VOCA_SET_PAGE_SIZE = 10;
+
 const VocaLibraryPage: React.FC = () => {
   const [page, setPage] = useState(0);
 
   const [selectedRating, setSelectedRating] = useState<number | null>(4.5);
+  const [displayedVocaSets, setDisplayedVocaSets] = useState<VocaSetModel[]>(
+    [],
+  );
 
-  const [actualFilterInput, setActualFilterInput] =
-    useState<FilterCollectionFormData>({
-      filterTitle: "",
-      filterCategories: [],
-    }); // use for triggering re-fetching the voca sets
+  const [filterInput, setFilterInput] = useState<FilterCollectionFormData>({
+    filterTitle: "",
+    filterCategories: [],
+  }); // use for triggering re-fetching the voca sets
 
-  const filterCollectionForm = useForm<FilterCollectionFormData>({
-    defaultValues: {
-      filterTitle: "",
-      filterCategories: [],
-    },
+  const resetPage = useCallback(() => {
+    setPage(0);
+    setDisplayedVocaSets([]);
+  }, []);
+
+  const debouncedFilterTitle = useDebounce(filterInput.filterTitle, {
+    callbackFn: resetPage, // reset page when filter title changes
   });
 
-  const { data: paginatedVocaSets, isLoading: isLoadingVocaSets } =
+  const { data: vocaSets, isLoading: isLoadingVocaSets } =
     useRecommendedVocaSets(
       {},
       {
-        filterTitle: actualFilterInput.filterTitle,
-        filterCategories: actualFilterInput.filterCategories,
+        filterTitle: debouncedFilterTitle,
+        filterCategories: filterInput.filterCategories,
         page,
-        limit: 10,
+        limit: VOCA_SET_PAGE_SIZE,
       },
     );
 
-  const { data: collectionTags } = useCollectionTags();
+  const hasMoreVocaSets = vocaSets?.length == VOCA_SET_PAGE_SIZE;
 
-  const handleSubmitFitler = (data: FilterCollectionFormData) => {
-    setActualFilterInput({ ...data });
-    setPage(0);
-  };
+  useEffect(() => {
+    if (vocaSets) {
+      setDisplayedVocaSets((prev) => [...prev, ...vocaSets]);
+    }
+  }, [vocaSets]);
+
+  const { data: collectionTags } = useCollectionTags();
 
   return (
     <Content>
+      {isLoadingVocaSets && <CustomBackdrop open={true} />}
       <Box sx={{ maxWidth: "1200px", mx: "auto", py: 3, px: 2 }}>
         <Box display="flex" flexDirection="column" alignItems="center">
           <Typography variant="h4" fontWeight={500} gutterBottom>
@@ -83,7 +95,6 @@ const VocaLibraryPage: React.FC = () => {
             Explore our library of over 15,000 curated lists.
           </Typography>
           <Paper
-            component="form"
             sx={{
               p: "2px 16px",
               display: "flex",
@@ -94,12 +105,17 @@ const VocaLibraryPage: React.FC = () => {
               backgroundColor: "#f6f8fa",
             }}
             elevation={0}
-            onSubmit={filterCollectionForm.handleSubmit(handleSubmitFitler)}
           >
             <InputBase
               sx={{ ml: 1, flex: 1 }}
               placeholder="Search vocabulary lists"
-              {...filterCollectionForm.register("filterTitle")}
+              value={filterInput.filterTitle}
+              onChange={(e) =>
+                setFilterInput({
+                  ...filterInput,
+                  filterTitle: e.target.value,
+                })
+              }
             />
             <IconButton type="submit" sx={{ p: "10px", color: "primary.main" }}>
               <SearchIcon />
@@ -123,34 +139,35 @@ const VocaLibraryPage: React.FC = () => {
           {/* Filter */}
 
           <Stack direction="row" gap={1} mt={1}>
-            <Controller
-              name="filterCategories"
-              control={filterCollectionForm.control}
-              render={({ field }) => (
-                <MultipleSelectCheckmarks
-                  label="Categories"
-                  itemLabels={collectionTags?.map((tag) => tag.tagName) || []}
-                  itemValues={collectionTags?.map((tag) => tag.tagName) || []}
-                  menuProps={{
-                    anchorOrigin: {
-                      vertical: "bottom",
-                      horizontal: "left",
-                    },
-                    transformOrigin: {
-                      vertical: "top",
-                      horizontal: "left",
-                    },
-                  }}
-                  menuWidth="240px"
-                  sx={{
-                    borderRadius: "20px",
-                    "& .MuiSelect-select": { lineHeight: "24px" },
-                  }}
-                  labelType="inside"
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              )}
+            <MultipleSelectCheckmarks
+              label="Categories"
+              itemLabels={collectionTags?.map((tag) => tag.tagName) || []}
+              itemValues={collectionTags?.map((tag) => tag.tagName) || []}
+              menuProps={{
+                anchorOrigin: {
+                  vertical: "bottom",
+                  horizontal: "left",
+                },
+                transformOrigin: {
+                  vertical: "top",
+                  horizontal: "left",
+                },
+              }}
+              menuWidth="240px"
+              sx={{
+                borderRadius: "20px",
+                "& .MuiSelect-select": { lineHeight: "24px" },
+              }}
+              labelType="inside"
+              value={filterInput.filterCategories}
+              onChange={(value) => {
+                setFilterInput({
+                  ...filterInput,
+                  filterCategories: value as string[],
+                });
+
+                resetPage();
+              }}
             />
 
             <RatingFilterDropdown
@@ -163,7 +180,7 @@ const VocaLibraryPage: React.FC = () => {
         </Box>
 
         <Grid2 container rowGap={1.5} sx={{ marginTop: 3 }}>
-          {paginatedVocaSets?.items.map((vocaSet) => (
+          {displayedVocaSets?.map((vocaSet) => (
             <Grid2 key={vocaSet.id} size={6}>
               <Link to={`${vocaSet.id}/lessons`} style={{ display: "flex" }}>
                 <CollectionCard
@@ -183,20 +200,28 @@ const VocaLibraryPage: React.FC = () => {
           </Box>
         )}
 
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: 2,
-          }}
-        >
-          <Pagination
-            count={paginatedVocaSets?.totalPages || 0}
-            page={page + 1}
-            onChange={(_, value) => setPage(value - 1)}
-            color="primary"
-          />
-        </Box>
+        {hasMoreVocaSets && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: 2,
+            }}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                backgroundColor: "white",
+                color: "primary.main",
+                borderRadius: "20px",
+              }}
+              onClick={() => setPage(page + 1)}
+            >
+              Load more
+            </Button>
+          </Box>
+        )}
       </Box>
     </Content>
   );

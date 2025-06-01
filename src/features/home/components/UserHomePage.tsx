@@ -46,7 +46,6 @@ import { getVocaSetsUserMightAlsoLike } from "../../shared-apis/vocaset-api";
 import PortraitCollectionCard from "../../../components/PortraitCollectionCard";
 import { useAttempts } from "../../../hooks/useAttempts";
 import { secondToHHMMSS } from "../../../utils/helper";
-import { getDisplayedPart } from "../../../utils/toeicExamHelper";
 import { getMostTakenTests } from "../api/api";
 
 type UserTargetFormData = {
