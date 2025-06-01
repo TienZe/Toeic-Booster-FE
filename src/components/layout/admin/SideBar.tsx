@@ -1,7 +1,6 @@
 import { Box, useTheme } from "@mui/material";
 import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import { useNavigate, useLocation } from "react-router-dom";
-import Logo from "../../../assets/logos/logo.svg";
 import LogoMini from "../../../assets/logos/logomini.png";
 import Link from "../../UI/Link";
 import { useSelector } from "react-redux";
@@ -46,7 +45,7 @@ const SideBar = (props: { collapsed: boolean }) => {
           {collapsed ? (
             <img src={LogoMini} style={{ height: "30px", width: "auto" }} />
           ) : (
-            <img src={Logo} />
+            <img src="/logo/logo.png" style={{ maxWidth: "140px" }} />
           )}
         </Link>
       </Box>

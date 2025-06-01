@@ -1,5 +1,3 @@
-"use client";
-
 import type React from "react";
 import {
   Box,
@@ -109,7 +107,7 @@ const Footer: React.FC = () => {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                ENGLASH
+                TOEIC BOOSTER
               </Typography>
               <Typography
                 variant="body1"
@@ -346,7 +344,7 @@ const Footer: React.FC = () => {
                 color: "white",
               }}
             >
-              © 2025 ENGLASH. All rights reserved.
+              © 2025 TOEIC BOOSTER. All rights reserved.
             </Typography>
             <Stack
               direction="row"

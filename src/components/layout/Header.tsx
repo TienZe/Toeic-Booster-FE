@@ -25,7 +25,6 @@ import {
 } from "@mui/icons-material";
 
 import CustomNavLink from "../UI/NavLink";
-import Logo from "../../assets/logos/logo.svg";
 import { AppDispatch, RootState } from "../../stores";
 import DefaultAvatar from "../../assets/avatars/default.svg";
 import { authActions, AuthState } from "../../stores/authSlice";
@@ -70,7 +69,7 @@ const Header: React.FC = () => {
       >
         <Stack direction="row" spacing={2}>
           <Link to="/" style={{ display: "flex", alignItems: "center" }}>
-            <img src={Logo} />
+            <img src="/logo/logo.png" style={{ maxWidth: "140px" }} />
           </Link>
           <Stack direction="row">
             <NavLink to="/">
