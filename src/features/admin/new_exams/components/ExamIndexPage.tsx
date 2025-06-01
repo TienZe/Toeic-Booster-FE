@@ -18,9 +18,9 @@ import { Box, Stack } from "@mui/system";
 import { SubmitHandler, useForm } from "react-hook-form";
 import RoundedInput from "../../../../components/UI/RoundedInput";
 import { useMutation } from "@tanstack/react-query";
-import { createExam, deleteEntireExam } from "../api/examApi";
+import { createExam, deleteExam } from "../api/examApi";
 import { useNavigate } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import AdminTableContainer from "../../vocasets/components/AdminTableContainer";
 import ExamSetRow from "./ExamSetRow";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
@@ -55,7 +55,7 @@ const EXAM_PAGE_SIZE = 10;
 const ExamIndexPage = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
-  const [deletedExam, setDeletedExam] = useState<number | null>(null);
+  const [deletedExamId, setDeletedExamId] = useState<number | null>(null);
   const [openNewModal, setOpenNewModal] = useState(false);
 
   const newExamForm = useForm<NewExamForm>({
@@ -69,7 +69,13 @@ const ExamIndexPage = () => {
     DEFAULT_EXAM_FILTER_FORM,
   );
 
-  const debouncedFilterName = useDebounce(filterFormData.filterName);
+  const resetPage = useCallback(() => {
+    setPage(0);
+  }, []);
+
+  const debouncedFilterName = useDebounce(filterFormData.filterName, {
+    callbackFn: resetPage,
+  });
 
   const { data: paginatedExams, isLoading: isLoadingExams } =
     usePaginatedToeicExams(
@@ -111,21 +117,21 @@ const ExamIndexPage = () => {
   });
 
   const deleteExamMutation = useMutation({
-    mutationFn: deleteEntireExam,
+    mutationFn: deleteExam,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["fetchExam"] });
+      queryClient.invalidateQueries({ queryKey: ["toeicExams"] });
       toast.success("Delete exam successfully!");
     },
     onSettled: () => {
       // reset state
-      setDeletedExam(null);
+      setDeletedExamId(null);
       deleteExamMutation.reset();
     },
   });
 
   const handleDeleteExam = () => {
-    if (deletedExam) {
-      deleteExamMutation.mutate(deletedExam);
+    if (deletedExamId) {
+      deleteExamMutation.mutate(deletedExamId);
     }
   };
 
@@ -209,45 +215,43 @@ const ExamIndexPage = () => {
           </Grid2>
         </Grid2>
 
-        {isLoadingExams ? (
-          <CustomBackdrop open />
-        ) : (
-          <AdminTableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell width="30%">ID</TableCell>
-                  <TableCell width="25%">Name</TableCell>
-                  <TableCell width="10%">Category</TableCell>
-                  <TableCell>Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedExams?.items.map((exam: ToeicExam) => (
-                  <ExamSetRow
-                    key={exam.id}
-                    examSet={exam}
-                    onDelete={() => setDeletedExam(exam.id)}
-                  />
-                ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TablePagination
-                    count={paginatedExams?.total || 0}
-                    rowsPerPage={EXAM_PAGE_SIZE}
-                    rowsPerPageOptions={[EXAM_PAGE_SIZE]}
-                    page={page}
-                    onPageChange={(_e, newPage) => {
-                      setPage(newPage);
-                    }}
-                    ActionsComponent={TablePaginationActions}
-                  />
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </AdminTableContainer>
-        )}
+        {isLoadingExams && <CustomBackdrop open />}
+
+        <AdminTableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell width="30%">ID</TableCell>
+                <TableCell width="25%">Name</TableCell>
+                <TableCell width="10%">Category</TableCell>
+                <TableCell>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedExams?.items.map((exam: ToeicExam) => (
+                <ExamSetRow
+                  key={exam.id}
+                  examSet={exam}
+                  onDelete={() => setDeletedExamId(exam.id)}
+                />
+              ))}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  count={paginatedExams?.total || 0}
+                  rowsPerPage={EXAM_PAGE_SIZE}
+                  rowsPerPageOptions={[EXAM_PAGE_SIZE]}
+                  page={page}
+                  onPageChange={(_e, newPage) => {
+                    setPage(newPage);
+                  }}
+                  ActionsComponent={TablePaginationActions}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </AdminTableContainer>
       </Box>
 
       {/*  New exam modal */}
@@ -318,27 +322,32 @@ const ExamIndexPage = () => {
       </CustomModal>
 
       {/* Delete modal */}
-      <CustomModal open={!!deletedExam} onClose={() => setDeletedExam(null)}>
+      <CustomModal
+        open={!!deletedExamId}
+        onClose={() => setDeletedExamId(null)}
+      >
         <Box sx={{ padding: 3 }}>
           <Typography variant="h6" sx={{ marginBottom: 1 }}>
             Do you want to delete this exam?
           </Typography>
           <Stack direction="row" spacing={0.5} justifyContent="flex-end">
             <Button
+              variant="contained"
+              onClick={() => setDeletedExamId(null)}
+              sx={{ boxShadow: "none" }}
+            >
+              Cancel
+            </Button>
+            <Button
               variant="outlined"
-              color="error"
               onClick={handleDeleteExam}
               sx={{ width: "80px" }}
-              disabled={deleteExamMutation.isPending}
             >
               {deleteExamMutation.isPending ? (
-                <CircularProgress size={20} color="error" />
+                <CircularProgress size={20} />
               ) : (
                 "Delete"
               )}
-            </Button>
-            <Button variant="contained" onClick={() => setDeletedExam(null)}>
-              Cancel
             </Button>
           </Stack>
         </Box>
