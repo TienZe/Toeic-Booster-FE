@@ -68,6 +68,7 @@ const PartResultIndex = () => {
       assistantQuestionActions.setQuestion({
         questionId,
         attemptId,
+        showChatBox: true,
       }),
     );
   };
@@ -89,27 +90,51 @@ const PartResultIndex = () => {
         );
       case "part2":
         return (
-          <Part2 questionGroups={part2QuestionGroups.part2} mode={"review"} />
+          <Part2
+            questionGroups={part2QuestionGroups.part2}
+            mode={"review"}
+            onAssistant={handleAssistQuestion}
+          />
         );
       case "part3":
         return (
-          <Part3 questionGroups={part2QuestionGroups.part3} mode={"review"} />
+          <Part3
+            questionGroups={part2QuestionGroups.part3}
+            mode={"review"}
+            onAssistant={handleAssistQuestion}
+          />
         );
       case "part4":
         return (
-          <Part4 questionGroups={part2QuestionGroups.part4} mode={"review"} />
+          <Part4
+            questionGroups={part2QuestionGroups.part4}
+            mode={"review"}
+            onAssistant={handleAssistQuestion}
+          />
         );
       case "part5":
         return (
-          <Part5 questionGroups={part2QuestionGroups.part5} mode={"review"} />
+          <Part5
+            questionGroups={part2QuestionGroups.part5}
+            mode={"review"}
+            onAssistant={handleAssistQuestion}
+          />
         );
       case "part6":
         return (
-          <Part6 questionGroups={part2QuestionGroups.part6} mode={"review"} />
+          <Part6
+            questionGroups={part2QuestionGroups.part6}
+            mode={"review"}
+            onAssistant={handleAssistQuestion}
+          />
         );
       case "part7":
         return (
-          <Part7 questionGroups={part2QuestionGroups.part7} mode={"review"} />
+          <Part7
+            questionGroups={part2QuestionGroups.part7}
+            mode={"review"}
+            onAssistant={handleAssistQuestion}
+          />
         );
       default:
         return <div>Cannot find this part</div>;

@@ -26,10 +26,11 @@ import {
   BotMessageSquare,
 } from "lucide-react";
 import { chat, getChatHistory } from "../../api/chatbot";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../stores";
 import ReactMarkdown from "react-markdown";
 import { useQuery } from "@tanstack/react-query";
+import { assistantQuestionActions } from "../../../../stores/assistantQuestionSlice";
 
 interface Message {
   id: string;
@@ -45,15 +46,20 @@ const introductionMessage: Message = {
 };
 
 export default function TOEICChatbot() {
-  const [showChatbot, setShowChatbot] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { questionId, attemptId } = useSelector(
+  const { questionId, attemptId, showChatBox } = useSelector(
     (state: RootState) => state.assistantQuestion,
   );
+
+  const dispatch = useDispatch();
+
+  const setShowChatBox = (show: boolean) => {
+    dispatch(assistantQuestionActions.setShowChatBox(show));
+  };
 
   const { data: chatHistory } = useQuery({
     queryKey: ["chat-history", { questionId, attemptId }],
@@ -64,10 +70,6 @@ export default function TOEICChatbot() {
       }),
     enabled: !!questionId && !!attemptId,
   });
-
-  useEffect(() => {
-    setShowChatbot(true);
-  }, [questionId, attemptId]);
 
   useEffect(() => {
     if (chatHistory) {
@@ -152,7 +154,7 @@ export default function TOEICChatbot() {
       }}
     >
       {/* Floating Chat Button */}
-      {!showChatbot && (
+      {!showChatBox && (
         <Box
           sx={{
             position: "fixed",
@@ -162,7 +164,7 @@ export default function TOEICChatbot() {
           }}
         >
           <Button
-            onClick={() => setShowChatbot(true)}
+            onClick={() => setShowChatBox(true)}
             variant="contained"
             sx={{
               width: 64,
@@ -184,7 +186,7 @@ export default function TOEICChatbot() {
       )}
 
       {/* Modern Chatbot Interface */}
-      <Fade in={showChatbot} timeout={300}>
+      <Fade in={showChatBox} timeout={300}>
         <Box
           sx={{
             position: "fixed",
@@ -260,7 +262,7 @@ export default function TOEICChatbot() {
                 </IconButton>
                 <IconButton
                   size="small"
-                  onClick={() => setShowChatbot(false)}
+                  onClick={() => setShowChatBox(false)}
                   sx={{
                     color: "white",
                     opacity: 0.8,
@@ -483,8 +485,8 @@ export default function TOEICChatbot() {
 
       {/* Backdrop */}
       <Backdrop
-        open={showChatbot}
-        onClick={() => setShowChatbot(false)}
+        open={showChatBox}
+        onClick={() => setShowChatBox(false)}
         sx={{ zIndex: 999, backgroundColor: "rgba(0, 0, 0, 0.1)" }}
       />
     </Box>

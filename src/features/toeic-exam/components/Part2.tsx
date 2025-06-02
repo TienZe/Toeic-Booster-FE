@@ -13,32 +13,18 @@ import parse from "html-react-parser";
 import useScrollToTop from "../hooks/useScrollToTop";
 import { useQuestionContext } from "./QuestionProvider";
 import { setScript } from "../../../stores/selectedScript";
-import { QuestionGroup } from "../../../types/ToeicExam";
 import { ABC, answerIndexToLabel } from "../../../utils/toeicExamHelper";
 import Item from "./Item";
 import { ClosedCaptionRounded } from "@mui/icons-material";
+import { PartProps } from "../types/PartProps";
+import QuestionNumber from "./Exams/QuestionNumber";
 
-interface Part2Props {
-  questionGroups?: QuestionGroup[];
-
-  mode?: string;
-  handleNotedQuestion?: (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
-  ) => void;
-  isNotedQuestion?: (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
-  ) => boolean;
-}
-
-const Part2: React.FC<Part2Props> = ({
+const Part2: React.FC<PartProps> = ({
   questionGroups,
   mode,
   handleNotedQuestion = () => {},
   isNotedQuestion = () => false,
+  onAssistant,
 }) => {
   const { questionRefs } = useQuestionContext();
   const PART = 2;
@@ -231,7 +217,19 @@ const Part2: React.FC<Part2Props> = ({
                 );
                 return (
                   <Stack spacing={1} marginTop={1}>
-                    <Box
+                    <QuestionNumber
+                      questionNumber={question.questionNumber}
+                      questionId={question.id}
+                      isNoted={isNoted}
+                      isCorrectQuestion={isCorrectQuestion ?? false}
+                      onAssistant={onAssistant}
+                      onClickQuestionNumber={() =>
+                        handleNotedQuestion(
+                          PART,
+                          groupIndexInPart,
+                          questionIndex,
+                        )
+                      }
                       ref={(el) => {
                         if (el) {
                           if (!questionRefs.current[PART]) {
@@ -245,36 +243,7 @@ const Part2: React.FC<Part2Props> = ({
                           ] = el as HTMLDivElement;
                         }
                       }}
-                      sx={{
-                        background: isNoted
-                          ? "orange"
-                          : isCorrectQuestion === true
-                            ? "#00B035"
-                            : isCorrectQuestion === false
-                              ? "#E20D2C"
-                              : "var(--color-primary-main)",
-                        color: "white",
-                        fontWeight: "400",
-                        borderRadius: "50%",
-                        padding: "15px",
-                        width: "35px",
-                        height: "35px",
-                        marginBottom: "15px",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        cursor: "pointer",
-                      }}
-                      onClick={() =>
-                        handleNotedQuestion(
-                          PART,
-                          groupIndexInPart,
-                          questionIndex,
-                        )
-                      }
-                    >
-                      {question.questionNumber}
-                    </Box>
+                    />
                     {ABC.map((answerLabel) => question[answerLabel]).map(
                       (_, answerIndex) => {
                         const answerLabel = answerIndexToLabel(answerIndex);

@@ -14,30 +14,17 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import InfoIcon from "@mui/icons-material/Info";
 import useScrollToTop from "../hooks/useScrollToTop";
 import { useQuestionContext } from "./QuestionProvider";
-import { QuestionGroup } from "../../../types/ToeicExam";
 import { ABCD, answerIndexToLabel } from "../../../utils/toeicExamHelper";
 import Item from "./Item";
+import { PartProps } from "../types/PartProps";
+import QuestionNumber from "./Exams/QuestionNumber";
 
-interface Part6Props {
-  questionGroups: QuestionGroup[];
-  mode?: string;
-  handleNotedQuestion?: (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
-  ) => void;
-  isNotedQuestion?: (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
-  ) => boolean;
-}
-
-const Part6: React.FC<Part6Props> = ({
+const Part6: React.FC<PartProps> = ({
   questionGroups,
   mode,
   handleNotedQuestion = () => {},
   isNotedQuestion = () => false,
+  onAssistant,
 }) => {
   const { questionRefs } = useQuestionContext();
   const PART = 6;
@@ -130,7 +117,7 @@ const Part6: React.FC<Part6Props> = ({
       </Typography>
 
       {/* Group Questions */}
-      {questionGroups.map((group, groupIndexInPart) => {
+      {questionGroups?.map((group, groupIndexInPart) => {
         const isDisabled = mode === "review";
         const isExplain = mode === "review";
         const isScriptExpanded = checkScriptExpanded(PART, groupIndexInPart);
@@ -215,8 +202,19 @@ const Part6: React.FC<Part6Props> = ({
                         padding: "20px",
                       }}
                     >
-                      <Box
-                        key={`question-${groupIndexInPart}-${questionIndex}`}
+                      <QuestionNumber
+                        questionNumber={question.questionNumber}
+                        questionId={question.id}
+                        isNoted={isNoted}
+                        isCorrectQuestion={isCorrectQuestion ?? false}
+                        onAssistant={onAssistant}
+                        onClickQuestionNumber={() =>
+                          handleNotedQuestion(
+                            PART,
+                            groupIndexInPart,
+                            questionIndex,
+                          )
+                        }
                         ref={(el) => {
                           if (el) {
                             if (!questionRefs.current[PART]) {
@@ -230,52 +228,8 @@ const Part6: React.FC<Part6Props> = ({
                             ] = el as HTMLDivElement;
                           }
                         }}
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "15px",
-                          marginBottom: "15px",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            background: isNoted
-                              ? "orange"
-                              : isCorrectQuestion === true
-                                ? "#00B035"
-                                : isCorrectQuestion === false
-                                  ? "#E20D2C"
-                                  : "var(--color-primary-main)",
-                            color: "white",
-                            fontWeight: "400",
-                            borderRadius: "50%",
-                            padding: "15px",
-                            width: "35px",
-                            height: "35px",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            cursor: "pointer",
-                          }}
-                          onClick={() =>
-                            handleNotedQuestion(
-                              PART,
-                              groupIndexInPart,
-                              questionIndex,
-                            )
-                          }
-                        >
-                          {question.questionNumber}
-                        </Box>
-                        <Typography
-                          sx={{
-                            fontWeight: "600",
-                            fontSize: "18px",
-                          }}
-                        >
-                          {question.question}
-                        </Typography>
-                      </Box>
+                      />
+
                       <Box sx={{ width: "100%" }}>
                         <Stack spacing={1}>
                           {ABCD.map((answerLabel) => question[answerLabel]).map(

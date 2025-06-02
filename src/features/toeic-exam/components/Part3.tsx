@@ -13,31 +13,18 @@ import parse from "html-react-parser";
 import { setScript } from "../../../stores/selectedScript";
 import useScrollToTop from "../hooks/useScrollToTop";
 import { useQuestionContext } from "./QuestionProvider";
-import { QuestionGroup } from "../../../types/ToeicExam";
 import { ABCD, answerIndexToLabel } from "../../../utils/toeicExamHelper";
 import Item from "./Item";
 import { ClosedCaptionRounded } from "@mui/icons-material";
+import { PartProps } from "../types/PartProps";
+import QuestionNumber from "./Exams/QuestionNumber";
 
-interface Part3Props {
-  questionGroups?: QuestionGroup[];
-  mode?: string;
-  handleNotedQuestion?: (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
-  ) => void;
-  isNotedQuestion?: (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
-  ) => boolean;
-}
-
-const Part3: React.FC<Part3Props> = ({
+const Part3: React.FC<PartProps> = ({
   questionGroups,
   mode,
   handleNotedQuestion = () => {},
   isNotedQuestion = () => false,
+  onAssistant,
 }) => {
   const { questionRefs } = useQuestionContext();
   const PART = 3;
@@ -245,57 +232,34 @@ const Part3: React.FC<Part3Props> = ({
                   );
                   return (
                     <Stack spacing={1} marginTop={1}>
-                      <Stack direction="row" gap={1} alignItems="center">
-                        <Box
-                          ref={(el) => {
-                            if (el) {
-                              if (!questionRefs.current[PART]) {
-                                questionRefs.current[PART] = [];
-                              }
-                              if (
-                                !questionRefs.current[PART][groupIndexInPart]
-                              ) {
-                                questionRefs.current[PART][groupIndexInPart] =
-                                  [];
-                              }
-                              questionRefs.current[PART][groupIndexInPart][
-                                questionIndex
-                              ] = el as HTMLDivElement;
+                      <QuestionNumber
+                        questionNumber={question.questionNumber}
+                        questionId={question.id}
+                        isNoted={isNoted}
+                        isCorrectQuestion={isCorrectQuestion ?? false}
+                        onAssistant={onAssistant}
+                        onClickQuestionNumber={() =>
+                          handleNotedQuestion(
+                            PART,
+                            groupIndexInPart,
+                            questionIndex,
+                          )
+                        }
+                        ref={(el) => {
+                          if (el) {
+                            if (!questionRefs.current[PART]) {
+                              questionRefs.current[PART] = [];
                             }
-                          }}
-                          sx={{
-                            background: isNoted
-                              ? "orange"
-                              : isCorrectQuestion === true
-                                ? "#00B035"
-                                : isCorrectQuestion === false
-                                  ? "#E20D2C"
-                                  : "var(--color-primary-main)",
-                            color: "white",
-                            fontWeight: "400",
-                            borderRadius: "50%",
-                            padding: "15px",
-                            width: "35px",
-                            height: "35px",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            cursor: "pointer",
-                          }}
-                          onClick={() =>
-                            handleNotedQuestion(
-                              PART,
-                              groupIndexInPart,
-                              questionIndex,
-                            )
+                            if (!questionRefs.current[PART][groupIndexInPart]) {
+                              questionRefs.current[PART][groupIndexInPart] = [];
+                            }
+                            questionRefs.current[PART][groupIndexInPart][
+                              questionIndex
+                            ] = el as HTMLDivElement;
                           }
-                        >
-                          {question.questionNumber}
-                        </Box>
-                        <Typography sx={{ fontWeight: "500" }}>
-                          {question.question}
-                        </Typography>
-                      </Stack>
+                        }}
+                        question={question.question}
+                      />
                       {ABCD.map((answerLabel) => question[answerLabel]).map(
                         (answer, answerIndex) => {
                           const answerLabel = answerIndexToLabel(answerIndex);

@@ -1,4 +1,4 @@
-import { Box, Divider, Paper, Stack, styled, Typography } from "@mui/material";
+import { Box, Divider, Stack, Typography } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -13,87 +13,17 @@ import parse from "html-react-parser";
 import { setScript } from "../../../stores/selectedScript";
 import useScrollToTop from "../hooks/useScrollToTop";
 import { useQuestionContext } from "./QuestionProvider";
-import { QuestionGroup } from "../../../types/ToeicExam";
 import { ABCD, answerIndexToLabel } from "../../../utils/toeicExamHelper";
+import QuestionNumber from "./Exams/QuestionNumber";
+import Item from "./Item";
+import { PartProps } from "../types/PartProps";
 
-interface Part4Props {
-  questionGroups: QuestionGroup[];
-  mode?: string;
-  handleNotedQuestion?: (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
-  ) => void;
-  isNotedQuestion?: (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
-  ) => boolean;
-}
-
-const Item = styled(Paper)(
-  ({
-    isActive,
-    isDisabled,
-    isCorrect,
-    isIncorrect,
-    isChosen,
-    isExplain,
-  }: {
-    isActive?: boolean;
-    isDisabled?: boolean;
-    isCorrect?: boolean;
-    isIncorrect?: boolean;
-    isChosen?: boolean;
-    isExplain?: boolean;
-  }) => ({
-    backgroundColor: isActive
-      ? "#EBF5FF"
-      : isCorrect && isChosen
-        ? "#F0FDF4"
-        : isCorrect
-          ? "white"
-          : isIncorrect
-            ? "#FDF2F3"
-            : "#fff",
-    padding: "15px",
-    border: isActive
-      ? "1px solid #0071F9"
-      : isCorrect
-        ? "1px solid #00B035"
-        : isIncorrect
-          ? "1px solid #E20D2C"
-          : isExplain && isDisabled
-            ? "1px solid #0071F9"
-            : isDisabled
-              ? ""
-              : "1px solid #f0f0f0",
-    borderRadius: "10px",
-    "&:hover": {
-      backgroundColor: isActive ? "#EBF5FF" : isDisabled ? "" : "",
-      border: isDisabled
-        ? undefined
-        : isActive
-          ? "1px solid #0071F9"
-          : "1px solid #F9A95A",
-      cursor: "pointer",
-      "& .innerBox": {
-        backgroundColor: isDisabled
-          ? undefined
-          : isActive
-            ? "#0071F9"
-            : "#6B7280",
-        color: isDisabled ? undefined : "white",
-      },
-    },
-  }),
-);
-
-const Part4: React.FC<Part4Props> = ({
+const Part4: React.FC<PartProps> = ({
   questionGroups,
   mode,
   handleNotedQuestion = () => {},
   isNotedQuestion = () => false,
+  onAssistant,
 }) => {
   const { questionRefs } = useQuestionContext();
   const PART = 4;
@@ -186,7 +116,7 @@ const Part4: React.FC<Part4Props> = ({
       </Typography>
 
       {/* Group Questions */}
-      {questionGroups.map((group, groupIndexInPart) => {
+      {questionGroups?.map((group, groupIndexInPart) => {
         const isDisabled = mode === "review";
         const isExplain = mode === "review";
         const isScriptExpanded = checkScriptExpanded(PART, groupIndexInPart);
@@ -300,57 +230,34 @@ const Part4: React.FC<Part4Props> = ({
                   );
                   return (
                     <Stack spacing={1} marginTop={1}>
-                      <Stack direction="row" gap={1} alignItems="center">
-                        <Box
-                          ref={(el) => {
-                            if (el) {
-                              if (!questionRefs.current[PART]) {
-                                questionRefs.current[PART] = [];
-                              }
-                              if (
-                                !questionRefs.current[PART][groupIndexInPart]
-                              ) {
-                                questionRefs.current[PART][groupIndexInPart] =
-                                  [];
-                              }
-                              questionRefs.current[PART][groupIndexInPart][
-                                questionIndex
-                              ] = el as HTMLDivElement;
+                      <QuestionNumber
+                        questionNumber={question.questionNumber}
+                        questionId={question.id}
+                        isNoted={isNoted}
+                        isCorrectQuestion={isCorrectQuestion ?? false}
+                        onAssistant={onAssistant}
+                        onClickQuestionNumber={() =>
+                          handleNotedQuestion(
+                            PART,
+                            groupIndexInPart,
+                            questionIndex,
+                          )
+                        }
+                        ref={(el) => {
+                          if (el) {
+                            if (!questionRefs.current[PART]) {
+                              questionRefs.current[PART] = [];
                             }
-                          }}
-                          sx={{
-                            background: isNoted
-                              ? "orange"
-                              : isCorrectQuestion === true
-                                ? "#00B035"
-                                : isCorrectQuestion === false
-                                  ? "#E20D2C"
-                                  : "var(--color-primary-main)",
-                            color: "white",
-                            fontWeight: "400",
-                            borderRadius: "50%",
-                            padding: "15px",
-                            width: "35px",
-                            height: "35px",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            cursor: "pointer",
-                          }}
-                          onClick={() =>
-                            handleNotedQuestion(
-                              PART,
-                              groupIndexInPart,
-                              questionIndex,
-                            )
+                            if (!questionRefs.current[PART][groupIndexInPart]) {
+                              questionRefs.current[PART][groupIndexInPart] = [];
+                            }
+                            questionRefs.current[PART][groupIndexInPart][
+                              questionIndex
+                            ] = el as HTMLDivElement;
                           }
-                        >
-                          {question.questionNumber}
-                        </Box>
-                        <Typography sx={{ fontWeight: "500" }}>
-                          {question.question}
-                        </Typography>
-                      </Stack>
+                        }}
+                        question={question.question}
+                      />
 
                       {ABCD.map((answerLabel) => question[answerLabel]).map(
                         (answer, answerIndex) => {

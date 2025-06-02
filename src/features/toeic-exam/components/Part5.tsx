@@ -1,4 +1,4 @@
-import { Box, Divider, Paper, Stack, styled, Typography } from "@mui/material";
+import { Box, Divider, Stack, Typography } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -12,30 +12,17 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import parse from "html-react-parser";
 import useScrollToTop from "../hooks/useScrollToTop";
 import { useQuestionContext } from "./QuestionProvider";
-import { QuestionGroup } from "../../../types/ToeicExam";
 import { ABCD, answerIndexToLabel } from "../../../utils/toeicExamHelper";
 import Item from "./Item";
+import { PartProps } from "../types/PartProps";
+import QuestionNumber from "./Exams/QuestionNumber";
 
-interface Part5Props {
-  questionGroups: QuestionGroup[];
-  mode?: string;
-  handleNotedQuestion?: (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
-  ) => void;
-  isNotedQuestion?: (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
-  ) => boolean;
-}
-
-const Part5: React.FC<Part5Props> = ({
+const Part5: React.FC<PartProps> = ({
   questionGroups,
   mode,
   handleNotedQuestion = () => {},
   isNotedQuestion = () => false,
+  onAssistant,
 }) => {
   const PART = 5;
   const { questionRefs } = useQuestionContext();
@@ -114,7 +101,7 @@ const Part5: React.FC<Part5Props> = ({
       </Typography>
 
       {/* Group Questions */}
-      {questionGroups.map((group, groupIndexInPart) => {
+      {questionGroups?.map((group, groupIndexInPart) => {
         const isDisabled = mode === "review";
         const isExplain = mode === "review";
         return (
@@ -170,54 +157,34 @@ const Part5: React.FC<Part5Props> = ({
                 );
                 return (
                   <Stack spacing={1} marginTop={1}>
-                    <Stack direction="row" gap={1} alignItems="center">
-                      <Box
-                        ref={(el) => {
-                          if (el) {
-                            if (!questionRefs.current[PART]) {
-                              questionRefs.current[PART] = [];
-                            }
-                            if (!questionRefs.current[PART][groupIndexInPart]) {
-                              questionRefs.current[PART][groupIndexInPart] = [];
-                            }
-                            questionRefs.current[PART][groupIndexInPart][
-                              questionIndex
-                            ] = el as HTMLDivElement;
+                    <QuestionNumber
+                      questionNumber={question.questionNumber}
+                      questionId={question.id}
+                      isNoted={isNoted}
+                      isCorrectQuestion={isCorrectQuestion ?? false}
+                      onAssistant={onAssistant}
+                      onClickQuestionNumber={() =>
+                        handleNotedQuestion(
+                          PART,
+                          groupIndexInPart,
+                          questionIndex,
+                        )
+                      }
+                      ref={(el) => {
+                        if (el) {
+                          if (!questionRefs.current[PART]) {
+                            questionRefs.current[PART] = [];
                           }
-                        }}
-                        sx={{
-                          background: isNoted
-                            ? "orange"
-                            : isCorrectQuestion === true
-                              ? "#00B035"
-                              : isCorrectQuestion === false
-                                ? "#E20D2C"
-                                : "var(--color-primary-main)",
-                          color: "white",
-                          fontWeight: "400",
-                          borderRadius: "50%",
-                          padding: "15px",
-                          width: "35px",
-                          height: "35px",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          cursor: "pointer",
-                        }}
-                        onClick={() =>
-                          handleNotedQuestion(
-                            PART,
-                            groupIndexInPart,
-                            questionIndex,
-                          )
+                          if (!questionRefs.current[PART][groupIndexInPart]) {
+                            questionRefs.current[PART][groupIndexInPart] = [];
+                          }
+                          questionRefs.current[PART][groupIndexInPart][
+                            questionIndex
+                          ] = el as HTMLDivElement;
                         }
-                      >
-                        {question.questionNumber}
-                      </Box>
-                      <Typography sx={{ fontWeight: "500" }}>
-                        {question.question}
-                      </Typography>
-                    </Stack>
+                      }}
+                      question={question.question}
+                    />
 
                     {ABCD.map((answerLabel) => question[answerLabel]).map(
                       (answer, answerIndex) => {
