@@ -151,14 +151,7 @@ export default function TOEICChatbot() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        bgcolor: "grey.50",
-        p: 4,
-        position: "relative",
-      }}
-    >
+    <Box>
       {/* Floating Chat Button */}
       {!showChatBox && (
         <Box

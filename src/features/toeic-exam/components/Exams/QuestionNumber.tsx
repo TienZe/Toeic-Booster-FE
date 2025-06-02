@@ -20,7 +20,6 @@ const QuestionNumber = React.forwardRef<HTMLDivElement, QuestionNumberProps>(
       questionNumber,
       questionId,
       isNoted,
-      isCorrectQuestion,
       onAssistant,
       onClickQuestionNumber,
     },
@@ -37,13 +36,12 @@ const QuestionNumber = React.forwardRef<HTMLDivElement, QuestionNumberProps>(
           <Box
             ref={ref}
             sx={{
-              backgroundColor: isNoted
-                ? "orange"
-                : isCorrectQuestion === true
-                  ? "#00B035"
-                  : isCorrectQuestion === false
-                    ? "#E20D2C"
-                    : "primary.main",
+              backgroundColor: isNoted ? "orange" : "primary.main",
+              // : isCorrectQuestion === true
+              //   ? "#00B035"
+              //   : isCorrectQuestion === false
+              //     ? "#E20D2C"
+              //     : "primary.main",
               color: "white",
               fontWeight: "400",
               borderRadius: "50%",
@@ -65,7 +63,7 @@ const QuestionNumber = React.forwardRef<HTMLDivElement, QuestionNumberProps>(
         </Stack>
         {onAssistant && (
           <IconButton onClick={() => onAssistant(questionId)}>
-            <Sparkles size={20} color="var(--color-primary-main)" />
+            <Sparkles size={20} color="var(--mui-palette-primary-main)" />
           </IconButton>
         )}
       </Stack>

@@ -272,7 +272,7 @@ const PartResultIndex = () => {
           }}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         >
-          <NavigationIcon color="primary" />
+          <NavigationIcon color="primary" fontSize="large" />
         </div>
       )}
     </Content>

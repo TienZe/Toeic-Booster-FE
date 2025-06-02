@@ -46,8 +46,14 @@ const ResultTable: React.FC<ResultTableProps> = ({ examId }) => {
         <CustomBackdrop open />
       ) : (
         <TableContainer sx={{ boxShadow: "none" }}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead>
+          <Table sx={{ minWidth: 650 }} size="small">
+            <TableHead
+              sx={{
+                "& .MuiTableCell-root": {
+                  p: 1,
+                },
+              }}
+            >
               <TableRow>
                 <TableCell>Date</TableCell>
                 <TableCell width={150}>Result</TableCell>
