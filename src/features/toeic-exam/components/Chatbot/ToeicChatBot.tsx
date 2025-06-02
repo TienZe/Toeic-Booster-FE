@@ -1,7 +1,5 @@
-"use client";
-
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -50,6 +48,7 @@ export default function TOEICChatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   const { questionId, attemptId, showChatBox } = useSelector(
     (state: RootState) => state.assistantQuestion,
@@ -83,6 +82,13 @@ export default function TOEICChatbot() {
       ]);
     }
   }, [chatHistory]);
+
+  useEffect(() => {
+    if (endOfMessagesRef.current) {
+      // Auto scroll to the end of the messages
+      endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   if (!questionId || !attemptId) {
     return null;
@@ -417,6 +423,8 @@ export default function TOEICChatbot() {
                         </Paper>
                       </Box>
                     )}
+
+                    <div ref={endOfMessagesRef}></div>
                   </Box>
                 </Box>
 
