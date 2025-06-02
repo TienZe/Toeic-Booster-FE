@@ -228,7 +228,7 @@ const UserHomePage = () => {
             </Stack>
 
             {lastAttempts && lastAttempts.items.length > 0 && (
-              <Link to="/history">
+              <Link to="/toeic-statistics?tab=1">
                 <ViewMoreButton>View All</ViewMoreButton>
               </Link>
             )}
