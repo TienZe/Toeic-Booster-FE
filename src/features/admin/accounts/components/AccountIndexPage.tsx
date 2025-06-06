@@ -19,7 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getUsers } from "../api/user-api";
 import CustomBackdrop from "../../../../components/UI/CustomBackdrop";
 import useAdminTablePagination from "../../hooks/useAdminTablePagination";
-import { Role, User } from "../../../../types/auth";
+import { RoleEnum, User } from "../../../../types/auth";
 import AdminTableContainer from "../../vocasets/components/AdminTableContainer";
 import TablePaginationActions from "../../../../components/UI/TablePaginationActions";
 import format from "date-fns/format";
@@ -76,13 +76,13 @@ const AccountIndexPage: React.FC = () => {
   useEffect(() => {
     // Update the filtered users when filter form changes
     const newFilteredUsers = users?.filter((user) => {
-      if (role !== "all" && !user.roles.includes(role as Role)) {
+      if (role !== "all" && !user.roleNames.includes(role as RoleEnum)) {
         return false;
       }
 
-      if (status !== "all" && user.isActive !== (status === "active")) {
-        return false;
-      }
+      // if (status !== "all" && user.isActive !== (status === "active")) {
+      //   return false;
+      // }
 
       const searchLower = debouncedSearch.toLowerCase();
       if (
@@ -235,7 +235,7 @@ const AccountIndexPage: React.FC = () => {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.name}</TableCell>
                     <TableCell align="center">
-                      {user.roles
+                      {user.roleNames
                         .map((role) => capitalizeFirstLetter(role))
                         .join(",")}
                     </TableCell>
@@ -245,9 +245,10 @@ const AccountIndexPage: React.FC = () => {
                           display: "inline-block",
                           width: "10px",
                           height: "10px",
-                          backgroundColor: user.isActive
-                            ? "success.main"
-                            : "divider",
+                          // backgroundColor: user.isActive
+                          //   ? "success.main"
+                          //   : "divider",
+                          backgroundColor: "divider",
                           borderRadius: "50%",
                         }}
                       ></Box>

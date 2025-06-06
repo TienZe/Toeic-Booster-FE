@@ -53,7 +53,7 @@ const WORD_PAGE_SIZE = 5;
 const WordIndexPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [openNewModal, setOpenNewModal] = useState(false);
-  const [deletedWordId, setDeletedWordId] = useState<string | null>(null);
+  const [deletedWordId, setDeletedWordId] = useState<number | null>(null);
 
   const [updatedWordId, setUpdatedWordId] = useState<string | number | null>(
     null,

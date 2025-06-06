@@ -15,8 +15,8 @@ const DetailContent: React.FC<DetailProps> = ({ examId }) => {
       <Box sx={{ pb: 2 }}>
         <TestDetailInfo
           testName={toeicExamInfo?.name || ""}
-          commentCount={toeicExamInfo?.commentCount || 0}
-          takenStudents={toeicExamInfo?.takenStudents || 0}
+          commentCount={0}
+          takenStudents={toeicExamInfo?.attemptsCount || 0}
         />
       </Box>
 

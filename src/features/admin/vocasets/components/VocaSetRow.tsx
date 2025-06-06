@@ -47,7 +47,7 @@ const VocaSetRow: React.FC<{
         />
       </TableCell>
       <TableCell>{vocaSet.name}</TableCell>
-      <TableCell align="center">{vocaSet?.userCount || 0}</TableCell>
+      <TableCell align="center">{0}</TableCell>
       <TableCell align="center">{vocaSet?.lessonsCount || 0}</TableCell>
       <TableCell align="center">
         <ActionDropdown actions={actions} />

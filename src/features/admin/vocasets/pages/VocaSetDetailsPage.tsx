@@ -114,7 +114,7 @@ const VocaSetDetailsPage = () => {
   const [preview, setPreview] = useState<boolean>(false);
   const [openNewModal, setOpenNewModal] = useState<boolean>(false);
   const [searchLesson, setSearchLesson] = useState<string>("");
-  const [deletedLessonId, setDeletedLessonId] = useState<string | null>(null);
+  const [deletedLessonId, setDeletedLessonId] = useState<number | null>(null);
 
   const openDeleteModal = Boolean(deletedLessonId);
 
@@ -180,7 +180,7 @@ const VocaSetDetailsPage = () => {
     vocaSetUpdateMutation.mutate(request);
   };
 
-  const handleClickDeleteLesson = (lessonId: string) => {
+  const handleClickDeleteLesson = (lessonId: number) => {
     setDeletedLessonId(lessonId);
   };
 
@@ -325,7 +325,7 @@ const VocaSetDetailsPage = () => {
                     </Button>
                     <Button
                       variant="contained"
-                      sx={(theme) => ({
+                      sx={() => ({
                         float: "right",
                         px: "24px",
                         minWidth: "110px",

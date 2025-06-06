@@ -39,7 +39,7 @@ import {
   UpdateUserProfileRequest,
 } from "../types/Request";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { getPhoneValidator, validateEmail } from "../../../../utils/helper";
+import { validateEmail } from "../../../../utils/helper";
 import { capitalizeFirstLetter } from "../../../../utils/stringFormatter";
 import useFileInput from "../../../../hooks/useFileInput";
 
@@ -200,11 +200,6 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
       needToMutate = true;
     }
 
-    if (data.phone && data.phone !== user.phone) {
-      request.phone = data.phone;
-      needToMutate = true;
-    }
-
     if (fileSrc && fileSrc !== user.avatar) {
       request.avatar = fileSrc;
       needToMutate = true;
@@ -247,7 +242,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
       resetForm({
         email: user.email,
         name: user.name,
-        phone: user.phone || "",
+        // phone: user.phone || "",
         newPassword: "",
         confirmNewPassword: "",
       });
@@ -337,7 +332,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
                   }}
                 >
                   <FormControlLabel
-                    control={<Switch color="success" checked={user.isActive} />}
+                    control={<Switch color="success" checked={true} />}
                     label="Account status"
                     labelPlacement="start"
                   />
@@ -387,7 +382,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
               <Grid2 size={6}>
                 <TextField
                   label="User name"
-                  defaultValue={user.username}
+                  defaultValue={user.name}
                   slotProps={{ input: { readOnly: true } }}
                 />
               </Grid2>
@@ -399,7 +394,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
                   {...register("name", { required: "Name is required" })}
                 />
               </Grid2>
-              <Grid2 size={6}>
+              {/* <Grid2 size={6}>
                 <TextField
                   label="Phone number"
                   error={!!validationErrors.phone}
@@ -409,7 +404,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
                     ...getPhoneValidator(),
                   })}
                 />
-              </Grid2>
+              </Grid2> */}
             </Grid2>
           </Box>
           <Divider />
@@ -434,11 +429,6 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
                   value={RoleEnum.User}
                   control={<Radio size="small" />}
                   label="Student"
-                />
-                <FormControlLabel
-                  value={RoleEnum.Moderator}
-                  control={<Radio size="small" />}
-                  label="Moderator"
                 />
                 <FormControlLabel
                   value={RoleEnum.Admin}

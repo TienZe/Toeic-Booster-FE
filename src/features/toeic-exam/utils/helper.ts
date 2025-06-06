@@ -1,12 +1,4 @@
-import {
-  groupQuestionData,
-  TOEIC_PARTS,
-} from "../../admin/new_exams/types/examType";
-import { PracticeDetailConverted } from "../types/PracticeDetailConverted";
-import {
-  groupQuestionDetailResponse,
-  PracticeDetailResponse,
-} from "../types/PracticeDetailResponse";
+import { TOEIC_PARTS } from "../../admin/new_exams/types/examType";
 
 export const toHHMMSS = (secs: number) => {
   //const sec_num = parseInt(secs, 10);
@@ -60,71 +52,6 @@ export const sortPartArray = (partArray: string[]) => {
 
     return numA - numB;
   });
-};
-
-export const convertPracticeResponse = (data: PracticeDetailResponse) => {
-  const result: PracticeDetailConverted = {
-    name: data.test.name,
-    tags: data.test.tags || [{ id: "1", name: "2024" }],
-    partData: [
-      { part: "part1", groupQuestionData: [] },
-      { part: "part2", groupQuestionData: [] },
-      { part: "part3", groupQuestionData: [] },
-      { part: "part4", groupQuestionData: [] },
-      { part: "part5", groupQuestionData: [] },
-      { part: "part6", groupQuestionData: [] },
-      { part: "part7", groupQuestionData: [] },
-    ],
-  };
-
-  data.test.groupQuestions.forEach((group: groupQuestionDetailResponse) => {
-    const partIndex = result.partData.findIndex(
-      (part) => part.part === group.part.key,
-    );
-
-    const audioMedia = group.questionMedia.find(
-      (audio) => audio.type === "audio",
-    );
-    const imageMedia = group.questionMedia.filter(
-      (image) => image.type === "image",
-    );
-
-    const image = imageMedia.map((img) => {
-      return {
-        fileUrl: img.url,
-        index: img.index,
-      };
-    });
-
-    const questionData = group.questions.map((questionItem) => {
-      return {
-        questionId: questionItem.id,
-        questionNumber: questionItem.questionNumber,
-        question: questionItem.question,
-        answer: questionItem.answer,
-        correctAnswer: questionItem.correctAnswer,
-        userAnswer: {
-          id: questionItem?.userAnswer?.[0]?.id ?? null,
-          userAnswer: questionItem?.userAnswer?.[0]?.userAnswer ?? null,
-          isCorrect: questionItem?.userAnswer?.[0]?.isCorrect ?? null,
-        },
-        explain: questionItem.explain,
-      };
-    });
-
-    questionData.sort((a, b) => a.questionNumber - b.questionNumber);
-    const groupQuestionData: groupQuestionData = {
-      audioUrl: audioMedia?.url ?? null,
-      image: image,
-      transcript: group.transcript,
-      detail: group.detail,
-      questionData: questionData,
-    };
-
-    result.partData[partIndex].groupQuestionData.push(groupQuestionData);
-  });
-
-  return result;
 };
 
 export const parseHtmlToText = (htmlString: string) => {

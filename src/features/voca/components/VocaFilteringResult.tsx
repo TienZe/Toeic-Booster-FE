@@ -9,7 +9,6 @@ import BoldStrokeButton from "./BoldStrokeButton";
 import { useQuery } from "@tanstack/react-query";
 import { getLessonFilteringResult } from "../api/voca-learning";
 import DotLoadingProgress from "../../../components/UI/DotLoadingProgress";
-import Link from "../../../components/UI/Link";
 import VocaChoosingModal from "./VocaChoosingModal";
 import { useState } from "react";
 

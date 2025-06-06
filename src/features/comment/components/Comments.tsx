@@ -25,7 +25,7 @@ const Comments: React.FC<CommentsProps> = ({ examId }) => {
     refetch,
   } = useQuery({
     queryKey: ["fetchComments", examId],
-    queryFn: () => fetchCommentsByTest(examId || ""),
+    queryFn: () => fetchCommentsByTest(examId || 0),
     enabled: !!examId,
   });
 
@@ -56,7 +56,7 @@ const Comments: React.FC<CommentsProps> = ({ examId }) => {
       idComment: parentId,
       content: content,
     };
-    mutation.mutate(newComment);
+    mutation.mutate(newComment as ISingleComment);
   };
   // useEffect(() => {
   //   setBackendComments(Comments);

@@ -69,7 +69,7 @@ const UserHistoryPage = () => {
                   whiteSpace: "nowrap",
                 }}
               >
-                {user?.username || user?.name}
+                {user?.name}
               </Typography>
             )}
           </Box>

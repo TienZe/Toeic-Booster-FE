@@ -1,7 +1,7 @@
 import axiosClient from "../../../axios";
 import { IComment, ISingleComment } from "../types/IComment";
 
-const fetchCommentsByTest = async (testId: string) => {
+const fetchCommentsByTest = async (testId: number) => {
   const response = await axiosClient.get<IComment[]>(`/comment/test/${testId}`);
   return response.data;
 };

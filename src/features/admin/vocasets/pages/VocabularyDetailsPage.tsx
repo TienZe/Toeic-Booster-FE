@@ -89,7 +89,6 @@ const VocabularyDetailsPage: React.FC<VocabularyDetailsPageProps> = ({
   onClose,
   mode,
   wordId,
-  lessonId,
   onWordUpdatedSuccess,
 }) => {
   const navigate = useNavigate();
@@ -97,7 +96,7 @@ const VocabularyDetailsPage: React.FC<VocabularyDetailsPageProps> = ({
   const createMode = mode == "create" || pathname.includes("create");
 
   const [searchParams] = useSearchParams();
-  lessonId = lessonId ?? searchParams.get("lessonId");
+  // lessonId = lessonId ?? searchParams.get("lessonId");
   const vocaId = wordId ?? searchParams.get("id");
 
   const queryClient = useQueryClient();

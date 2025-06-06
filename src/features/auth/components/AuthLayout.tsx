@@ -7,8 +7,6 @@ import Container from "@mui/material/Container";
 import LoginImg from "../assets/login-img.svg";
 import RegisterImg from "../assets/register-img.svg";
 
-import classes from "./AuthLayout.module.scss";
-
 import TabItem from "./TabItem";
 import { Link, Outlet, useLocation, Navigate } from "react-router-dom";
 import { Image } from "../../../components/UI/Image";

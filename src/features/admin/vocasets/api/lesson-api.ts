@@ -27,7 +27,7 @@ export async function getLessonById(id: string|number, request?: GetLessonReques
   return response.data.data;
 }
 
-export async function deleteLesson(id: string) {
+export async function deleteLesson(id: number) {
   const response = await axiosClient.delete("/lessons/" + id);
 
   return response.data.data;

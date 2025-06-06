@@ -189,12 +189,14 @@ const Part5Form: React.FC<Part1FormProps> = ({ groupIndex, onClose }) => {
                           question.correctAnswer ===
                           answerIndexToLabel(answerIndex)
                         }
-                        onChange={(_, checked) =>
-                          form.setValue(
-                            `questionGroups.${groupIndex}.questions.${questionIndex}.correctAnswer`,
-                            checked ? answerIndexToLabel(answerIndex) : null,
-                          )
-                        }
+                        onChange={(_, checked) => {
+                          if (checked) {
+                            form.setValue(
+                              `questionGroups.${groupIndex}.questions.${questionIndex}.correctAnswer`,
+                              answerIndexToLabel(answerIndex),
+                            );
+                          }
+                        }}
                       />
                     }
                     label=""

@@ -8,6 +8,8 @@ export interface User {
   targetScore: number;
   testDate: string;
 
+  isActive: boolean;
+
   createdAt: string;
 }
 
