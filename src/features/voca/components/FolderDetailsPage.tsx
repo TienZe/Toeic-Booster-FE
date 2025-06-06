@@ -18,7 +18,6 @@ import { useCallback, useState } from "react";
 import BoldStrokeButton from "./BoldStrokeButton";
 import VocaSearching from "./VocaSearching";
 import { toast } from "react-toastify";
-import PinNewWordToExistingFolderRequest from "../types/PinNewWordToExistingFolderRequest";
 import { WordItem } from "../../../types/voca-search";
 import { vocaWordClassAbrr2FullName } from "../../../utils/helper";
 import CustomModal from "../../../components/UI/CustomModal";
@@ -27,8 +26,10 @@ import VocabularyModel from "../../../types/VocabularyModel";
 import useLesson from "../../../hooks/useLesson";
 import {
   attachNewWordsToLesson,
+  createLessonVocabulary,
   removeLessonVocabularyById,
 } from "../../shared-apis/lesson-vocabulary-api";
+import CreateLessonVocabularyRequest from "../../shared-apis/types/CreateLessonVocabularyRequest";
 
 const FolderDetailsPage = () => {
   const navigate = useNavigate();
@@ -47,21 +48,16 @@ const FolderDetailsPage = () => {
   );
   const [editedVocaId, setEditedVocaId] = useState<number | null>(null);
 
-  // const pinNewWordMutation = useMutation({
-  //   mutationFn: pinNewWordToExistingFolder,
-  //   onSuccess: () => {
-  //     toast.success("Pin new word successfully!");
-  //     queryClient.invalidateQueries({
-  //       queryKey: ["userFolders", { id: folderId }],
-  //     });
-  //   },
-  //   onError: () => {
-  //     toast.error("Pin new word failed!");
-  //   },
-  //   onSettled: () => {
-  //     pinNewWordMutation.reset();
-  //   },
-  // });
+  const addCustomWordMutation = useMutation({
+    mutationFn: createLessonVocabulary,
+    onSuccess: () => {
+      toast.success("Pin new word successfully!");
+      invalidateFolderDetails();
+    },
+    onError: () => {
+      toast.error("Pin new word failed!");
+    },
+  });
 
   const invalidateFolderDetails = useCallback(() => {
     queryClient.invalidateQueries({
@@ -108,9 +104,11 @@ const FolderDetailsPage = () => {
         wordIds: [wordItem.id],
       });
     } else {
-      // Handle pin new word to existing folder
-      const request: PinNewWordToExistingFolderRequest = {
-        folderId,
+      wordItem = wordItem as WordItem;
+
+      // Add custom word to the folder, don't create the related system word, just create new lesson vocabulary
+      const request: CreateLessonVocabularyRequest = {
+        lessonId: folderId,
         word: wordItem.word,
         pronunciation: wordItem.pronunciation || "",
         pronunciationAudio: wordItem.pronunciationAudio,
@@ -122,7 +120,7 @@ const FolderDetailsPage = () => {
 
       console.log("request", request);
 
-      // pinNewWordMutation.mutate(request);
+      addCustomWordMutation.mutate(request);
     }
   };
 
@@ -237,7 +235,7 @@ const FolderDetailsPage = () => {
         <VocaSearching
           containerSx={{ marginTop: 1.5 }}
           onClickWord={handleClickOnWordItem}
-          searchMode="system"
+          searchMode="hybrid"
         />
       </Box>
 

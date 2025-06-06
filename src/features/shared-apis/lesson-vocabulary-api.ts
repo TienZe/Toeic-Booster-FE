@@ -1,6 +1,7 @@
 import axiosClient from "../../axios";
 import ApiResponse from "../../types/ApiResponse";
 import { LessonVocabulary } from "../../types/LessonVocabulary";
+import CreateLessonVocabularyRequest from "./types/CreateLessonVocabularyRequest";
 import { GetLessonVocabulariesRequest } from "./types/GetLessonVocabulariesRequest";
 
 export async function getLessonVocabularies(
@@ -49,4 +50,18 @@ export async function attachNewWordsToLesson(request: {
   });
 
   return response.data;
+}
+
+export async function createLessonVocabulary(
+  request: CreateLessonVocabularyRequest,
+) {
+  const { lessonId, ...wordData } = request;
+  const response = await axiosClient.post<ApiResponse<LessonVocabulary[]>>(
+    `/lessons/${lessonId}/words`,
+    {
+      words: [wordData],
+    },
+  );
+
+  return response.data.data;
 }

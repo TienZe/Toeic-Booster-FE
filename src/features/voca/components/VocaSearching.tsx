@@ -19,7 +19,7 @@ type VocaSearchingProps = {
   containerSx?: SxProps;
   onClickWord?: (selectedWord: WordItem | VocabularyModel) => void;
   title?: string;
-  searchMode?: "dictionary-api" | "system";
+  searchMode?: "dictionary-api" | "system" | "hybrid";
   highlightVocabularyIds?: number[];
 };
 
@@ -27,7 +27,7 @@ const VocaSearching: React.FC<VocaSearchingProps> = ({
   containerSx,
   onClickWord,
   title,
-  searchMode = "dictionary-api",
+  searchMode = "hybrid",
   highlightVocabularyIds,
 }) => {
   const anchorEle = useRef<HTMLDivElement>(null);
@@ -44,14 +44,27 @@ const VocaSearching: React.FC<VocaSearchingProps> = ({
       return searchWord;
     }
 
-    return async (searchKey: string) => {
-      const paginatedWords = await getSystemWords({
+    const searchSystemWords = async (searchKey: string) => {
+      const systemWords = await getSystemWords({
         page: 0,
         limit: 10,
         search: searchKey,
       });
 
-      return paginatedWords.items;
+      return systemWords.items;
+    };
+
+    if (searchMode === "system") {
+      return searchSystemWords;
+    }
+
+    return async (searchKey: string) => {
+      const [dictionaryApiWords, systemWords] = await Promise.all([
+        searchWord(searchKey),
+        searchSystemWords(searchKey),
+      ]);
+
+      return [...dictionaryApiWords, ...systemWords];
     };
   }, [searchMode]);
 
@@ -61,7 +74,7 @@ const VocaSearching: React.FC<VocaSearchingProps> = ({
     isError,
     isSuccess,
     error,
-  } = useQuery<WordItem[] | VocabularyModel[]>({
+  } = useQuery<Array<WordItem | VocabularyModel>>({
     queryKey: ["voca-search", { word: wordInputDebounce }],
     queryFn: () => searchWordFn(wordInputDebounce),
     enabled: wordInputDebounce.length > 0,

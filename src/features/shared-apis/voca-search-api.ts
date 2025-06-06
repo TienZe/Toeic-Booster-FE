@@ -34,7 +34,7 @@ export async function searchWord(word: string) {
     for (const definition of meaning.definitions) {
       wordItems.push({
         word: wordResult.word,
-        pronunciation: phonetic,
+        pronunciation: phonetic || null,
         pronunciationAudio: phoneticAudio,
         partOfSpeech,
         definition: definition.definition,
