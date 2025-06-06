@@ -26,7 +26,6 @@ tsconfig.app.tsbuildinfo
 *.sln
 *.sw?
 
-.github
 tasks
 screenshots
 

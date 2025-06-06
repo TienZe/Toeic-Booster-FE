@@ -1,0 +1,43 @@
+name: Deploy new commit to Azure VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Azure VM via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AZURE_HOST }}
+          username: ${{ secrets.AZURE_USERNAME }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          port: 22
+          script: |
+            echo "🚚 ==> Pulling latest code"
+            cd ~/toeic-booster/Toeic-Booster-FE
+            git pull origin main
+
+            echo "🛑 ==> Stopping old container (if exists)"
+            docker stop toeic_booster_fe || true
+
+            echo "🗑️ ==> Removing old container (if exists)"
+            docker rm toeic_booster_fe || true
+
+            echo "🔨 ==> Building new Docker image"
+            docker build \
+              --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
+              --build-arg VITE_TINY_KEY=${{ secrets.VITE_TINY_KEY }} \
+              --build-arg VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }} \
+              -t toeic_booster_fe:latest .
+
+            echo "🚀 ==> Running new container"
+            docker run -d --name toeic_booster_fe -p 3000:3000 toeic_booster_fe:latest
+
+            echo "✅ ==> Deployment finished successfully"
