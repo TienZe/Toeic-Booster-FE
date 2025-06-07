@@ -1,15 +1,23 @@
 import axiosClient from "../../../../axios";
+import ApiResponse from "../../../../types/ApiResponse";
 import { User } from "../../../../types/auth";
+import PaginatedData from "../../../../types/PaginatedData";
 import {
   ChangeRoleOfUserRequest,
+  GetUsersRequest,
   UpdateUserPasswordRequest,
   UpdateUserProfileRequest,
 } from "../types/Request";
 
-export async function getUsers() {
-  const response = await axiosClient.get<User[]>("/users");
+export async function getUsers($request: GetUsersRequest) {
+  const response = await axiosClient.get<ApiResponse<PaginatedData<User>>>(
+    "/users",
+    {
+      params: $request,
+    },
+  );
 
-  return response.data;
+  return response.data.data;
 }
 
 export async function deactivateUser(userId: string) {

@@ -19,7 +19,7 @@ import {
 import CustomModal, {
   CustomModalProps,
 } from "../../../../components/UI/CustomModal";
-import { getRole, RoleEnum, User } from "../../../../types/auth";
+import { getRole, RoleEnum, User, UserStatus } from "../../../../types/auth";
 import { AddAPhoto } from "@mui/icons-material";
 import PasswordTextField from "../../../../components/UI/PasswordTextField";
 import UserStatusLegend from "./UserStatusLegend";
@@ -161,7 +161,10 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
   const handleConfirmSwitchStatus = () => {
     if (!user) return;
 
-    switchStatusMutation.mutate({ userId: user.id, activate: !user.isActive });
+    switchStatusMutation.mutate({
+      userId: user.id,
+      activate: user.status == UserStatus.Active,
+    });
   };
 
   const handleChangeRole = () => {
@@ -549,10 +552,11 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
       >
         <Box sx={{ padding: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-            Do you want to {user.isActive ? "deactivate" : "activate"} this
+            Do you want to{" "}
+            {user.status == UserStatus.Active ? "deactivate" : "activate"} this
             account?
           </Typography>
-          {user.isActive ? (
+          {user.status == UserStatus.Active ? (
             <Typography>
               Deactivating the account will temporarily disable the user's
               access.

@@ -18,3 +18,10 @@ export interface ChangeRoleOfUserRequest {
   userId: string;
   roles: RoleEnum[];
 }
+
+export interface GetUsersRequest {
+  page?: number;
+  limit?: number;
+  search?: string;
+  filteredStatus?: string;
+}

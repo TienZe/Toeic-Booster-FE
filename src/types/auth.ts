@@ -8,7 +8,7 @@ export interface User {
   targetScore: number;
   testDate: string;
 
-  isActive: boolean;
+  status: UserStatus;
 
   createdAt: string;
 }
@@ -16,6 +16,11 @@ export interface User {
 export enum RoleEnum {
   Admin = "admin",
   User = "user",
+}
+
+export enum UserStatus {
+  Active = "active",
+  Inactive = "inactive",
 }
 
 export function canAccessAdminPage(user: User) {
