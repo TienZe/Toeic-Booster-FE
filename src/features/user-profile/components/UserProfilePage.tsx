@@ -53,7 +53,7 @@ const UserProfilePage: React.FC = () => {
     defaultValues: { name: "", email: "" },
   });
 
-  const [name, email] = profileForm.watch(["name", "email"]);
+  const [name] = profileForm.watch(["name"]);
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["user"],
@@ -99,10 +99,6 @@ const UserProfilePage: React.FC = () => {
     const request: Record<string, unknown> = {};
     if (data.name !== user?.name) {
       request.name = data.name;
-    }
-
-    if (data.email !== user?.email) {
-      request.email = data.email;
     }
 
     updateProfileMutation.mutate(request);
@@ -239,12 +235,13 @@ const UserProfilePage: React.FC = () => {
                     <TextField
                       label={"Email"}
                       variant="standard"
-                      value={email}
-                      error={!!profileForm.formState.errors.email}
-                      helperText={profileForm.formState.errors.email?.message}
-                      {...profileForm.register("email", {
-                        required: "Email is required",
-                      })}
+                      value={profileForm.getValues("email")}
+                      disabled
+                      slotProps={{
+                        input: {
+                          readOnly: true,
+                        },
+                      }}
                     />
                   </Grid2>
                   <Grid2 size={12}>

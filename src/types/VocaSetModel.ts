@@ -10,6 +10,7 @@ export default interface VocaSetModel {
   tags: CollectionTag[];
 
   lessonsCount?: number;
+  numOfTakenStudents?: number;
 }
 
 export interface VocaSetWithUserProgress extends VocaSetModel {
