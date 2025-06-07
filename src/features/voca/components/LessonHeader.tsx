@@ -1,6 +1,5 @@
 import { Box, IconButton, Stack, SxProps, Typography } from "@mui/material";
 import { RxCross2 } from "react-icons/rx";
-import WhiteLogo from "../assets/logo-white.svg";
 
 interface LessonHeader {
   lessonName?: string;
@@ -48,7 +47,7 @@ const LessonHeader: React.FC<LessonHeader> = ({
           </Typography>
         </Stack>
         <Stack alignItems="center">
-          <img src={WhiteLogo} style={{ height: "28px" }} />
+          <img src="/logo/logo-white.svg" style={{ height: "28px" }} />
           <Typography
             color="white"
             sx={{

@@ -1,4 +1,4 @@
-import { Checkbox, Stack, Typography } from "@mui/material";
+import { Radio, Stack, Typography } from "@mui/material";
 
 interface FolderSelectItemProps {
   name: string;
@@ -41,7 +41,7 @@ const FolderSelectItem: React.FC<FolderSelectItemProps> = ({
         <Typography sx={{ fontSize: "15px", color: "#B4B4B4" }}>
           {totalWords} words
         </Typography>
-        <Checkbox checked={selected} />
+        <Radio checked={selected} />
       </Stack>
     </Stack>
   );

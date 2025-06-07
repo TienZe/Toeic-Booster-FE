@@ -88,7 +88,7 @@ const PinWordModalModal: React.FC<PinWordModalModalProps> = ({
           </Alert>
         )}
 
-        <Typography sx={{ fontSize: "18px", marginBottom: "35px" }}>
+        <Typography sx={{ fontSize: "1rem", marginBottom: 2 }}>
           Select the folder you want to save to
         </Typography>
 

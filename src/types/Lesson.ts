@@ -12,6 +12,8 @@ export default interface Lesson {
   numOfWords: number;
   words: LessonVocabulary[];
 
+  reservedThumbnail?: string | null;
+
   learningStep?: LearningStep; // The learning step of the posted user
   retainedWords?: number; // The number of retained words of the posted user in the lesson
 }
@@ -28,9 +30,9 @@ export function getLessonThumbnail(lesson: Lesson): string {
     return lesson.thumbnail;
   }
 
-  // if (lesson.listWord.length > 1) {
-  //   return lesson.listWord[0].thumbnail;
-  // }
+  if (lesson.reservedThumbnail) {
+    return lesson.reservedThumbnail;
+  }
 
   return DefaultLessonThumbnail;
 }

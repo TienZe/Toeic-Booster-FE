@@ -22,6 +22,7 @@ import {
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import Link from "../UI/Link";
+import { Image } from "../UI/Image";
 
 const MotionBox = motion(Box, { forwardMotionProps: true });
 
@@ -95,20 +96,10 @@ const Footer: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              <Typography
-                variant="h5"
-                component="div"
-                sx={{
-                  fontWeight: "bold",
-                  mb: 0.5,
-                  background: "linear-gradient(45deg, #fff 30%, #e3f2fd 90%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                TOEIC BOOSTER
-              </Typography>
+              <Image
+                src="/logo/logo-white.svg"
+                sx={{ maxHeight: 24, width: "auto", mb: 0.5 }}
+              />
               <Typography
                 variant="body1"
                 sx={{

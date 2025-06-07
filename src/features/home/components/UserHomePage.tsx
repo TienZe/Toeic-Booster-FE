@@ -414,6 +414,13 @@ const UserHomePage = () => {
                   {...userTargetForm.register("targetScore", {
                     required: "This field is required",
                   })}
+                  slotProps={{
+                    input: {
+                      inputProps: {
+                        step: 5,
+                      },
+                    },
+                  }}
                 />
                 <div>
                   <Button

@@ -78,7 +78,7 @@ const PersonalWordFolderPage = () => {
                   id={folder.id}
                   name={folder.name}
                   pinnedWords={folder?.numOfWords || 0}
-                  thumbnail={folder?.words?.[0]?.thumbnail}
+                  thumbnail={folder?.reservedThumbnail}
                 />
               ))
             : "You haven't created a vocabulary yet, create a word folder to save the vocabulary you want to learn."}

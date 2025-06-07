@@ -26,7 +26,7 @@ export const LessonCard: React.FC<
         }}
         onClick={onClickCard}
       >
-        <img src={image} style={{ height: "100%" }} />
+        <img src={image} style={{ height: "100%", borderRadius: "8px" }} />
       </Box>
       <Typography
         variant="h6"

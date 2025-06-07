@@ -9,9 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Deploy to Azure VM via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -22,7 +19,8 @@ jobs:
           script: |
             echo "🚚 ==> Pulling latest code"
             cd ~/toeic-booster/Toeic-Booster-FE
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
 
             echo "🛑 ==> Stopping old container (if exists)"
             docker stop toeic_booster_fe || true
