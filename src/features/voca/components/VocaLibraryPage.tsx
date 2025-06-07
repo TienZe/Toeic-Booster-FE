@@ -55,7 +55,6 @@ const VocaLibraryPage: React.FC = () => {
 
   const resetPage = useCallback(() => {
     setPage(0);
-    setDisplayedVocaSets([]);
   }, []);
 
   const debouncedFilterTitle = useDebounce(filterInput.filterTitle, {
@@ -77,9 +76,13 @@ const VocaLibraryPage: React.FC = () => {
 
   useEffect(() => {
     if (vocaSets) {
-      setDisplayedVocaSets((prev) => [...prev, ...vocaSets]);
+      if (page == 0) {
+        setDisplayedVocaSets(vocaSets);
+      } else {
+        setDisplayedVocaSets((prev) => [...prev, ...vocaSets]);
+      }
     }
-  }, [vocaSets]);
+  }, [vocaSets, page]);
 
   const { data: collectionTags } = useCollectionTags();
 
