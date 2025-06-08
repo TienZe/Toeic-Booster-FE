@@ -186,6 +186,7 @@ export default function CreateExam() {
             type="submit"
             sx={{ alignSelf: "end" }}
             startIcon={<Save />}
+            disableElevation
           >
             Update
           </Button>

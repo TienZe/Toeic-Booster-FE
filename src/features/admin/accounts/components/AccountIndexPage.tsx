@@ -28,7 +28,7 @@ import useDebounce from "../../../../hooks/useDebounce";
 import UserInfoModal from "./UserInfoModal";
 import UserStatusLegend from "./UserStatusLegend";
 
-const USER_PAGE_SIZE = 2;
+const USER_PAGE_SIZE = 10;
 
 const AccountIndexPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -120,7 +120,7 @@ const AccountIndexPage: React.FC = () => {
               <Button
                 startIcon={<FilterAltOff />}
                 disableRipple
-                sx={{ py: "14px", px: "10px", alignSelf: "flex-end" }}
+                sx={{ py: "5px", px: "16px", alignSelf: "flex-end" }}
                 onClick={handleResetFilter}
               >
                 Clear

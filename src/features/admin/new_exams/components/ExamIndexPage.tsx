@@ -207,7 +207,7 @@ const ExamIndexPage = () => {
           <Grid2 size={4} display="flex" alignItems="end">
             <Button
               onClick={handleResetFilter}
-              variant="outlined"
+              variant="text"
               startIcon={<FilterAltOff />}
             >
               Clear
