@@ -1,22 +1,12 @@
-import { RoleEnum } from "../../../../types/auth";
+import { UserStatus } from "../../../../types/auth";
 
-export interface UpdateUserProfileRequest {
+export interface AdminUpdateUserRequest {
   userId: string;
-  email?: string;
   name?: string;
-  phone?: string;
   avatar?: string;
-}
-
-export interface UpdateUserPasswordRequest {
-  userId: string;
-  password: string;
-  passwordConfirm: string;
-}
-
-export interface ChangeRoleOfUserRequest {
-  userId: string;
-  roles: RoleEnum[];
+  status?: UserStatus;
+  newPassword?: string;
+  newPasswordConfirmation?: string;
 }
 
 export interface GetUsersRequest {

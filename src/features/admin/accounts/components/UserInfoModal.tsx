@@ -4,13 +4,10 @@ import {
   Button,
   Chip,
   Divider,
-  FormControl,
   FormControlLabel,
   FormGroup,
   Grid2,
   IconButton,
-  Radio,
-  RadioGroup,
   Stack,
   Switch,
   TextField,
@@ -19,25 +16,16 @@ import {
 import CustomModal, {
   CustomModalProps,
 } from "../../../../components/UI/CustomModal";
-import { getRole, RoleEnum, User, UserStatus } from "../../../../types/auth";
+import { User, UserStatus } from "../../../../types/auth";
 import { AddAPhoto } from "@mui/icons-material";
 import PasswordTextField from "../../../../components/UI/PasswordTextField";
 import UserStatusLegend from "./UserStatusLegend";
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  changeRoleOfUser,
-  deleteUser,
-  switchUserStatus,
-  updateUserPassword,
-  updateUserProfile,
-} from "../api/user-api";
+import { deleteUser, updateUser } from "../api/user-api";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
-import {
-  UpdateUserPasswordRequest,
-  UpdateUserProfileRequest,
-} from "../types/Request";
+import { AdminUpdateUserRequest } from "../types/Request";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { validateEmail } from "../../../../utils/helper";
 import { capitalizeFirstLetter } from "../../../../utils/stringFormatter";
@@ -45,14 +33,15 @@ import useFileInput from "../../../../hooks/useFileInput";
 
 interface UserInfoModalProps {
   modal: CustomModalProps;
-  defaultUser: User;
+  defaultUser: User; // the initial user data for form
 }
 
 type FormData = {
   email: string;
   name: string;
   newPassword: string;
-  confirmNewPassword: string;
+  newPasswordConfirmation: string;
+  status: UserStatus;
 };
 
 const UserInfoModal: React.FC<UserInfoModalProps> = ({
@@ -62,7 +51,6 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
   const queryClient = useQueryClient();
   const [openConfirmSwitchStatusModal, setOpenConfirmSwitchStatusModal] =
     useState(false);
-  const [updatedRole, setUpdatedRole] = useState<RoleEnum | null>(null);
 
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
@@ -75,57 +63,31 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
     formState: { errors: validationErrors },
     handleSubmit,
     reset: resetForm,
-    setValue,
   } = useForm<FormData>({
     defaultValues: {
       email: defaultUser.email || "",
       name: defaultUser.name || "",
       newPassword: "",
-      confirmNewPassword: "",
+      newPasswordConfirmation: "",
     },
   });
 
   const { fileInputRef, fileSrc, handleChangeFileInput, chooseFile } =
     useFileInput(user.avatar || "");
 
-  const switchStatusMutation = useMutation({
-    mutationFn: (request: { userId: string; activate: boolean }) =>
-      switchUserStatus(request.userId, request.activate),
-    onSuccess: (newUserData: User) => {
-      toast.success("Account status has been updated!");
-      setUser(newUserData);
-      setHasChanged(true);
-    },
-    onSettled: () => {
-      setOpenConfirmSwitchStatusModal(false);
-      switchStatusMutation.reset();
-    },
-  });
-
-  const updateProfileMutation = useMutation({
-    mutationFn: updateUserProfile,
+  const updateUserMutation = useMutation({
+    mutationFn: updateUser,
     onSuccess: (newUserData: User) => {
       toast.success("User information has been updated!");
       setUser(newUserData);
       setHasChanged(true);
+      setOpenConfirmSwitchStatusModal(false);
     },
     onError: (error) => {
       toast.error(capitalizeFirstLetter(error.message[0]));
     },
     onSettled: () => {
-      updateProfileMutation.reset();
-    },
-  });
-
-  const updatePasswordMutation = useMutation({
-    mutationFn: updateUserPassword,
-    onSuccess: () => {
-      toast.success("Password has been updated!");
-      setValue("newPassword", "");
-      setValue("confirmNewPassword", "");
-    },
-    onSettled: () => {
-      updatePasswordMutation.reset();
+      updateUserMutation.reset();
     },
   });
 
@@ -145,34 +107,15 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
     },
   });
 
-  const changeRoleMutation = useMutation({
-    mutationFn: changeRoleOfUser,
-    onSuccess: (newUserData: User) => {
-      toast.success("User role has been updated!");
-      setUser(newUserData);
-      setHasChanged(true);
-    },
-    onSettled: () => {
-      changeRoleMutation.reset();
-      setUpdatedRole(null);
-    },
-  });
-
   const handleConfirmSwitchStatus = () => {
     if (!user) return;
 
-    switchStatusMutation.mutate({
+    updateUserMutation.mutate({
       userId: user.id,
-      activate: user.status == UserStatus.Active,
-    });
-  };
-
-  const handleChangeRole = () => {
-    if (!updatedRole) return;
-
-    changeRoleMutation.mutate({
-      userId: user.id,
-      roles: [updatedRole],
+      status:
+        user.status == UserStatus.Active
+          ? UserStatus.Inactive
+          : UserStatus.Active,
     });
   };
 
@@ -187,7 +130,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
   const handleSaveChanges: SubmitHandler<FormData> = (data) => {
     if (!user) return;
 
-    const request: UpdateUserProfileRequest = {
+    const request: AdminUpdateUserRequest = {
       userId: user.id,
     };
 
@@ -198,10 +141,10 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
       needToMutate = true;
     }
 
-    if (data.email !== user.email) {
-      request.email = data.email;
-      needToMutate = true;
-    }
+    // if (data.email !== user.email) {
+    //   request.email = data.email;
+    //   needToMutate = true;
+    // }
 
     if (fileSrc && fileSrc !== user.avatar) {
       request.avatar = fileSrc;
@@ -209,19 +152,20 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
     }
 
     if (needToMutate) {
-      updateProfileMutation.mutate(request);
+      updateUserMutation.mutate(request);
     }
 
     // Check whether need to update password
     const needToUpdatePassword =
-      data.newPassword !== "" && data.confirmNewPassword !== "";
+      data.newPassword !== "" && data.newPasswordConfirmation !== "";
     if (needToUpdatePassword) {
-      const updatePasswordRequest: UpdateUserPasswordRequest = {
+      const updatePasswordRequest: AdminUpdateUserRequest = {
         userId: user.id,
-        password: data.newPassword,
-        passwordConfirm: data.confirmNewPassword,
+        newPassword: data.newPassword,
+        newPasswordConfirmation: data.newPasswordConfirmation,
       };
-      updatePasswordMutation.mutate(updatePasswordRequest);
+
+      updateUserMutation.mutate(updatePasswordRequest);
     }
 
     if (!(needToMutate || needToUpdatePassword)) {
@@ -245,9 +189,9 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
       resetForm({
         email: user.email,
         name: user.name,
-        // phone: user.phone || "",
         newPassword: "",
-        confirmNewPassword: "",
+        newPasswordConfirmation: "",
+        status: user.status,
       });
     }
   }, [resetForm, user]);
@@ -335,7 +279,12 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
                   }}
                 >
                   <FormControlLabel
-                    control={<Switch color="success" checked={true} />}
+                    control={
+                      <Switch
+                        color="success"
+                        checked={user.status == UserStatus.Active}
+                      />
+                    }
                     label="Account status"
                     labelPlacement="start"
                   />
@@ -382,13 +331,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
                   helperText={validationErrors.email?.message}
                 />
               </Grid2>
-              <Grid2 size={6}>
-                <TextField
-                  label="User name"
-                  defaultValue={user.name}
-                  slotProps={{ input: { readOnly: true } }}
-                />
-              </Grid2>
+              <Grid2 size={6}></Grid2>
               <Grid2 size={6}>
                 <TextField
                   label="Full name"
@@ -397,22 +340,11 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
                   {...register("name", { required: "Name is required" })}
                 />
               </Grid2>
-              {/* <Grid2 size={6}>
-                <TextField
-                  label="Phone number"
-                  error={!!validationErrors.phone}
-                  helperText={validationErrors.phone?.message}
-                  {...register("phone", {
-                    ...(user.phone && { required: "Phone is required" }),
-                    ...getPhoneValidator(),
-                  })}
-                />
-              </Grid2> */}
             </Grid2>
           </Box>
           <Divider />
 
-          <Box sx={{ padding: 1.5, paddingTop: 1 }}>
+          {/* <Box sx={{ padding: 1.5, paddingTop: 1 }}>
             <Typography variant="h6" sx={{ fontWeight: "600" }}>
               Role
             </Typography>
@@ -441,7 +373,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
               </RadioGroup>
             </FormControl>
           </Box>
-          <Divider />
+          <Divider /> */}
 
           {/* Change password */}
           <Box sx={{ padding: 1.5, paddingTop: 1 }}>
@@ -472,9 +404,9 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
               <Grid2 size={6}>
                 <PasswordTextField
                   label="Confirm new password"
-                  error={!!validationErrors.confirmNewPassword}
-                  helperText={validationErrors.confirmNewPassword?.message}
-                  register={register("confirmNewPassword", {
+                  error={!!validationErrors.newPasswordConfirmation}
+                  helperText={validationErrors.newPasswordConfirmation?.message}
+                  register={register("newPasswordConfirmation", {
                     validate: (value: string) =>
                       value === getValues("newPassword") ||
                       "Password does not match",
@@ -535,7 +467,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
                   sx={{ width: "100%", boxShadow: "none" }}
                   onClick={handleSubmit(handleSaveChanges)}
                 >
-                  {updateProfileMutation.isPending
+                  {updateUserMutation.isPending
                     ? "Please wait..."
                     : "Save changes"}
                 </Button>
@@ -586,7 +518,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
       </CustomModal>
 
       {/* Modal confirm change role */}
-      <CustomModal open={!!updatedRole} onClose={() => setUpdatedRole(null)}>
+      {/* <CustomModal open={!!updatedRole} onClose={() => setUpdatedRole(null)}>
         <Box sx={{ padding: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>
             Do you want to change this user's role?
@@ -607,7 +539,7 @@ const UserInfoModal: React.FC<UserInfoModalProps> = ({
             </Button>
           </Stack>
         </Box>
-      </CustomModal>
+      </CustomModal> */}
 
       {/* Delete modal */}
       <CustomModal
