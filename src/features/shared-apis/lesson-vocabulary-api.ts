@@ -3,6 +3,7 @@ import ApiResponse from "../../types/ApiResponse";
 import { LessonVocabulary } from "../../types/LessonVocabulary";
 import { BulkStoreLessonVocabularyRequest } from "./types/BulkStoreLessonVocabulary";
 import { GetLessonVocabulariesRequest } from "./types/GetLessonVocabulariesRequest";
+import { UpdateLessonVocabularyRequest } from "./types/UpdateLessonVocabularyRequest";
 
 export async function getLessonVocabularies(
   lessonId: number,
@@ -48,4 +49,16 @@ export async function attachNewWordsToLesson(
   });
 
   return response.data;
+}
+
+export async function updateLessonVocabulary(
+  request: UpdateLessonVocabularyRequest,
+) {
+  const { lessonVocabularyId, ...data } = request;
+  const response = await axiosClient.put<ApiResponse<LessonVocabulary>>(
+    `/lesson-vocabularies/${lessonVocabularyId}`,
+    data,
+  );
+
+  return response.data.data;
 }

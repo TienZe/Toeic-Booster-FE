@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import RoundedInput from "../../../../components/UI/RoundedInput";
-import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { GoBackButton } from "../../../../components/UI/GoBackButton";
 import { AddPhotoAlternate, Delete, Edit } from "@mui/icons-material";
 // import DefaultLessonImage from "../assets/default-lesson-img.webp";
@@ -51,6 +51,8 @@ import {
   attachNewWordsToLesson,
   deleteLessonVocabulary,
 } from "../../../shared-apis/lesson-vocabulary-api";
+import LessonVocaDetails from "../components/LessonVocaDetails";
+import SideDrawer from "../../../../components/UI/SideDrawer";
 
 interface LessonFormData {
   name: string;
@@ -69,6 +71,7 @@ const LessonDetailsPage = () => {
   const openDeleteModal = Boolean(detachedVocaId);
 
   const [openAttachingVocaModal, setOpenAttachingVocaModal] = useState(false);
+  const [editedLessonVoca, setEditedLessonVoca] = useState<LessonVocabulary>();
 
   const { data: lesson, isLoading: isLoadingLesson } = useLesson(
     lessonId!,
@@ -373,11 +376,12 @@ const LessonDetailsPage = () => {
                     <TableCell>{lessonWord.meaning}</TableCell>
                     <TableCell align="right">
                       <Stack direction="row" justifyContent="center">
-                        <Link to={`/admin/voca?id=${lessonWord.id}`}>
-                          <IconButton color="primary">
-                            <Edit />
-                          </IconButton>
-                        </Link>
+                        <IconButton
+                          color="primary"
+                          onClick={() => setEditedLessonVoca(lessonWord)}
+                        >
+                          <Edit />
+                        </IconButton>
                         <IconButton
                           color="error"
                           onClick={() =>
@@ -453,6 +457,13 @@ const LessonDetailsPage = () => {
               (lessonWord) => +lessonWord.vocabularyId,
             )}
           />
+
+          <SideDrawer
+            open={Boolean(editedLessonVoca)}
+            onClose={() => setEditedLessonVoca(undefined)}
+          >
+            <LessonVocaDetails lessonVocabulary={editedLessonVoca!} />
+          </SideDrawer>
         </Box>
       )}
     </>
