@@ -26,10 +26,9 @@ import VocabularyModel from "../../../types/VocabularyModel";
 import useLesson from "../../../hooks/useLesson";
 import {
   attachNewWordsToLesson,
-  createLessonVocabulary,
   removeLessonVocabularyById,
 } from "../../shared-apis/lesson-vocabulary-api";
-import CreateLessonVocabularyRequest from "../../shared-apis/types/CreateLessonVocabularyRequest";
+import { PostWordItem } from "../../shared-apis/types/BulkStoreLessonVocabulary";
 
 const FolderDetailsPage = () => {
   const navigate = useNavigate();
@@ -48,17 +47,6 @@ const FolderDetailsPage = () => {
   );
   const [editedVocaId, setEditedVocaId] = useState<number | null>(null);
 
-  const addCustomWordMutation = useMutation({
-    mutationFn: createLessonVocabulary,
-    onSuccess: () => {
-      toast.success("Pin new word successfully!");
-      invalidateFolderDetails();
-    },
-    onError: () => {
-      toast.error("Pin new word failed!");
-    },
-  });
-
   const invalidateFolderDetails = useCallback(() => {
     queryClient.invalidateQueries({
       predicate: (query) => {
@@ -68,13 +56,15 @@ const FolderDetailsPage = () => {
     });
   }, [queryClient, folderId]);
 
-  const attachSystemWordsMutation = useMutation({
+  const attachWordToFolderMutation = useMutation({
     mutationFn: attachNewWordsToLesson,
     onSuccess: () => {
+      toast.success("Pin new word successfully!");
       invalidateFolderDetails();
     },
     onSettled: () => {
-      attachSystemWordsMutation.reset();
+      toast.error("Pin new word failed!");
+      attachWordToFolderMutation.reset();
     },
   });
 
@@ -99,16 +89,15 @@ const FolderDetailsPage = () => {
     if ("id" in wordItem) {
       // This word is system word, already exists, so just attach it to the lesson
       wordItem = wordItem as VocabularyModel;
-      attachSystemWordsMutation.mutate({
-        lessonId: folderId,
-        wordIds: [wordItem.id],
+      attachWordToFolderMutation.mutate({
+        lessonId: +folderId,
+        words: [{ vocabularyId: wordItem.id }],
       });
     } else {
       wordItem = wordItem as WordItem;
 
       // Add custom word to the folder, don't create the related system word, just create new lesson vocabulary
-      const request: CreateLessonVocabularyRequest = {
-        lessonId: folderId,
+      const lessonVocaData: PostWordItem = {
         word: wordItem.word,
         pronunciation: wordItem.pronunciation || "",
         pronunciationAudio: wordItem.pronunciationAudio,
@@ -118,9 +107,12 @@ const FolderDetailsPage = () => {
         definition: wordItem.definition,
       };
 
-      console.log("request", request);
+      console.log("lessonVocaData", lessonVocaData);
 
-      addCustomWordMutation.mutate(request);
+      attachWordToFolderMutation.mutate({
+        lessonId: +folderId,
+        words: [lessonVocaData],
+      });
     }
   };
 

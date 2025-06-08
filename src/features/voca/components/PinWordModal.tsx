@@ -58,7 +58,7 @@ const PinWordModalModal: React.FC<PinWordModalModalProps> = ({
 
     attachSystemWordsMutation.mutate({
       lessonId: selectedFolderId,
-      wordIds: [lessonVocabularyId],
+      words: [{ lessonVocabularyId }],
     });
   };
 

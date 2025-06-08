@@ -60,8 +60,8 @@ const VocaSearching: React.FC<VocaSearchingProps> = ({
 
     return async (searchKey: string) => {
       const [dictionaryApiWords, systemWords] = await Promise.all([
+        searchSystemWords(searchKey), // prioritize system words at the top
         searchWord(searchKey),
-        searchSystemWords(searchKey),
       ]);
 
       return [...dictionaryApiWords, ...systemWords];

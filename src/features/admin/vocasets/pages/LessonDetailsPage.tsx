@@ -190,7 +190,9 @@ const LessonDetailsPage = () => {
 
     attachNewWordsMutation.mutate({
       lessonId: lessonId!,
-      wordIds: newAttachedWords.map((word) => word.id),
+      words: newAttachedWords.map((word) => ({
+        vocabularyId: word.id,
+      })),
     });
   };
 

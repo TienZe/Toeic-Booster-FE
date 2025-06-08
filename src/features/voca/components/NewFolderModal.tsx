@@ -53,7 +53,7 @@ const NewWordFolderModal: React.FC<NewWordFolderModalProps> = ({
 
   const pinWordToNewFolderMutation = useMutation({
     mutationFn: (newFolderRequest: NewUserFolderRequest) =>
-      pinWordToNewFolder(newFolderRequest, lessonVocabularyId!),
+      pinWordToNewFolder(newFolderRequest, [{ lessonVocabularyId }]),
     onSuccess: () => {
       onClose();
       toast.success("Word has been pinned");

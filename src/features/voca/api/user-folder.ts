@@ -3,6 +3,7 @@ import ApiResponse from "../../../types/ApiResponse";
 import { UserFolder } from "../../../types/user-folder";
 import VocabularyModel from "../../../types/VocabularyModel";
 import { attachNewWordsToLesson } from "../../shared-apis/lesson-vocabulary-api";
+import { PostWordItem } from "../../shared-apis/types/BulkStoreLessonVocabulary";
 import PinNewWordToExistingFolderRequest from "../types/PinNewWordToExistingFolderRequest";
 import {
   NewUserFolderRequest,
@@ -53,14 +54,14 @@ export async function deleteUserFolder(folderId: number) {
 }
 
 export async function pinWordToNewFolder(
-  request: NewUserFolderRequest,
-  vocaId: number,
+  newFolderRequest: NewUserFolderRequest,
+  words: PostWordItem[],
 ) {
-  const folder = await createNewFolder(request);
+  const folder = await createNewFolder(newFolderRequest);
 
   const updatedFolder = await attachNewWordsToLesson({
     lessonId: folder.id,
-    wordIds: [vocaId],
+    words,
   });
 
   return updatedFolder;
