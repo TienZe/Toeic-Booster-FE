@@ -1,4 +1,4 @@
-import { Box, LinearProgress, Stack, Typography } from "@mui/material";
+import { Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
 import FlashCardCompositionAnimationType from "../types/FlashCardCompositionAnimationType";
 import { AnimationType } from "../types/FlashCardCompositionAnimationType";
 import LessonMainContent from "./LessonMainContent.tsx";
@@ -11,6 +11,7 @@ import { saveLessonLearning } from "../api/voca-learning.ts";
 import { useMutation } from "@tanstack/react-query";
 import { SaveLessonLearningRequest } from "../types/SaveLessonLearningRequest.ts";
 import Lesson from "../../../types/Lesson.ts";
+import CustomModal from "../../../components/UI/CustomModal.tsx";
 
 interface VocaFilteringProcessProps {
   onFinish?: () => void;
@@ -47,6 +48,8 @@ const VocaFilteringProcess: React.FC<VocaFilteringProcessProps> = ({
   const currentLessonVocabularyId = vocabularies[currentVocaIdx]?.id;
 
   const [openExitDrawer, setOpenExitDrawer] = useState(false);
+  const [openConfirmSkipFiltering, setOpenConfirmSkipFiltering] =
+    useState(false);
 
   const saveLessonLearningMutation = useMutation({
     mutationFn: saveLessonLearning,
@@ -66,11 +69,12 @@ const VocaFilteringProcess: React.FC<VocaFilteringProcessProps> = ({
 
     setUserKnowledge([...newUserKnowledge]);
 
-    // handleNext is recreated every time the component re-renders
+    // handleAnswer is recreated every time the component re-renders
     // so the currentVocaIdx is the voca index of current render
     setPrevVocaIdx(currentVocaIdx); // needed for animation
 
     if (currentVocaIdx === vocaLength - 1 && lesson) {
+      // Finish filtering process
       const request: SaveLessonLearningRequest = {
         lessonId: lesson.id,
         lessonLearnings: newUserKnowledge,
@@ -80,6 +84,26 @@ const VocaFilteringProcess: React.FC<VocaFilteringProcessProps> = ({
     }
 
     setCurrentVocaIdx((prev) => Math.min(prev + 1, vocaLength - 1));
+  };
+
+  const handleSkipFiltering = () => {
+    const postUserKnowledge = [...userKnowledge];
+
+    for (let i = currentVocaIdx; i < vocaLength; i++) {
+      postUserKnowledge.push({
+        alreadyKnown: false,
+        lessonVocabularyId: vocabularies[i].id,
+      });
+    }
+
+    console.log("constructed postUserKnowledge", postUserKnowledge);
+
+    const request: SaveLessonLearningRequest = {
+      lessonId: lesson.id,
+      lessonLearnings: postUserKnowledge,
+    };
+
+    saveLessonLearningMutation.mutate(request);
   };
 
   return (
@@ -198,11 +222,43 @@ const VocaFilteringProcess: React.FC<VocaFilteringProcessProps> = ({
             sx={{
               width: "254px",
             }}
+            onClick={() => setOpenConfirmSkipFiltering(true)}
           >
             SKIP THE STEP
           </BoldStrokeButton>
         </Stack>
       </Box>
+
+      <CustomModal
+        open={openConfirmSkipFiltering}
+        onClose={() => setOpenConfirmSkipFiltering(false)}
+      >
+        <Box sx={{ padding: 2, maxWidth: "500px" }}>
+          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            Are you sure to skip this step?
+          </Typography>
+          <Typography>
+            Skipping this step results in marking all words as unknown
+          </Typography>
+          <Stack direction="row" spacing={0.5} sx={{ marginTop: 1 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSkipFiltering}
+              sx={{ boxShadow: "none", minWidth: "85px" }}
+            >
+              OK
+            </Button>
+            <Button
+              color="primary"
+              variant="outlined"
+              onClick={() => setOpenConfirmSkipFiltering(false)}
+            >
+              Cancel
+            </Button>
+          </Stack>
+        </Box>
+      </CustomModal>
 
       <SuspendLearningDrawer
         open={openExitDrawer}
