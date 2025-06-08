@@ -29,6 +29,7 @@ import {
   removeLessonVocabularyById,
 } from "../../shared-apis/lesson-vocabulary-api";
 import { PostWordItem } from "../../shared-apis/types/BulkStoreLessonVocabulary";
+import { LessonVocabulary } from "../../../types/LessonVocabulary";
 
 const FolderDetailsPage = () => {
   const navigate = useNavigate();
@@ -45,7 +46,9 @@ const FolderDetailsPage = () => {
   const [deletedFolderWordId, setDeletedFolderWordId] = useState<number | null>(
     null,
   );
-  const [editedVocaId, setEditedVocaId] = useState<number | null>(null);
+  const [editedLessonVocaId, setEditedLessonVocaId] = useState<number | null>(
+    null,
+  );
 
   const invalidateFolderDetails = useCallback(() => {
     queryClient.invalidateQueries({
@@ -71,7 +74,7 @@ const FolderDetailsPage = () => {
   const detachSystemWordMutation = useMutation({
     mutationFn: removeLessonVocabularyById,
     onSuccess: () => {
-      toast.success("Delete word successfully!");
+      toast.success("Unpin word successfully!");
       invalidateFolderDetails();
     },
     onSettled: () => {
@@ -125,11 +128,11 @@ const FolderDetailsPage = () => {
   };
 
   const handleUpdatedFlashCard = () => {
-    queryClient.invalidateQueries({
-      queryKey: ["userFolders", { id: folderId }],
-    });
+    // Refetch the folder details (including its words)
+    invalidateFolderDetails();
+
     // Then close the modal
-    setEditedVocaId(null);
+    setEditedLessonVocaId(null);
   };
 
   if (!folderId) {
@@ -239,7 +242,9 @@ const FolderDetailsPage = () => {
             vocabularies={folder?.words || []}
             status={VocabularyCardState.DEFAULT}
             onCloseWordCard={(vocaId: number) => setDeletedFolderWordId(vocaId)}
-            onEditWordCard={(vocaId: number) => setEditedVocaId(vocaId)}
+            onEditWordCard={(lessonVocaId: number) =>
+              setEditedLessonVocaId(lessonVocaId)
+            }
           />
 
           {folder?.words?.length == 0 && (
@@ -297,14 +302,16 @@ const FolderDetailsPage = () => {
         </Box>
       </CustomModal>
 
-      {editedVocaId && folder && (
+      {editedLessonVocaId && folder && (
         <EditFlashCardModal
-          key={editedVocaId}
-          open={editedVocaId != null}
-          onClose={() => setEditedVocaId(null)}
+          key={editedLessonVocaId}
+          open={editedLessonVocaId != null}
+          onClose={() => setEditedLessonVocaId(null)}
           onFlashCardUpdated={handleUpdatedFlashCard}
-          voca={
-            folder?.words?.find((v) => v.id === editedVocaId) as VocabularyModel
+          lessonVocabulary={
+            folder?.words?.find(
+              (v) => v.id === editedLessonVocaId,
+            ) as LessonVocabulary
           }
         />
       )}

@@ -25,7 +25,7 @@ const LessonVocaDetails: React.FC<LessonVocaDetailsProps> = ({
   const [internalLessonVocabulary, setInternalLessonVocabulary] =
     useState<LessonVocabulary>(lessonVocabulary);
 
-  // Update system word mutation
+  // Update lesson own vocabulary mutation
   const updateMutation = useMutation({
     mutationFn: updateLessonVocabulary,
     onSuccess: (responseData: LessonVocabulary) => {
