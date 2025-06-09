@@ -50,3 +50,32 @@ export function splitQuestionGroupsToParts(
 export function getDisplayedPart(part: Part) {
   return "Part " + part.replace("part", "");
 }
+
+// Mapping from Toeic part to number of questions
+export const PART_TO_QUESTION_RANGE: Record<Part, [number, number]> = {
+  part1: [1, 6],
+  part2: [7, 31],
+  part3: [32, 70],
+  part4: [71, 100],
+  part5: [101, 130],
+  part6: [131, 146],
+  part7: [147, 200],
+};
+
+/**
+ * Given an array of parts (e.g., ["PART_1", "PART_2"]) returns an array of question numbers for those parts.
+ * Example: ["PART_1"] => [1,2,3,4,5,6]
+ *          ["PART_1", "PART_2"] => [1,2,3,4,5,6,7,8,...,31]
+ */
+export function getQuestionNumbersFromParts(parts: Part[]): number[] {
+  const numbers: number[] = [];
+
+  for (const part of parts) {
+    const [start, end] = PART_TO_QUESTION_RANGE[part];
+    for (let i = start; i <= end; i++) {
+      numbers.push(i);
+    }
+  }
+
+  return numbers.sort((a, b) => a - b);
+}

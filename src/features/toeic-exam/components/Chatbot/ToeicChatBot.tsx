@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -29,6 +29,7 @@ import { RootState } from "../../../../stores";
 import ReactMarkdown from "react-markdown";
 import { useQuery } from "@tanstack/react-query";
 import { assistantQuestionActions } from "../../../../stores/assistantQuestionSlice";
+import { getQuestionNumbersFromParts } from "../../../../utils/toeicExamHelper";
 
 interface Message {
   id: string;
@@ -43,11 +44,24 @@ const introductionMessage: Message = {
     "Xin chào! Tôi là gia sư TOEIC. Tôi có thể giúp bạn giải đáp chi tiết về câu hỏi TOEIC. Hãy hỏi tôi bất cứ điều gì!",
 };
 
-// Mock question data for suggestions
-const MOCK_QUESTIONS = Array.from({ length: 20 }, (_, i) => ({
-  id: i + 1,
-  label: `Question ${i + 1}`,
-}));
+const quickQuestions = [
+  "Tại sao đáp án này đúng?",
+  "Phân tích ngữ pháp",
+  "Từ vựng quan trọng",
+  "Mẹo làm bài",
+];
+
+function extractQuestionNumber(input: string) {
+  // The first number after @ is the question id
+  const atIndex = input.indexOf("@");
+  if (atIndex !== -1) {
+    const wordsAfterAt = input.slice(atIndex + 1).split(/\s/);
+    const afterAt = wordsAfterAt[0];
+    return +afterAt;
+  }
+
+  return null;
+}
 
 export default function TOEICChatbot() {
   const [isMinimized, setIsMinimized] = useState(false);
@@ -55,40 +69,47 @@ export default function TOEICChatbot() {
   const [input, setInput] = useState("");
   // State for question suggestion dropdown
   const [showSuggestion, setShowSuggestion] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<
-    typeof MOCK_QUESTIONS
-  >([]);
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
+
+  const [highlightedIndex, setHighlightedIndex] = useState(0); // current index of question that is focus
   const inputBoxRef = useRef<HTMLDivElement>(null);
   const highlightedSuggestionRef = useRef<HTMLDivElement>(null);
+
+  console.log("highlightedIndex", highlightedIndex);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const endOfMessagesRef = useRef<HTMLDivElement>(null);
+
+  const { questionId, attemptId, showChatBox, attemptSelectedParts } =
+    useSelector((state: RootState) => state.assistantQuestion);
+
+  const attemptQuestionNumbers = useMemo(() => {
+    return getQuestionNumbersFromParts(attemptSelectedParts);
+  }, [attemptSelectedParts]);
+
+  const [filteredSuggestions, setFilteredSuggestions] = useState<number[]>(
+    attemptQuestionNumbers,
+  );
 
   const hasSuggestionModalDisplayed =
     showSuggestion && filteredSuggestions.length > 0;
 
-  // Auto-scroll highlighted suggestion into view
-  useEffect(() => {
-    if (highlightedSuggestionRef.current) {
-      highlightedSuggestionRef.current.scrollIntoView({
-        // block: "nearest",
-        behavior: "smooth",
-      });
-    }
-  }, [highlightedIndex]);
+  const dispatch = useDispatch();
 
-  // Insert suggestion at the @... fragment
-  const handleSuggestionSelect = (q: (typeof MOCK_QUESTIONS)[number]) => {
-    const atIndex = input.indexOf("@");
-    if (atIndex !== -1) {
-      const afterAt = input.slice(atIndex + 1).split(/\s/)[0];
-      const before = input.slice(0, atIndex);
-      const after = input.slice(atIndex + 1 + afterAt.length);
-      setInput(`${before}@${q.id}${after}`);
-    }
-    setShowSuggestion(false);
-    setFilteredSuggestions([]);
+  const setShowChatBox = (show: boolean) => {
+    dispatch(assistantQuestionActions.setShowChatBox(show));
   };
 
-  const [isLoading, setIsLoading] = useState(false);
+  // Get the chat history for the question slot of the current attempt (create if not exists)
+  const { data: chatHistory } = useQuery({
+    queryKey: ["chat-history", { questionId, attemptId }],
+    queryFn: () =>
+      getChatHistory({
+        questionId: questionId!,
+        toeicTestAttemptId: attemptId!,
+      }),
+    enabled: !!questionId && !!attemptId,
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -101,10 +122,8 @@ export default function TOEICChatbot() {
       // console.log("wordsAfterAt", wordsAfterAt);
 
       if (wordsAfterAt.length == 1) {
-        const filtered = MOCK_QUESTIONS.filter(
-          (q) =>
-            q.label.toLowerCase().includes(afterAt.toLowerCase()) ||
-            q.id.toString().startsWith(afterAt),
+        const filtered = attemptQuestionNumbers.filter((questionNumber) =>
+          questionNumber.toString().startsWith(afterAt),
         );
         setFilteredSuggestions(filtered);
         setShowSuggestion(true);
@@ -116,6 +135,7 @@ export default function TOEICChatbot() {
 
     setShowSuggestion(false);
     setFilteredSuggestions([]);
+    setHighlightedIndex(0);
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -166,27 +186,19 @@ export default function TOEICChatbot() {
     }
   };
 
-  const endOfMessagesRef = useRef<HTMLDivElement>(null);
-
-  const { questionId, attemptId, showChatBox } = useSelector(
-    (state: RootState) => state.assistantQuestion,
-  );
-
-  const dispatch = useDispatch();
-
-  const setShowChatBox = (show: boolean) => {
-    dispatch(assistantQuestionActions.setShowChatBox(show));
+  // Insert suggestion at the @... fragment
+  const handleSuggestionSelect = (selectedQuestionNumber: number) => {
+    const atIndex = input.indexOf("@");
+    if (atIndex !== -1) {
+      const afterAt = input.slice(atIndex + 1).split(/\s/)[0];
+      const before = input.slice(0, atIndex);
+      const after = input.slice(atIndex + 1 + afterAt.length);
+      setInput(`${before}@${selectedQuestionNumber}${after}`);
+    }
+    setShowSuggestion(false);
+    setFilteredSuggestions([]);
+    setHighlightedIndex(0);
   };
-
-  const { data: chatHistory } = useQuery({
-    queryKey: ["chat-history", { questionId, attemptId }],
-    queryFn: () =>
-      getChatHistory({
-        questionId: questionId!,
-        toeicTestAttemptId: attemptId!,
-      }),
-    enabled: !!questionId && !!attemptId,
-  });
 
   useEffect(() => {
     if (chatHistory) {
@@ -207,6 +219,16 @@ export default function TOEICChatbot() {
       endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
+  // Auto-scroll highlighted suggestion into view
+  useEffect(() => {
+    if (highlightedSuggestionRef.current) {
+      highlightedSuggestionRef.current.scrollIntoView({
+        // block: "nearest",
+        behavior: "smooth",
+      });
+    }
+  }, [highlightedIndex]);
 
   // Handle click outside to close suggestion
   useEffect(() => {
@@ -232,15 +254,12 @@ export default function TOEICChatbot() {
     return null;
   }
 
-  const quickQuestions = [
-    "Tại sao đáp án này đúng?",
-    "Phân tích ngữ pháp",
-    "Từ vựng quan trọng",
-    "Mẹo làm bài",
-  ];
-
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
+
+    if (!chatHistory) {
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -253,10 +272,12 @@ export default function TOEICChatbot() {
     setIsLoading(true);
 
     try {
+      const contextQuestionNumber = extractQuestionNumber(messageText); // the attached question number that the user want to ask
+
       const response = await chat({
-        questionId,
-        toeicTestAttemptId: attemptId,
+        toeicChatHistoryId: chatHistory.id,
         text: messageText,
+        contextQuestionNumber,
       });
 
       const assistantMessage: Message = {
@@ -281,9 +302,6 @@ export default function TOEICChatbot() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log("send message", input);
-    return;
     sendMessage(input);
   };
 
@@ -633,11 +651,11 @@ export default function TOEICChatbot() {
                             },
                           }}
                         >
-                          {filteredSuggestions.map((q, idx) => {
+                          {filteredSuggestions.map((questionNumber, idx) => {
                             const isHighlighted = idx === highlightedIndex;
                             return (
                               <Box
-                                key={q.id}
+                                key={questionNumber}
                                 ref={
                                   isHighlighted
                                     ? highlightedSuggestionRef
@@ -659,9 +677,11 @@ export default function TOEICChatbot() {
                                     fontWeight: 600,
                                   },
                                 }}
-                                onMouseDown={() => handleSuggestionSelect(q)}
+                                onMouseDown={() =>
+                                  handleSuggestionSelect(questionNumber)
+                                }
                               >
-                                {q.label}
+                                Question {questionNumber}
                               </Box>
                             );
                           })}

@@ -69,6 +69,7 @@ const PartResultIndex = () => {
         questionId,
         attemptId,
         showChatBox: true,
+        attemptSelectedParts: selectedParts,
       }),
     );
   };

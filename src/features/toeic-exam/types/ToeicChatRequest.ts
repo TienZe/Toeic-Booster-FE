@@ -1,7 +1,7 @@
 export interface ToeicChatRequest {
-  questionId: number;
-  toeicTestAttemptId: number;
+  toeicChatHistoryId: number;
   text: string;
+  contextQuestionNumber?: number | null;
 }
 
 export interface GetToeicChatHistoryRequest {
