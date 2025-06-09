@@ -43,11 +43,129 @@ const introductionMessage: Message = {
     "Xin chào! Tôi là gia sư TOEIC. Tôi có thể giúp bạn giải đáp chi tiết về câu hỏi TOEIC. Hãy hỏi tôi bất cứ điều gì!",
 };
 
+// Mock question data for suggestions
+const MOCK_QUESTIONS = Array.from({ length: 20 }, (_, i) => ({
+  id: i + 1,
+  label: `Question ${i + 1}`,
+}));
+
 export default function TOEICChatbot() {
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  // State for question suggestion dropdown
+  const [showSuggestion, setShowSuggestion] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<
+    typeof MOCK_QUESTIONS
+  >([]);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const inputBoxRef = useRef<HTMLDivElement>(null);
+  const highlightedSuggestionRef = useRef<HTMLDivElement>(null);
+
+  const hasSuggestionModalDisplayed =
+    showSuggestion && filteredSuggestions.length > 0;
+
+  // Auto-scroll highlighted suggestion into view
+  useEffect(() => {
+    if (highlightedSuggestionRef.current) {
+      highlightedSuggestionRef.current.scrollIntoView({
+        // block: "nearest",
+        behavior: "smooth",
+      });
+    }
+  }, [highlightedIndex]);
+
+  // Insert suggestion at the @... fragment
+  const handleSuggestionSelect = (q: (typeof MOCK_QUESTIONS)[number]) => {
+    const atIndex = input.indexOf("@");
+    if (atIndex !== -1) {
+      const afterAt = input.slice(atIndex + 1).split(/\s/)[0];
+      const before = input.slice(0, atIndex);
+      const after = input.slice(atIndex + 1 + afterAt.length);
+      setInput(`${before}@${q.id}${after}`);
+    }
+    setShowSuggestion(false);
+    setFilteredSuggestions([]);
+  };
+
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInput(value);
+    // Detect the first @
+    const atIndex = value.indexOf("@");
+    if (atIndex !== -1) {
+      const wordsAfterAt = value.slice(atIndex + 1).split(/\s/);
+      const afterAt = wordsAfterAt[0];
+      // console.log("wordsAfterAt", wordsAfterAt);
+
+      if (wordsAfterAt.length == 1) {
+        const filtered = MOCK_QUESTIONS.filter(
+          (q) =>
+            q.label.toLowerCase().includes(afterAt.toLowerCase()) ||
+            q.id.toString().startsWith(afterAt),
+        );
+        setFilteredSuggestions(filtered);
+        setShowSuggestion(true);
+        setHighlightedIndex(0);
+
+        return;
+      }
+    }
+
+    setShowSuggestion(false);
+    setFilteredSuggestions([]);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!hasSuggestionModalDisplayed) {
+      // Multiline: Shift+Enter inserts a newline
+      if (e.shiftKey && e.key === "Enter") {
+        e.preventDefault();
+        const { selectionStart, selectionEnd } =
+          e.target as HTMLTextAreaElement;
+
+        // Insert newline at cursor position
+        setInput(
+          (prev) =>
+            prev.slice(0, selectionStart ?? prev.length) +
+            "\n" +
+            prev.slice(selectionEnd ?? prev.length),
+        );
+
+        return;
+      }
+
+      // Enter as submit
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleSubmit(e);
+
+        return;
+      }
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((prev) =>
+        prev < filteredSuggestions.length - 1 ? prev + 1 : 0,
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((prev) =>
+        prev > 0 ? prev - 1 : filteredSuggestions.length - 1,
+      );
+    } else if (e.key === "Enter") {
+      if (showSuggestion && filteredSuggestions[highlightedIndex]) {
+        e.preventDefault();
+        handleSuggestionSelect(filteredSuggestions[highlightedIndex]);
+      }
+    } else if (e.key === "Escape") {
+      setShowSuggestion(false);
+    }
+  };
+
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   const { questionId, attemptId, showChatBox } = useSelector(
@@ -89,6 +207,26 @@ export default function TOEICChatbot() {
       endOfMessagesRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
+  // Handle click outside to close suggestion
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        inputBoxRef.current &&
+        !inputBoxRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestion(false);
+      }
+    }
+    if (showSuggestion) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showSuggestion]);
 
   if (!questionId || !attemptId) {
     return null;
@@ -143,6 +281,9 @@ export default function TOEICChatbot() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    console.log("send message", input);
+    return;
     sendMessage(input);
   };
 
@@ -363,7 +504,7 @@ export default function TOEICChatbot() {
                                 variant="caption"
                                 sx={{ fontSize: "0.7rem" }}
                               >
-                                Toeic tutor
+                                TOEIC Tutor
                               </Typography>
                             </Stack>
                           )}
@@ -430,32 +571,103 @@ export default function TOEICChatbot() {
                     onSubmit={handleSubmit}
                     sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}
                   >
-                    <TextField
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      placeholder="Hỏi về câu hỏi này..."
-                      variant="outlined"
-                      size="small"
-                      maxRows={3}
-                      disabled={isLoading}
-                      sx={{
-                        flex: 1,
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: 2.5,
-                          fontSize: "0.85rem",
-                          "& fieldset": {
-                            borderColor: "grey.200",
+                    <Box
+                      sx={{ position: "relative", flex: 1 }}
+                      ref={inputBoxRef}
+                    >
+                      <TextField
+                        value={input}
+                        onChange={handleInputChange}
+                        onKeyDown={handleInputKeyDown}
+                        placeholder="Hỏi về câu hỏi này..."
+                        variant="outlined"
+                        size="small"
+                        multiline
+                        minRows={1}
+                        maxRows={3}
+                        disabled={isLoading}
+                        sx={{
+                          flex: 1,
+                          width: "100%",
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 2.5,
+                            fontSize: "0.85rem",
+                            "& fieldset": {
+                              borderColor: "grey.200",
+                            },
+                            "&:hover fieldset": {
+                              borderColor: "grey.300",
+                            },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "primary.main",
+                              borderWidth: 1,
+                            },
                           },
-                          "&:hover fieldset": {
-                            borderColor: "grey.300",
-                          },
-                          "&.Mui-focused fieldset": {
-                            borderColor: "primary.main",
-                            borderWidth: 1,
-                          },
-                        },
-                      }}
-                    />
+                        }}
+                        inputProps={{ autoComplete: "off" }}
+                        autoFocus
+                      />
+
+                      {showSuggestion && filteredSuggestions.length > 0 && (
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            position: "absolute",
+                            left: 0,
+                            right: 0,
+                            bottom: "100%",
+                            zIndex: 10,
+                            mt: 0.5,
+                            maxHeight: 220,
+                            overflowY: "auto",
+                            borderRadius: 2.5,
+                            border: "1.5px solid",
+                            borderColor: "primary.extraLight",
+                            backgroundColor: "#fff",
+                            p: 0.5,
+                            maxWidth: "200px",
+                            boxSizing: "border-box",
+                            "&:hover > div:not(:hover)": {
+                              backgroundColor: "white",
+                              fontWeight: 400,
+                            },
+                          }}
+                        >
+                          {filteredSuggestions.map((q, idx) => {
+                            const isHighlighted = idx === highlightedIndex;
+                            return (
+                              <Box
+                                key={q.id}
+                                ref={
+                                  isHighlighted
+                                    ? highlightedSuggestionRef
+                                    : undefined
+                                }
+                                sx={{
+                                  px: 1,
+                                  py: 0.5,
+                                  cursor: "pointer",
+                                  borderRadius: 1.5,
+                                  fontSize: "12px",
+                                  backgroundColor: isHighlighted
+                                    ? "primary.extraLight"
+                                    : "white",
+                                  fontWeight: isHighlighted ? 600 : 400,
+                                  transition: "background 0.2s",
+                                  "&:hover": {
+                                    backgroundColor: "primary.extraLight",
+                                    fontWeight: 600,
+                                  },
+                                }}
+                                onMouseDown={() => handleSuggestionSelect(q)}
+                              >
+                                {q.label}
+                              </Box>
+                            );
+                          })}
+                        </Paper>
+                      )}
+                    </Box>
                     <IconButton
                       type="submit"
                       disabled={isLoading || !input.trim()}
