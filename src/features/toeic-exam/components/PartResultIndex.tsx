@@ -27,8 +27,9 @@ import { Part } from "../../../types/ToeicExam";
 import { useAttemptDetails } from "../../../hooks/useAttemptDetails";
 import { GoBackButton } from "../../../components/UI/GoBackButton";
 import TOEICChatbot from "./Chatbot/ToeicChatBot";
-import { assistantQuestionActions } from "../../../stores/assistantQuestionSlice";
-import { useDispatch } from "react-redux";
+import { reviewToeicAttemptActions } from "../../../stores/reviewToeicAttemptSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../stores";
 
 const PartResultIndex = () => {
   const dispatch = useDispatch();
@@ -46,9 +47,16 @@ const PartResultIndex = () => {
     };
   }, []);
 
-  const [currentPartIndex, setCurrentPartIndex] = useState(0);
+  // const [currentPartIndex, setCurrentPartIndex] = useState(0);
   const routeParams = useParams<{ attemptId: string }>();
   const attemptId = Number(routeParams.attemptId);
+
+  const { activePart } = useSelector(
+    (state: RootState) => state.reviewToeicAttempt,
+  );
+
+  const setActivePart = (part: Part) =>
+    dispatch(reviewToeicAttemptActions.setActivePart(part));
 
   const { isLoading: isLoadingAttemptDetails, data: attemptDetails } =
     useAttemptDetails(attemptId, {
@@ -56,6 +64,7 @@ const PartResultIndex = () => {
     });
 
   const selectedParts = attemptDetails?.selectedParts || [];
+  const currentPartIndex = selectedParts.indexOf(activePart);
 
   const part2QuestionGroups = useMemo(() => {
     return splitQuestionGroupsToParts(
@@ -65,22 +74,23 @@ const PartResultIndex = () => {
 
   const handleAssistQuestion = (questionId: number) => {
     dispatch(
-      assistantQuestionActions.setQuestion({
+      reviewToeicAttemptActions.setQuestion({
         questionId,
         attemptId,
-        showChatBox: true,
         attemptSelectedParts: selectedParts,
       }),
     );
+
+    dispatch(reviewToeicAttemptActions.setShowChatBox(true));
   };
 
-  const handleNext = () => setCurrentPartIndex((prev) => prev + 1);
-  const handlePrevious = () => setCurrentPartIndex((prev) => prev - 1);
+  const handleNext = () => setActivePart(selectedParts[currentPartIndex + 1]);
+  const handlePrevious = () =>
+    setActivePart(selectedParts[currentPartIndex - 1]);
 
   const renderPart = () => {
-    const currentPart = selectedParts[currentPartIndex];
-
-    switch (currentPart) {
+    // const currentPart = selectedParts[currentPartIndex];
+    switch (activePart) {
       case "part1":
         return (
           <Part1
@@ -204,7 +214,7 @@ const PartResultIndex = () => {
                                 borderRadius: 3,
                                 padding: "0 18px",
                               }}
-                              onClick={() => setCurrentPartIndex(partIndex)}
+                              onClick={() => setActivePart(part)}
                             >
                               {`Part ${part[4]}`}
                             </Button>
@@ -251,7 +261,7 @@ const PartResultIndex = () => {
                   <SubMitBox
                     partDataChosen={part2QuestionGroups}
                     setCurrentPart={(part: Part) => {
-                      setCurrentPartIndex(selectedParts.indexOf(part));
+                      setActivePart(part);
                     }}
                     mode={"review"}
                   />
@@ -259,9 +269,9 @@ const PartResultIndex = () => {
               </Grid2>
             </Grid2>
           </Box>
-        </QuestionProvider>
 
-        <TOEICChatbot />
+          <TOEICChatbot />
+        </QuestionProvider>
       </Container>
       {showScrollToTop && (
         <div

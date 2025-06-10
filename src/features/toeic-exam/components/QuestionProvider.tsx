@@ -8,11 +8,11 @@ import React, {
 
 // Define the context value type
 interface QuestionContextType {
-  questionRefs: MutableRefObject<HTMLDivElement[][][]>;
+  questionRefs: MutableRefObject<HTMLDivElement[]>;
   scrollToQuestion: (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
+    questionNumber: number,
+    renderQuestionsFn?: () => void,
+    scrollOption?: ScrollIntoViewOptions,
   ) => void;
 }
 
@@ -28,20 +28,21 @@ interface QuestionProviderProps {
 export const QuestionProvider: React.FC<QuestionProviderProps> = ({
   children,
 }) => {
-  const questionRefs = useRef<HTMLDivElement[][][]>([]);
+  const questionRefs = useRef<HTMLDivElement[]>(Array.from({ length: 201 }));
 
   const scrollToQuestion = (
-    part: number,
-    groupIndex: number,
-    questionIndex: number,
+    questionNumber: number,
+    renderQuestionsFn?: () => void,
+    scrollOption?: ScrollIntoViewOptions,
   ) => {
+    renderQuestionsFn?.();
+
     setTimeout(() => {
-      questionRefs.current[part]?.[groupIndex]?.[questionIndex]?.scrollIntoView(
-        {
-          behavior: "smooth",
-          block: "center",
-        },
-      );
+      questionRefs.current[questionNumber]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        ...scrollOption,
+      });
     }, 300);
   };
 

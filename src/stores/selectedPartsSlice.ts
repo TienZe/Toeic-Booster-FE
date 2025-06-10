@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Part } from "../types/ToeicExam";
 
 interface SelectedPartsState {
-  selectedParts: string[];
+  selectedParts: Part[];
   limitTime: string;
 }
 
@@ -14,7 +15,7 @@ const selectedPartsSlice = createSlice({
   name: "selectedParts",
   initialState,
   reducers: {
-    setSelectedParts: (state, action: PayloadAction<string[]>) => {
+    setSelectedParts: (state, action: PayloadAction<Part[]>) => {
       const sortedSelectedParts = action.payload.slice().sort();
       state.selectedParts = sortedSelectedParts;
     },

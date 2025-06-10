@@ -21,9 +21,6 @@ const ListQuestion: React.FC<ListQuestionProps> = ({
 
   const { scrollToQuestion } = useQuestionContext();
 
-  console.log("partDataChosen", partDataChosen);
-  console.log("Object.keys(partDataChosen)", Object.keys(partDataChosen));
-
   const isNotedQuestion = (
     part: number,
     groupIndex: number,
@@ -70,8 +67,8 @@ const ListQuestion: React.FC<ListQuestionProps> = ({
                     <Button
                       key={`btn-${groupIndex}-${questionIndex}`}
                       onClick={() => {
-                        setCurrentPart(partChosen as Part);
-                        scrollToQuestion(part, groupIndex, questionIndex);
+                        setCurrentPart(partChosen as Part); // switch to part first, so all questions of part are rendered
+                        scrollToQuestion(question.questionNumber); // then scroll to question
                       }}
                       sx={{
                         minWidth: "24px",

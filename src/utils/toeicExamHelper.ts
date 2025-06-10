@@ -79,3 +79,14 @@ export function getQuestionNumbersFromParts(parts: Part[]): number[] {
 
   return numbers.sort((a, b) => a - b);
 }
+
+export function getPartOfQuestionNumber(questionNumber: number): Part {
+  for (const part of PARTS) {
+    const [start, end] = PART_TO_QUESTION_RANGE[part];
+    if (questionNumber >= start && questionNumber <= end) {
+      return part;
+    }
+  }
+
+  return "part1";
+}

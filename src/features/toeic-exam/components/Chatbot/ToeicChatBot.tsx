@@ -28,8 +28,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../stores";
 import ReactMarkdown from "react-markdown";
 import { useQuery } from "@tanstack/react-query";
-import { assistantQuestionActions } from "../../../../stores/assistantQuestionSlice";
+import { reviewToeicAttemptActions } from "../../../../stores/reviewToeicAttemptSlice";
 import { getQuestionNumbersFromParts } from "../../../../utils/toeicExamHelper";
+import { useQuestionContext } from "../QuestionProvider";
 
 interface Message {
   id: string;
@@ -74,6 +75,8 @@ export default function TOEICChatbot() {
   const inputBoxRef = useRef<HTMLDivElement>(null);
   const highlightedSuggestionRef = useRef<HTMLDivElement>(null);
 
+  const { scrollToQuestion } = useQuestionContext();
+
   console.log("highlightedIndex", highlightedIndex);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -81,7 +84,7 @@ export default function TOEICChatbot() {
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   const { questionId, attemptId, showChatBox, attemptSelectedParts } =
-    useSelector((state: RootState) => state.assistantQuestion);
+    useSelector((state: RootState) => state.reviewToeicAttempt);
 
   const attemptQuestionNumbers = useMemo(() => {
     return getQuestionNumbersFromParts(attemptSelectedParts);
@@ -89,7 +92,7 @@ export default function TOEICChatbot() {
 
   const [filteredSuggestions, setFilteredSuggestions] = useState<number[]>(
     attemptQuestionNumbers,
-  );
+  ); // filtered question number show in suggestion modal
 
   const hasSuggestionModalDisplayed =
     showSuggestion && filteredSuggestions.length > 0;
@@ -97,7 +100,7 @@ export default function TOEICChatbot() {
   const dispatch = useDispatch();
 
   const setShowChatBox = (show: boolean) => {
-    dispatch(assistantQuestionActions.setShowChatBox(show));
+    dispatch(reviewToeicAttemptActions.setShowChatBox(show));
   };
 
   // Get the chat history for the question slot of the current attempt (create if not exists)
@@ -111,6 +114,12 @@ export default function TOEICChatbot() {
     enabled: !!questionId && !!attemptId,
   });
 
+  const hideQuestionNumberSuggestionModal = () => {
+    setShowSuggestion(false);
+    setFilteredSuggestions([]);
+    setHighlightedIndex(0);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInput(value);
@@ -122,20 +131,31 @@ export default function TOEICChatbot() {
       // console.log("wordsAfterAt", wordsAfterAt);
 
       if (wordsAfterAt.length == 1) {
+        // pending enter question number
         const filtered = attemptQuestionNumbers.filter((questionNumber) =>
           questionNumber.toString().startsWith(afterAt),
         );
         setFilteredSuggestions(filtered);
         setShowSuggestion(true);
         setHighlightedIndex(0);
+      } else {
+        // There are word after @questionNumber, so scroll into the corresponding question
+        const questionNumber = afterAt;
 
-        return;
+        // Show the part that contains the question
+        dispatch(
+          reviewToeicAttemptActions.setFocusQuestionNumber(+questionNumber),
+        );
+        scrollToQuestion(+questionNumber, undefined, {
+          // behavior: "instant",
+          block: "center",
+        });
+
+        hideQuestionNumberSuggestionModal();
       }
+    } else {
+      hideQuestionNumberSuggestionModal();
     }
-
-    setShowSuggestion(false);
-    setFilteredSuggestions([]);
-    setHighlightedIndex(0);
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -179,7 +199,9 @@ export default function TOEICChatbot() {
     } else if (e.key === "Enter") {
       if (showSuggestion && filteredSuggestions[highlightedIndex]) {
         e.preventDefault();
-        handleSuggestionSelect(filteredSuggestions[highlightedIndex]);
+        handleQuestionNumberSuggestionSelect(
+          filteredSuggestions[highlightedIndex],
+        );
       }
     } else if (e.key === "Escape") {
       setShowSuggestion(false);
@@ -187,17 +209,20 @@ export default function TOEICChatbot() {
   };
 
   // Insert suggestion at the @... fragment
-  const handleSuggestionSelect = (selectedQuestionNumber: number) => {
+  const handleQuestionNumberSuggestionSelect = (
+    selectedQuestionNumber: number,
+  ) => {
+    // append the selected question number to the input textarea
     const atIndex = input.indexOf("@");
     if (atIndex !== -1) {
-      const afterAt = input.slice(atIndex + 1).split(/\s/)[0];
-      const before = input.slice(0, atIndex);
-      const after = input.slice(atIndex + 1 + afterAt.length);
+      const afterAt = input.slice(atIndex + 1).split(/\s/)[0]; // get the selected question number after @
+      const before = input.slice(0, atIndex); // str before @
+      const after = input.slice(atIndex + 1 + afterAt.length); // str after selected question number
       setInput(`${before}@${selectedQuestionNumber}${after}`);
     }
-    setShowSuggestion(false);
-    setFilteredSuggestions([]);
-    setHighlightedIndex(0);
+
+    // close suggestion modal
+    hideQuestionNumberSuggestionModal();
   };
 
   useEffect(() => {
@@ -249,10 +274,6 @@ export default function TOEICChatbot() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showSuggestion]);
-
-  if (!questionId || !attemptId) {
-    return null;
-  }
 
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
@@ -308,6 +329,10 @@ export default function TOEICChatbot() {
   const handleQuickQuestion = (question: string) => {
     sendMessage(question);
   };
+
+  if (!questionId || !attemptId) {
+    return null;
+  }
 
   return (
     <Box>
@@ -626,6 +651,7 @@ export default function TOEICChatbot() {
                         autoFocus
                       />
 
+                      {/* Question number suggestion modal */}
                       {showSuggestion && filteredSuggestions.length > 0 && (
                         <Paper
                           elevation={0}
@@ -678,7 +704,9 @@ export default function TOEICChatbot() {
                                   },
                                 }}
                                 onMouseDown={() =>
-                                  handleSuggestionSelect(questionNumber)
+                                  handleQuestionNumberSuggestionSelect(
+                                    questionNumber,
+                                  )
                                 }
                               >
                                 Question {questionNumber}

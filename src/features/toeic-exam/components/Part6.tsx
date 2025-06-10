@@ -217,15 +217,7 @@ const Part6: React.FC<PartProps> = ({
                         }
                         ref={(el) => {
                           if (el) {
-                            if (!questionRefs.current[PART]) {
-                              questionRefs.current[PART] = [];
-                            }
-                            if (!questionRefs.current[PART][groupIndexInPart]) {
-                              questionRefs.current[PART][groupIndexInPart] = [];
-                            }
-                            questionRefs.current[PART][groupIndexInPart][
-                              questionIndex
-                            ] = el as HTMLDivElement;
+                            questionRefs.current[question.questionNumber] = el;
                           }
                         }}
                       />
