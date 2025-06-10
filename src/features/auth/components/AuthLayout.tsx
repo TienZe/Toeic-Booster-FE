@@ -10,6 +10,7 @@ import RegisterImg from "../assets/register-img.svg";
 import TabItem from "./TabItem";
 import { Link, Outlet, useLocation, Navigate } from "react-router-dom";
 import { Image } from "../../../components/UI/Image";
+import { Stack } from "@mui/material";
 
 const AuthLayout: React.FC = () => {
   const { pathname: activeRoute } = useLocation();
@@ -64,13 +65,20 @@ const AuthLayout: React.FC = () => {
           >
             {/* Nav */}
             <Box sx={{ textAlign: "center", marginBottom: 2 }}>
-              <Typography
-                variant="h4"
-                // color="primary.main"
-                sx={{ marginBottom: 1.25 }}
+              <Stack
+                direction="row"
+                alignItems="center"
+                gap={0.4}
+                sx={{ mb: 1 }}
               >
-                Welcome to EngFlash!
-              </Typography>
+                <Typography variant="h4" color="secondary">
+                  Welcome to
+                </Typography>
+                <Image
+                  src="/logo/logo.png"
+                  sx={{ height: "32px", width: "auto", mb: "4px" }}
+                />
+              </Stack>
               <Box
                 sx={{
                   backgroundColor: "primary.extraLight",
