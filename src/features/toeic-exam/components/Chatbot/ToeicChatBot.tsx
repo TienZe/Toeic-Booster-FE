@@ -120,6 +120,15 @@ export default function TOEICChatbot() {
     setHighlightedIndex(0);
   };
 
+  const focusToQuestion = (questionNumber: number) => {
+    // Show the part that contains the question
+    dispatch(reviewToeicAttemptActions.setFocusQuestionNumber(+questionNumber));
+    scrollToQuestion(+questionNumber, undefined, {
+      // behavior: "instant",
+      block: "center",
+    });
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInput(value);
@@ -140,17 +149,7 @@ export default function TOEICChatbot() {
         setHighlightedIndex(0);
       } else {
         // There are word after @questionNumber, so scroll into the corresponding question
-        const questionNumber = afterAt;
-
-        // Show the part that contains the question
-        dispatch(
-          reviewToeicAttemptActions.setFocusQuestionNumber(+questionNumber),
-        );
-        scrollToQuestion(+questionNumber, undefined, {
-          // behavior: "instant",
-          block: "center",
-        });
-
+        focusToQuestion(+afterAt);
         hideQuestionNumberSuggestionModal();
       }
     } else {
@@ -219,6 +218,7 @@ export default function TOEICChatbot() {
       const before = input.slice(0, atIndex); // str before @
       const after = input.slice(atIndex + 1 + afterAt.length); // str after selected question number
       setInput(`${before}@${selectedQuestionNumber}${after}`);
+      focusToQuestion(selectedQuestionNumber);
     }
 
     // close suggestion modal
@@ -347,7 +347,10 @@ export default function TOEICChatbot() {
           }}
         >
           <Button
-            onClick={() => setShowChatBox(true)}
+            onClick={() => {
+              setShowChatBox(true);
+              setIsMinimized(false);
+            }}
             variant="contained"
             sx={{
               width: 64,

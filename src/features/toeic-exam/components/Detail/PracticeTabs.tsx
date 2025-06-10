@@ -25,6 +25,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { resetAnswers } from "../../../../stores/userAnswer";
 import { resetNotedQuestion } from "../../../../stores/notedQuestionSlice";
 import { PARTS } from "../../../../utils/toeicExamHelper";
+import { Part } from "../../../../types/ToeicExam";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -83,7 +84,7 @@ export default function PracticeTabs() {
   };
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const part = event.target.name;
+    const part = event.target.name as Part;
     const checked = event.target.checked;
     if (checked) {
       dispatch(setSelectedParts([...selectedParts, part]));
