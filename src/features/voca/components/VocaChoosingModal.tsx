@@ -147,7 +147,7 @@ const VocaChoosingModal = ({
             sx={{ mt: 2, height: "calc(90vh - 350px)" }}
           >
             {lessonVocabularies?.map((lessonWord) => (
-              <Grid2 size={6}>
+              <Grid2 size={6} key={lessonWord.id}>
                 <WordSelectItem
                   word={lessonWord.word}
                   partOfSpeech={lessonWord.partOfSpeech}

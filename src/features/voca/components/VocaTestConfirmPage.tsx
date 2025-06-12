@@ -10,6 +10,8 @@ import TimeRuleIcon from "../assets/test-rule-images/time-rule.svg";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import Link from "../../../components/UI/Link";
 import BoldStrokeButton from "./BoldStrokeButton";
+import VocaChoosingModal from "./VocaChoosingModal";
+import { useState } from "react";
 
 const VocaTestConfirmPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,6 +19,8 @@ const VocaTestConfirmPage: React.FC = () => {
   const lessonId = searchParams.get("id");
   const lessonName = searchParams.get("name");
   const vocaSetId = searchParams.get("vocaSetId");
+
+  const [openVocaChoosingModal, setOpenVocaChoosingModal] = useState(false);
 
   if (!lessonId) {
     return <Navigate to="/" />;
@@ -84,16 +88,15 @@ const VocaTestConfirmPage: React.FC = () => {
           justifyContent="space-between"
           sx={{ maxWidth: "984px", mx: "auto" }}
         >
-          <Link to={`/lesson/learn?id=${lessonId}`}>
-            <BoldStrokeButton
-              variant="outlined"
-              sx={{
-                width: "254px",
-              }}
-            >
-              CONTINUE LEARNING
-            </BoldStrokeButton>
-          </Link>
+          <BoldStrokeButton
+            variant="outlined"
+            sx={{
+              width: "254px",
+            }}
+            onClick={() => setOpenVocaChoosingModal(true)}
+          >
+            CONTINUE LEARNING
+          </BoldStrokeButton>
 
           <Link to={`/lesson/practice?id=${lessonId}`}>
             <BoldStrokeButton
@@ -107,6 +110,14 @@ const VocaTestConfirmPage: React.FC = () => {
           </Link>
         </Stack>
       </Box>
+
+      {lessonId && (
+        <VocaChoosingModal
+          lessonId={Number(lessonId)}
+          open={openVocaChoosingModal}
+          onClose={() => setOpenVocaChoosingModal(false)}
+        />
+      )}
     </Stack>
   );
 };

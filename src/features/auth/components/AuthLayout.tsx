@@ -1,5 +1,4 @@
 import Grid from "@mui/material/Grid2";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Container from "@mui/material/Container";
@@ -68,12 +67,10 @@ const AuthLayout: React.FC = () => {
               <Stack
                 direction="row"
                 alignItems="center"
+                justifyContent="center"
                 gap={0.4}
                 sx={{ mb: 1 }}
               >
-                <Typography variant="h4" color="secondary">
-                  Welcome to
-                </Typography>
                 <Image
                   src="/logo/logo.png"
                   sx={{ height: "32px", width: "auto", mb: "4px" }}
