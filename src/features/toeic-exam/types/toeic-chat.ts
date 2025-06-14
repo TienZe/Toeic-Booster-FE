@@ -20,10 +20,10 @@ interface ChatPart {
   text: string | ChatBotTextResponse;
 }
 
-export interface TextResponseObj {
-  text: string;
-  type: "text";
-}
+// export interface TextResponseObj {
+//   text: string;
+//   type: "text";
+// }
 
 export interface OptionResponseObj {
   text: string;
@@ -31,4 +31,4 @@ export interface OptionResponseObj {
   type: "option";
 }
 
-export type ChatBotTextResponse = TextResponseObj | OptionResponseObj;
+export type ChatBotTextResponse = OptionResponseObj;
