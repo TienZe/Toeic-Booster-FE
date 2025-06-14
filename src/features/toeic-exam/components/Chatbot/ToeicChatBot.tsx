@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -31,18 +31,21 @@ import { useQuery } from "@tanstack/react-query";
 import { reviewToeicAttemptActions } from "../../../../stores/reviewToeicAttemptSlice";
 import { getQuestionNumbersFromParts } from "../../../../utils/toeicExamHelper";
 import { useQuestionContext } from "../QuestionProvider";
+import { ChatBotTextResponse } from "../../types/toeic-chat";
 
 interface Message {
   id: string;
   role: "user" | "model";
-  content: string;
+  textResponse: ChatBotTextResponse | string;
 }
 
 const introductionMessage: Message = {
   id: "0",
   role: "model",
-  content:
-    "Xin chào! Tôi là gia sư TOEIC. Tôi có thể giúp bạn giải đáp chi tiết về câu hỏi TOEIC. Hãy hỏi tôi bất cứ điều gì!",
+  textResponse: {
+    text: "Xin chào! Tôi là gia sư TOEIC. Tôi có thể giúp bạn giải đáp chi tiết về câu hỏi TOEIC. Hãy hỏi tôi bất cứ điều gì!",
+    type: "text",
+  },
 };
 
 const quickQuestions = [
@@ -113,6 +116,49 @@ export default function TOEICChatbot() {
       }),
     enabled: !!questionId && !!attemptId,
   });
+
+  const renderMessage = (message: Message) => {
+    if (typeof message.textResponse == "string") {
+      return (
+        <Typography sx={{ fontSize: "0.85rem", lineHeight: 1.5 }}>
+          <ReactMarkdown>{message.textResponse as string}</ReactMarkdown>
+        </Typography>
+      );
+    }
+
+    return (
+      <>
+        <Typography sx={{ fontSize: "0.85rem", lineHeight: 1.5 }}>
+          <ReactMarkdown>{message.textResponse.text}</ReactMarkdown>
+        </Typography>
+
+        {message.textResponse.type == "option" && (
+          <Stack spacing={0.5} sx={{ mt: 1 }}>
+            {message.textResponse.options.map((option) => (
+              <Button
+                key={option}
+                variant="outlined"
+                color="primary"
+                sx={{
+                  textWrap: "wrap",
+                  fontSize: "12px",
+                  px: "8px",
+                  py: "4px",
+                }}
+                onClick={() => handleOptionClick(option)}
+              >
+                {option}
+              </Button>
+            ))}
+          </Stack>
+        )}
+      </>
+    );
+  };
+
+  const handleOptionClick = useCallback((option: string) => {
+    setInput(option);
+  }, []);
 
   const hideQuestionNumberSuggestionModal = () => {
     setShowSuggestion(false);
@@ -232,7 +278,7 @@ export default function TOEICChatbot() {
         ...chatHistory.chatContents.map((content) => ({
           id: content.id.toString(),
           role: content.role,
-          content: content.parts[0].text,
+          textResponse: content.parts[0].text,
         })),
       ]);
     }
@@ -285,7 +331,10 @@ export default function TOEICChatbot() {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: messageText,
+      textResponse: {
+        text: messageText,
+        type: "text",
+      },
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -304,7 +353,10 @@ export default function TOEICChatbot() {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "model",
-        content: response.text || "Xin lỗi, tôi không thể trả lời câu hỏi này.",
+        textResponse: response.text || {
+          text: "Xin lỗi, tôi không thể trả lời câu hỏi này.",
+          type: "text",
+        },
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -313,7 +365,10 @@ export default function TOEICChatbot() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "model",
-        content: "Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau. 😔",
+        textResponse: {
+          text: "Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau. 😔",
+          type: "text",
+        },
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -535,6 +590,7 @@ export default function TOEICChatbot() {
                             borderColor: "grey.200",
                           }}
                         >
+                          {/* Tutor avatar */}
                           {message.role == "model" && (
                             <Stack
                               direction="row"
@@ -554,11 +610,9 @@ export default function TOEICChatbot() {
                               </Typography>
                             </Stack>
                           )}
-                          <Typography
-                            sx={{ fontSize: "0.85rem", lineHeight: 1.5 }}
-                          >
-                            <ReactMarkdown>{message.content}</ReactMarkdown>
-                          </Typography>
+
+                          {/* User & tutor message rendering */}
+                          {renderMessage(message)}
                         </Paper>
                       </Box>
                     ))}

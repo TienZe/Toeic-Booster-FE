@@ -17,5 +17,18 @@ export interface ToeicChatContent {
 }
 
 interface ChatPart {
-  text: string;
+  text: string | ChatBotTextResponse;
 }
+
+export interface TextResponseObj {
+  text: string;
+  type: "text";
+}
+
+export interface OptionResponseObj {
+  text: string;
+  options: string[];
+  type: "option";
+}
+
+export type ChatBotTextResponse = TextResponseObj | OptionResponseObj;
