@@ -2,6 +2,7 @@ import axiosClient from "../../../axios";
 import ApiResponse from "../../../types/ApiResponse";
 import { ChatBotTextResponse, ToeicChatHistory } from "../types/toeic-chat";
 import {
+  CreateToeicChatHistoryRequest,
   GetToeicChatHistoryRequest,
   ToeicChatRequest,
 } from "../types/ToeicChatRequest";
@@ -16,6 +17,15 @@ export async function chat(request: ToeicChatRequest) {
 export async function getChatHistory(request: GetToeicChatHistoryRequest) {
   const response = await axiosClient.get<ApiResponse<ToeicChatHistory | null>>(
     `/chat/history/${request.toeicTestAttemptId}/${request.questionId}`,
+  );
+
+  return response.data.data;
+}
+
+export async function createChatHistory(request: CreateToeicChatHistoryRequest) {
+  const response = await axiosClient.post<ApiResponse<ToeicChatHistory>>(
+    `/chat/history`,
+    request,
   );
 
   return response.data.data;

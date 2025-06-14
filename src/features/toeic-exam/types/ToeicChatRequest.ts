@@ -5,6 +5,12 @@ export interface ToeicChatRequest {
 }
 
 export interface GetToeicChatHistoryRequest {
-  questionId: number;
   toeicTestAttemptId: number;
+  questionId: number;
+}
+
+export interface CreateToeicChatHistoryRequest {
+  attemptId: number;
+  questionId?: number;
+  questionNumber?: number;
 }
