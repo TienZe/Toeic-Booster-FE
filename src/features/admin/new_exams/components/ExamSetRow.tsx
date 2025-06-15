@@ -1,12 +1,55 @@
-import { Button, Stack, TableCell, TableRow } from "@mui/material";
-import { Link } from "react-router-dom";
-import { Delete, Edit } from "@mui/icons-material";
+import { TableCell, TableRow } from "@mui/material";
+import {
+  Publish,
+  ToggleOff,
+  ToggleOn,
+  DeleteOutline,
+  Edit,
+} from "@mui/icons-material";
 import { ToeicExam } from "../../../../types/ToeicExam";
+import { capitalizeFirstLetter } from "../../../../utils/stringFormatter";
+import ActionDropdown, {
+  ActionDropdownAction,
+} from "../../../../components/UI/ActionDropdown";
 
 const ExamSetRow: React.FC<{
   examSet: ToeicExam;
   onDelete?: () => void;
-}> = ({ examSet, onDelete }) => {
+  onChangeStatus?: (newStatus: string) => void;
+}> = ({ examSet, onDelete, onChangeStatus }) => {
+  const actions: ActionDropdownAction[] = [
+    {
+      label: "Edit",
+      icon: <Edit />,
+      link: `/admin/exam-set/${examSet.id}`,
+    },
+    {
+      label: "Delete",
+      icon: <DeleteOutline />,
+      onClick: onDelete,
+    },
+  ];
+
+  if (examSet.status == "pending") {
+    actions.push({
+      label: "Publish",
+      icon: <Publish />,
+      onClick: () => onChangeStatus?.("active"),
+    });
+  } else if (examSet.status == "inactive") {
+    actions.push({
+      label: "Activate",
+      icon: <ToggleOn />,
+      onClick: () => onChangeStatus?.("active"),
+    });
+  } else {
+    actions.push({
+      label: "Deactivate",
+      icon: <ToggleOff />,
+      onClick: () => onChangeStatus?.("inactive"),
+    });
+  }
+
   return (
     <TableRow>
       <TableCell>{examSet.id}</TableCell>
@@ -15,14 +58,10 @@ const ExamSetRow: React.FC<{
         {examSet.category?.category || "N/A"}
       </TableCell>
       <TableCell align="center">
-        <Stack direction="row" spacing={0.5} justifyContent="center">
-          <Link to={`/admin/exam-set/${examSet.id}`}>
-            <Button startIcon={<Edit />}>Edit</Button>
-          </Link>
-          <Button startIcon={<Delete />} color="error" onClick={onDelete}>
-            Delete
-          </Button>
-        </Stack>
+        {capitalizeFirstLetter(examSet.status)}
+      </TableCell>
+      <TableCell align="center">
+        <ActionDropdown actions={actions} />
       </TableCell>
     </TableRow>
   );

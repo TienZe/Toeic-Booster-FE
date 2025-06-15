@@ -35,6 +35,7 @@ export interface ToeicExam {
   id: number;
   name: string;
 
+  status: ExamStatus;
   tag?: number;
   questionGroups?: QuestionGroup[];
   category?: ToeicCategory;
@@ -43,6 +44,8 @@ export interface ToeicExam {
 
   createdAt: string;
 }
+
+export type ExamStatus = "active" | "inactive" | "pending";
 
 export type Part =
   | "part1"

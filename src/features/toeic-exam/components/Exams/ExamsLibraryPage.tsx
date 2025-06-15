@@ -52,6 +52,7 @@ const ExamsLibraryPage = () => {
         limit: EXAM_PAGE_SIZE,
         search: debouncedSearch,
         filteredCategory: filterFormData.filterCategory,
+        filteredStatus: "active",
       },
     );
 

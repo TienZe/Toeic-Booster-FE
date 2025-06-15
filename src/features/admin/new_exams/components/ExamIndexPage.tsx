@@ -18,7 +18,7 @@ import { Box, Stack } from "@mui/system";
 import { SubmitHandler, useForm } from "react-hook-form";
 import RoundedInput from "../../../../components/UI/RoundedInput";
 import { useMutation } from "@tanstack/react-query";
-import { createExam, deleteExam } from "../api/examApi";
+import { createExam, deleteExam, saveExam } from "../api/examApi";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
 import AdminTableContainer from "../../vocasets/components/AdminTableContainer";
@@ -28,7 +28,7 @@ import CustomModal from "../../../../components/UI/CustomModal";
 import queryClient from "../../../../queryClient";
 import { toast } from "react-toastify";
 import usePaginatedToeicExams from "../../../../hooks/usePaginatedToeicExams";
-import { ToeicExam } from "../../../../types/ToeicExam";
+import { ExamStatus, ToeicExam } from "../../../../types/ToeicExam";
 import { DEFAULT_QUESTION_GROUP } from "../../../../utils/defaultToeicTestQuestionGroups";
 import useToeicCategories from "../../../../hooks/useToeicCategories";
 import BootstrapSelect from "../../../../components/UI/BootstrapSelect";
@@ -129,10 +129,38 @@ const ExamIndexPage = () => {
     },
   });
 
+  const switchExamStatusMutation = useMutation({
+    mutationFn: saveExam,
+    onSuccess: (_, request) => {
+      queryClient.invalidateQueries({ queryKey: ["toeicExams"] });
+
+      const newStatus = request.status;
+
+      if (newStatus === "active") {
+        toast.success("Activate exam successfully!");
+      } else {
+        toast.success("Deactivate exam successfully!");
+      }
+    },
+    onSettled: () => {
+      switchExamStatusMutation.reset();
+    },
+    onError: () => {
+      toast.error("Switch exam status failed!");
+    },
+  });
+
   const handleDeleteExam = () => {
     if (deletedExamId) {
       deleteExamMutation.mutate(deletedExamId);
     }
+  };
+
+  const handleSwitchExamStatus = (examId: number, newStatus: string) => {
+    switchExamStatusMutation.mutate({
+      id: examId,
+      status: newStatus as ExamStatus,
+    });
   };
 
   const handleResetFilter = () => {
@@ -221,9 +249,10 @@ const ExamIndexPage = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell width="30%">ID</TableCell>
-                <TableCell width="25%">Name</TableCell>
-                <TableCell width="10%">Category</TableCell>
+                <TableCell width="100px">ID</TableCell>
+                <TableCell width="40%">Name</TableCell>
+                <TableCell width="20%">Category</TableCell>
+                <TableCell width="20%">Status</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
@@ -233,6 +262,9 @@ const ExamIndexPage = () => {
                   key={exam.id}
                   examSet={exam}
                   onDelete={() => setDeletedExamId(exam.id)}
+                  onChangeStatus={(newStatus) =>
+                    handleSwitchExamStatus(exam.id, newStatus)
+                  }
                 />
               ))}
             </TableBody>
