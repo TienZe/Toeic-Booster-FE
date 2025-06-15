@@ -72,7 +72,7 @@ const PartResultIndex = () => {
     );
   }, [attemptDetails?.toeicTest?.questionGroups]); // object mapping chosen parts to its question groups
 
-  const handleAssistQuestion = (questionId: number) => {
+  const handleAssistQuestion = (questionId: number, questionNumber: number) => {
     dispatch(
       reviewToeicAttemptActions.setQuestion({
         questionId,
@@ -80,6 +80,8 @@ const PartResultIndex = () => {
         attemptSelectedParts: selectedParts,
       }),
     );
+
+    dispatch(reviewToeicAttemptActions.setFocusQuestionNumber(questionNumber));
 
     dispatch(reviewToeicAttemptActions.setShowChatBox(true));
   };

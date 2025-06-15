@@ -28,7 +28,7 @@ import { chat, createChatHistory, getChatHistory } from "../../api/chatbot";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../stores";
 import ReactMarkdown from "react-markdown";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { reviewToeicAttemptActions } from "../../../../stores/reviewToeicAttemptSlice";
 import { getQuestionNumbersFromParts } from "../../../../utils/toeicExamHelper";
 import { useQuestionContext } from "../QuestionProvider";
@@ -50,7 +50,7 @@ const introductionMessage: Message = {
 const quickQuestions = [
   "Tại sao đáp án này đúng?",
   "Phân tích ngữ pháp",
-  "Từ vựng quan trọng",
+  "Liệt kê từ vựng quan trọng",
   "Mẹo làm bài",
 ];
 
@@ -67,6 +67,8 @@ function extractQuestionNumber(input: string) {
 }
 
 export default function TOEICChatbot() {
+  const queryClient = useQueryClient();
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   // State for question suggestion dropdown
@@ -122,6 +124,10 @@ export default function TOEICChatbot() {
     onSuccess: (newChatHistory) => {
       setMessages([introductionMessage]);
 
+      queryClient.invalidateQueries({
+        queryKey: ["chat-history", { questionId, attemptId }],
+      });
+
       // Update the initial question id (the first question context)
       dispatch(
         reviewToeicAttemptActions.setQuestion({
@@ -168,9 +174,9 @@ export default function TOEICChatbot() {
 
         {message.textResponse.type == "option" && (
           <Stack spacing={0.5} sx={{ mt: 1 }}>
-            {message.textResponse.options.map((option) => (
+            {message.textResponse.options.map((option, idx) => (
               <Button
-                key={option}
+                key={idx}
                 variant="outlined"
                 color="primary"
                 sx={{
@@ -178,6 +184,8 @@ export default function TOEICChatbot() {
                   fontSize: "12px",
                   px: "8px",
                   py: "4px",
+                  textAlign: "left",
+                  display: "block",
                 }}
                 onClick={() => handleOptionClick(option)}
               >
@@ -567,7 +575,7 @@ export default function TOEICChatbot() {
                     borderColor: "grey.100",
                   }}
                 >
-                  <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                  <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
                     {quickQuestions.map((question, index) => (
                       <Chip
                         key={index}
@@ -699,7 +707,7 @@ export default function TOEICChatbot() {
                 <Divider />
 
                 {/* Input */}
-                <Box sx={{ p: 1 }}>
+                <Box sx={{ p: 1, pt: "10px" }}>
                   <Box
                     component="form"
                     onSubmit={handleSubmit}
@@ -709,6 +717,10 @@ export default function TOEICChatbot() {
                       sx={{ position: "relative", flex: 1 }}
                       ref={inputBoxRef}
                     >
+                      <Chip
+                        label={`Question ${focusQuestionNumber}`}
+                        sx={{ fontSize: "10px", mb: 0.5 }}
+                      />
                       <TextField
                         value={input}
                         onChange={handleInputChange}

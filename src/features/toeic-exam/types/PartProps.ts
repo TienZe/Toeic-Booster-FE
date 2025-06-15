@@ -4,7 +4,7 @@ export interface PartProps {
   mode?: string;
   questionGroups?: QuestionGroup[];
 
-  onAssistant?: (questionId: number) => void;
+  onAssistant?: (questionId: number, questionNumber: number) => void;
 
   handleNotedQuestion?: (
     part: number,

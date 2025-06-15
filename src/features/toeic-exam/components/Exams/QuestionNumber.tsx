@@ -9,7 +9,7 @@ interface QuestionNumberProps {
   isNoted: boolean;
   isCorrectQuestion: boolean;
 
-  onAssistant?: (questionId: number) => void;
+  onAssistant?: (questionId: number, questionNumber: number) => void;
   onClickQuestionNumber: () => void;
 }
 
@@ -62,7 +62,7 @@ const QuestionNumber = React.forwardRef<HTMLDivElement, QuestionNumberProps>(
           )}
         </Stack>
         {onAssistant && (
-          <IconButton onClick={() => onAssistant(questionId)}>
+          <IconButton onClick={() => onAssistant(questionId, questionNumber)}>
             <Sparkles size={20} color="var(--mui-palette-primary-main)" />
           </IconButton>
         )}
