@@ -54,18 +54,6 @@ const quickQuestions = [
   "Mẹo làm bài",
 ];
 
-function extractQuestionNumber(input: string) {
-  // The first number after @ is the question id
-  const atIndex = input.indexOf("@");
-  if (atIndex !== -1) {
-    const wordsAfterAt = input.slice(atIndex + 1).split(/\s/);
-    const afterAt = wordsAfterAt[0];
-    return +afterAt;
-  }
-
-  return null;
-}
-
 export default function TOEICChatbot() {
   const queryClient = useQueryClient();
 
@@ -129,6 +117,7 @@ export default function TOEICChatbot() {
       });
 
       // Update the initial question id (the first question context)
+      // So the correct chat history can be fetched
       dispatch(
         reviewToeicAttemptActions.setQuestion({
           questionId: newChatHistory.questionId, // the corresponding of the latest attached question number (focusQuestionNumber)
@@ -210,8 +199,8 @@ export default function TOEICChatbot() {
 
   const focusToQuestion = (questionNumber: number) => {
     // Show the part that contains the question
-    dispatch(reviewToeicAttemptActions.setFocusQuestionNumber(+questionNumber));
-    scrollToQuestion(+questionNumber, undefined, {
+    dispatch(reviewToeicAttemptActions.setFocusQuestionNumber(questionNumber));
+    scrollToQuestion(questionNumber, undefined, {
       // behavior: "instant",
       block: "center",
     });
@@ -224,20 +213,29 @@ export default function TOEICChatbot() {
     const atIndex = value.indexOf("@");
     if (atIndex !== -1) {
       const wordsAfterAt = value.slice(atIndex + 1).split(/\s/);
-      const afterAt = wordsAfterAt[0];
+      const enterQuestionNumber = +wordsAfterAt[0];
+
+      if (
+        !enterQuestionNumber ||
+        !attemptQuestionNumbers.includes(enterQuestionNumber)
+      ) {
+        // Not numeric value or invalid question number
+        hideQuestionNumberSuggestionModal();
+        return;
+      }
       // console.log("wordsAfterAt", wordsAfterAt);
 
       if (wordsAfterAt.length == 1) {
         // pending enter question number
         const filtered = attemptQuestionNumbers.filter((questionNumber) =>
-          questionNumber.toString().startsWith(afterAt),
+          questionNumber.toString().startsWith(enterQuestionNumber.toString()),
         );
         setFilteredSuggestions(filtered);
         setShowSuggestion(true);
         setHighlightedIndex(0);
       } else {
         // There are word after @questionNumber, so scroll into the corresponding question
-        focusToQuestion(+afterAt);
+        focusToQuestion(enterQuestionNumber);
         hideQuestionNumberSuggestionModal();
       }
     } else {
@@ -247,6 +245,7 @@ export default function TOEICChatbot() {
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!hasSuggestionModalDisplayed) {
+      // The suggestion modal is not displayed, on pending enter chat input
       // Multiline: Shift+Enter inserts a newline
       if (e.shiftKey && e.key === "Enter") {
         e.preventDefault();
@@ -273,6 +272,7 @@ export default function TOEICChatbot() {
       }
     }
 
+    // Keyboard handler for suggestion question number modal
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setHighlightedIndex((prev) =>
@@ -386,12 +386,10 @@ export default function TOEICChatbot() {
     setIsLoading(true);
 
     try {
-      const contextQuestionNumber = extractQuestionNumber(messageText); // the attached question number that the user want to ask
-
       const response = await chat({
         toeicChatHistoryId: chatHistory.id,
         text: messageText,
-        contextQuestionNumber,
+        contextQuestionNumber: focusQuestionNumber,
       });
 
       const assistantMessage: Message = {

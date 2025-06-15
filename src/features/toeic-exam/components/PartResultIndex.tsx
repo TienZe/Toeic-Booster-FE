@@ -154,6 +154,12 @@ const PartResultIndex = () => {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      dispatch(reviewToeicAttemptActions.clear());
+    };
+  }, [dispatch]);
+
   return (
     <Content sx={{ backgroundColor: "secondary.extraLight" }}>
       <Container maxWidth="sm">
@@ -262,9 +268,6 @@ const PartResultIndex = () => {
                 >
                   <SubMitBox
                     partDataChosen={part2QuestionGroups}
-                    setCurrentPart={(part: Part) => {
-                      setActivePart(part);
-                    }}
                     mode={"review"}
                   />
                 </Box>

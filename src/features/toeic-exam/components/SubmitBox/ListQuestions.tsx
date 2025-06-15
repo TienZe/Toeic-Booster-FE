@@ -1,17 +1,22 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../stores";
 import { useQuestionContext } from "../QuestionProvider";
 import { Part, PartData } from "../../../../types/ToeicExam";
+import { reviewToeicAttemptActions } from "../../../../stores/reviewToeicAttemptSlice";
 
 interface ListQuestionProps {
   partDataChosen: PartData;
-  setCurrentPart: (part: Part) => void;
+  setCurrentPart?: (part: Part) => void;
+  mode?: string;
 }
 const ListQuestion: React.FC<ListQuestionProps> = ({
   partDataChosen,
   setCurrentPart,
+  mode,
 }) => {
+  const dispatch = useDispatch();
+
   const activeAnswers = useSelector(
     (state: RootState) => state.userAnswers.activeAnswers,
   );
@@ -67,7 +72,19 @@ const ListQuestion: React.FC<ListQuestionProps> = ({
                     <Button
                       key={`btn-${groupIndex}-${questionIndex}`}
                       onClick={() => {
-                        setCurrentPart(partChosen as Part); // switch to part first, so all questions of part are rendered
+                        // switch to part first, so all questions of part are rendered
+                        if (mode == "review") {
+                          // redux current question number used for review mode, this action also update the active part
+                          dispatch(
+                            reviewToeicAttemptActions.setFocusQuestionNumber(
+                              question.questionNumber,
+                            ),
+                          );
+                        } else {
+                          // local current part state used for practice mode
+                          setCurrentPart?.(partChosen as Part);
+                        }
+
                         scrollToQuestion(question.questionNumber); // then scroll to question
                       }}
                       sx={{

@@ -17,7 +17,7 @@ import { Part, PartData } from "../../../../types/ToeicExam";
 
 interface PartDataProps {
   partDataChosen: PartData;
-  setCurrentPart: (part: Part) => void;
+  setCurrentPart?: (part: Part) => void;
   mode?: string;
 }
 const SubMitBox: React.FC<PartDataProps> = ({
@@ -97,6 +97,7 @@ const SubMitBox: React.FC<PartDataProps> = ({
         <CustomBackdrop open />
       ) : (
         <>
+          {/* If is not review mode, then show the countdown and submit button */}
           {!mode && (
             <>
               <Box
@@ -141,6 +142,7 @@ const SubMitBox: React.FC<PartDataProps> = ({
             <ListQuestion
               partDataChosen={partDataChosen}
               setCurrentPart={setCurrentPart}
+              mode={mode}
             />
           </Box>
         </>
