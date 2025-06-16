@@ -196,9 +196,10 @@ const UserProfilePage: React.FC = () => {
         <Paper
           elevation={1}
           sx={{
-            marginTop: 7,
+            mt: 7,
             minHeight: "200px",
             padding: 1,
+            mb: 2,
           }}
         >
           <>
