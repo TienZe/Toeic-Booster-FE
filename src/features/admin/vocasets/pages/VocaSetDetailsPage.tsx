@@ -18,7 +18,6 @@ import {
 import RoundedInput from "../../../../components/UI/RoundedInput";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import VocaSet from "../../../../components/VocaSet";
 import { GoBackButton } from "../../../../components/UI/GoBackButton";
 import AdminTableContainer from "../components/AdminTableContainer";
 import useAdminTablePagination from "../../hooks/useAdminTablePagination";
@@ -111,7 +110,6 @@ const VocaSetDetailsPage = () => {
     },
   });
 
-  const [preview, setPreview] = useState<boolean>(false);
   const [openNewModal, setOpenNewModal] = useState<boolean>(false);
   const [searchLesson, setSearchLesson] = useState<string>("");
   const [deletedLessonId, setDeletedLessonId] = useState<number | null>(null);
@@ -317,13 +315,6 @@ const VocaSetDetailsPage = () => {
                 <Grid2 size={12}>
                   <Stack direction="row" spacing={0.5} justifyContent="end">
                     <Button
-                      variant="outlined"
-                      sx={{ float: "right", px: "24px" }}
-                      onClick={() => setPreview(true)}
-                    >
-                      Preview
-                    </Button>
-                    <Button
                       variant="contained"
                       sx={() => ({
                         float: "right",
@@ -451,29 +442,6 @@ const VocaSetDetailsPage = () => {
               </TableFooter>
             </Table>
           </AdminTableContainer>
-
-          {/* Preview modal */}
-          <CustomModal
-            open={preview}
-            onClose={() => setPreview(false)}
-            sx={{
-              width: "400px",
-              height: "400px",
-              alignItems: "center",
-              justifyContent: "center",
-              display: "flex",
-            }}
-          >
-            <></>
-            <VocaSet
-              id={formData.id}
-              title={formData.name}
-              author={"EngFlash"}
-              takenNumber={123}
-              // qualification={formData.level}
-              image={fileSrc}
-            />
-          </CustomModal>
 
           <NewLessonModal
             vocaSetId={vocaSetId}
