@@ -65,8 +65,11 @@ const FolderDetailsPage = () => {
       toast.success("Pin new word successfully!");
       invalidateFolderDetails();
     },
+    onError: (error) => {
+      toast.error(error.message || "Pin new word failed!");
+      console.error("Attach word to folder error", error);
+    },
     onSettled: () => {
-      toast.error("Pin new word failed!");
       attachWordToFolderMutation.reset();
     },
   });

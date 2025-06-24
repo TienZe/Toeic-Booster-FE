@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import DetailContent from "./DetailContent";
-import Comments from "../../../comment/components/Comments";
+// import Comments from "../../../comment/components/Comments";
 import { useParams } from "react-router-dom";
 import UserToeicInfoLayout from "../../../../components/layout/toeic/UserToeicInfoLayout";
 
@@ -20,7 +20,7 @@ const Detail = () => {
       >
         <DetailContent examId={examId} />
       </Box>
-      <Box
+      {/* <Box
         sx={{
           padding: 3,
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
@@ -29,7 +29,7 @@ const Detail = () => {
         }}
       >
         <Comments examId={examId} />
-      </Box>
+      </Box> */}
     </UserToeicInfoLayout>
   );
 };
