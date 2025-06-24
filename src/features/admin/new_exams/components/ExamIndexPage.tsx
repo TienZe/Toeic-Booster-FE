@@ -249,7 +249,9 @@ const ExamIndexPage = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell width="100px">ID</TableCell>
+                <TableCell width="120px" align="center">
+                  ID
+                </TableCell>
                 <TableCell width="40%">Name</TableCell>
                 <TableCell width="20%">Category</TableCell>
                 <TableCell width="20%">Status</TableCell>

@@ -216,7 +216,7 @@ const WordIndexPage: React.FC = () => {
                 <TableCell width={100}>ID</TableCell>
                 <TableCell>Thumbnail</TableCell>
                 <TableCell>Word</TableCell>
-                <TableCell width={100}>Type</TableCell>
+                <TableCell width={150}>Type</TableCell>
                 <TableCell>Meaning</TableCell>
                 <TableCell width={150} align="center">
                   Action
@@ -227,6 +227,7 @@ const WordIndexPage: React.FC = () => {
               {paginatedWords?.items.map((voca: VocabularyModel) => (
                 <TableRow>
                   <TableCell
+                    align="center"
                     sx={{
                       maxWidth: "100px",
                       whiteSpace: "nowrap",
@@ -247,7 +248,7 @@ const WordIndexPage: React.FC = () => {
                     />
                   </TableCell>
                   <TableCell>{voca.word}</TableCell>
-                  <TableCell align="center">{voca.partOfSpeech}</TableCell>
+                  <TableCell>{voca.partOfSpeech}</TableCell>
                   <TableCell>{voca.meaning}</TableCell>
                   <TableCell align="right">
                     <Stack direction="row" justifyContent="center">

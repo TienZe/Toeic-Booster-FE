@@ -28,6 +28,7 @@ const VocaSetRow: React.FC<{
   return (
     <TableRow>
       <TableCell
+        align="center"
         sx={{
           maxWidth: "50px",
           whiteSpace: "nowrap",

@@ -52,11 +52,9 @@ const ExamSetRow: React.FC<{
 
   return (
     <TableRow>
-      <TableCell>{examSet.id}</TableCell>
+      <TableCell align="center">{examSet.id}</TableCell>
       <TableCell>{examSet.name}</TableCell>
-      <TableCell align="center">
-        {examSet.category?.category || "N/A"}
-      </TableCell>
+      <TableCell>{examSet.category?.category || "N/A"}</TableCell>
       <TableCell align="center">
         {capitalizeFirstLetter(examSet.status)}
       </TableCell>

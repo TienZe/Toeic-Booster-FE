@@ -326,7 +326,9 @@ const VocaIndexPage: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell width={100}>ID</TableCell>
+                <TableCell width={100} align="center">
+                  ID
+                </TableCell>
                 <TableCell>Thumbnail</TableCell>
                 <TableCell>Name</TableCell>
                 {/* <TableCell>Level</TableCell> */}
