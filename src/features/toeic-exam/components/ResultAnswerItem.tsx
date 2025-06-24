@@ -1,5 +1,5 @@
 import { Check, Close } from "@mui/icons-material";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useMemo } from "react";
 
 interface ResultAnswerItemProps {
@@ -59,7 +59,7 @@ const ResultAnswerItem = ({
 
       {markIcon}
 
-      <Button
+      {/* <Button
         variant="text"
         size="small"
         sx={{
@@ -71,7 +71,7 @@ const ResultAnswerItem = ({
         disableRipple
       >
         [Detail]
-      </Button>
+      </Button> */}
     </Stack>
   );
 };

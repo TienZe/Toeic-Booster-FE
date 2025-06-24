@@ -22,7 +22,7 @@ const ResultAnswerList: React.FC<ResultAnswerListProps> = ({
 
       <Box
         display="grid"
-        gridTemplateColumns={{ xs: "1fr", md: "1fr 1fr" }}
+        gridTemplateColumns={{ xs: "1fr", md: "1fr 1fr 1fr 1fr" }}
         gap={2}
       >
         {questions.map((question) => (
