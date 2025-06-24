@@ -43,7 +43,7 @@ const VOCA_SET_PAGE_SIZE = 10;
 const VocaLibraryPage: React.FC = () => {
   const [page, setPage] = useState(0);
 
-  const [selectedRating, setSelectedRating] = useState<number | null>(4.5);
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [displayedVocaSets, setDisplayedVocaSets] = useState<VocaSetModel[]>(
     [],
   );
